@@ -19,10 +19,14 @@ export class ConsultaComponent {
 
     constructor(
         private fb: FormBuilder,
-        private router: Router // Adicione esta linha
+        private router: Router
     ) { }
+    
     isLoading = signal(false)
     errorMessage = signal("")
+    
+    // Step de progresso: 0 = Actos Clínicos, 1 = Preferências, 2 = Confirmação
+    stepAtual = signal(0);
     ngOnInit(): void {
         this.marcacaoForm = this.fb.group({
             actosClinicos: this.fb.array([]), // Se inicializar como um array vazio, nada aparecerá inicialmente
@@ -77,10 +81,52 @@ export class ConsultaComponent {
     }
 
     
+    // Step: Volta para Actos Clínicos ao clicar no cancelar
     onCancelMarcacao(): void {
         this.marcacaoForm.reset();
         while (this.actosClinicos.length !== 0) { this.actosClinicos.removeAt(0); }
         this.adicionarActoClinico();
+        this.stepAtual.set(0); // Volta para Actos Clínicos
         console.log('Marcação cancelada/limpa.');
+    }
+
+    // Step: Qualquer campo do formulário vai para Preferências
+    onFormFieldInteraction(): void {
+        if (this.stepAtual() === 0) {
+            this.stepAtual.set(1);
+        }
+    }
+
+    // Step: Preferências → Confirmação quando tudo preenchido
+    onFormChange(): void {
+        if (this.stepAtual() === 1) {
+            const controls = this.marcacaoForm.controls;
+            if (
+                controls['dataInicioPreferida'].valid &&
+                controls['dataFimPreferida'].valid &&
+                controls['horarioPreferido'].valid
+            ) {
+                this.stepAtual.set(2);
+            } else {
+                this.stepAtual.set(1);
+            }
+        }
+    }
+
+    // Verifica se há pelo menos um acto clínico válido
+    hasValidActos(): boolean {
+        return this.actosClinicos.controls.some(control => 
+            control.get('tipo')?.valid && control.get('subsistemaSaude')?.valid
+        );
+    }
+
+    // Método para definir o step atual ao clicar
+    setStep(step: number): void {
+        this.stepAtual.set(step);
+    }
+
+    // Método para ir para a home
+    goHome(): void {
+        this.router.navigate(['/']);
     }
 }

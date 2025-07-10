@@ -15,6 +15,7 @@ export class MarcacoesComponent {
   isDropdownOpen = false;
   selectedFilterValue: string = 'Últimos dias'; // Valor inicial do filtro selecionado
   triggerButtonText: string = 'Últimos dias'; // Texto inicial do botão
+  searchTerm: string = '';
 
   authService = inject(AuthService)
   currentUser = this.authService.currentUser
@@ -65,4 +66,36 @@ export class MarcacoesComponent {
     error: (err) => console.error('Erro ao buscar marcações:', err)
   });
 }
+
+  // Métodos para estatísticas
+  getPendingCount(): number {
+    return this.marcacoes.filter(m => m.estado === 'Pedido').length;
+  }
+
+  getConfirmedCount(): number {
+    return this.marcacoes.filter(m => m.estado === 'Agendado').length;
+  }
+
+  getCompletedCount(): number {
+    return this.marcacoes.filter(m => m.estado === 'Realizado').length;
+  }
+
+  // Método para filtrar marcações baseado na pesquisa
+  getFilteredMarcacoes(): PedidoMarcacao[] {
+    if (!this.searchTerm.trim()) {
+      return this.marcacoes;
+    }
+    
+    const search = this.searchTerm.toLowerCase();
+    return this.marcacoes.filter(marcacao => 
+      marcacao.dataInicioPreferida?.toLowerCase().includes(search) ||
+      marcacao.dataFimPreferida?.toLowerCase().includes(search) ||
+      marcacao.horarioPreferido?.toLowerCase().includes(search) ||
+      marcacao.observacoes?.toLowerCase().includes(search) ||
+      marcacao.estado?.toLowerCase().includes(search) ||
+      marcacao.actosClinicos?.some(acto => 
+        acto.tipo?.toLowerCase().includes(search)
+      )
+    );
+  }
 }

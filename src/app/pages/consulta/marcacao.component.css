@@ -1,0 +1,604 @@
+/* Container principal */
+.marcacao-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.marcacao-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,84,141,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+
+.marcacao-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 600px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.13);
+  overflow: hidden;
+  max-width: 1000px;
+  width: 90%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Lado esquerdo */
+.marcacao-left {
+  background: #00548d;
+  color: #fff;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4rem 1.5rem 1.5rem 1.5rem;
+  min-width: 200px;
+}
+
+.marcacao-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4rem;
+  letter-spacing: 0.03em;
+}
+
+.marcacao-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 4rem 0;
+  width: 100%;
+}
+
+.marcacao-steps li {
+  font-size: 1.1rem;
+  margin-bottom: 1.2rem;
+  opacity: 0.7;
+  position: relative;
+  padding-left: 28px;
+}
+
+.marcacao-steps li.active {
+  font-weight: 700;
+  opacity: 1;
+}
+
+.marcacao-steps li.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #00548d;
+}
+
+.marcacao-steps li:not(.active)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.4;
+}
+
+.step-clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.step-clickable:hover {
+  opacity: 0.8;
+  transform: translateX(2px);
+}
+
+.marcacao-img {
+  margin-top: auto;
+  width: 100%;
+  text-align: left;
+  padding-bottom: 0rem;
+  padding-left: 05px;
+}
+
+.logo-link {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.logo-link:hover {
+  transform: scale(1.05);
+}
+
+.marcacao-img img {
+  width: 50px;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+/* Lado direito */
+.marcacao-right {
+  flex: 2 1 0;
+  background: #fff;
+  padding: 2rem 2.5rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+/* Estilização do scroll */
+.marcacao-right::-webkit-scrollbar {
+  width: 8px;
+}
+
+.marcacao-right::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.marcacao-right::-webkit-scrollbar-thumb {
+  background: #00548d;
+  border-radius: 4px;
+}
+
+.marcacao-right::-webkit-scrollbar-thumb:hover {
+  background: #003a5c;
+}
+
+/* Header */
+.marcacao-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.marcacao-back-icon {
+  width: 40px;
+  height: 40px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #00548d;
+  flex-shrink: 0;
+}
+
+.marcacao-back-icon:hover {
+  background: #00548d;
+  color: white;
+  transform: translateX(-2px);
+}
+
+.marcacao-back-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.marcacao-header-content {
+  flex: 1;
+}
+
+.marcacao-title {
+  color: #00548d;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.marcacao-subtitle {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Formulário */
+.marcacao-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Seções do formulário */
+.form-section {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-icon {
+  width: 48px;
+  height: 48px;
+  background: #00548d;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.section-content {
+  flex: 1;
+}
+
+.section-title {
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.section-description {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Container de actos clínicos */
+.actos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.acto-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.acto-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.acto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.acto-number {
+  color: #00548d;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.remove-acto-btn {
+  width: 32px;
+  height: 32px;
+  background: #fee2e2;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #dc2626;
+}
+
+.remove-acto-btn:hover {
+  background: #fecaca;
+  transform: scale(1.05);
+}
+
+.remove-acto-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.acto-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Estado vazio */
+.empty-actos {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+}
+
+.empty-actos svg {
+  width: 48px;
+  height: 48px;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.empty-actos p {
+  color: #64748b;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Botão adicionar acto */
+.add-acto-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: white;
+  color: #00548d;
+  border: 2px dashed #00548d;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.add-acto-btn:hover {
+  background: #f8fafc;
+  border-color: #003a5c;
+  color: #003a5c;
+}
+
+.add-acto-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Grid de preferências */
+.preferences-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.preferences-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+/* Campos do formulário */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: #00548d;
+  box-shadow: 0 0 0 3px rgba(0, 84, 141, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Botões de ação */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cancel-btn,
+.submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.submit-btn {
+  background: #00548d;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 84, 141, 0.15);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #003a5c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 84, 141, 0.25);
+}
+
+.submit-btn:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-btn svg,
+.submit-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .marcacao-wrapper {
+    flex-direction: column;
+    min-height: unset;
+    max-width: 98vw;
+  }
+  
+  .marcacao-left, .marcacao-right {
+    min-width: 0;
+    width: 100%;
+  }
+  
+  .marcacao-left {
+    padding: 2rem 1.5rem 1rem 1.5rem;
+  }
+  
+  .marcacao-right {
+    padding: 1.5rem;
+    max-height: none;
+  }
+  
+  .marcacao-title {
+    font-size: 1.75rem;
+  }
+  
+  .preferences-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .marcacao-wrapper {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .marcacao-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .acto-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .remove-acto-btn {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .marcacao-wrapper {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .marcacao-left {
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+  
+  .marcacao-right {
+    padding: 1rem;
+  }
+  
+  .marcacao-title {
+    font-size: 1.5rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .section-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .section-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}

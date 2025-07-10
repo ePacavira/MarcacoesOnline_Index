@@ -6,6 +6,7 @@ import { ContactoComponent } from './pages/contacto/contacto.component';
 import { LoginComponent } from './pages/login/login.component';
 import { ConsultaComponent } from './pages/consulta/marcacao.component';
 import { UtenteComponent } from './pages/utente/utente.component';
+import { ServicosComponent } from './pages/servicos/servicos.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
@@ -18,6 +19,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: HomeComponent },
       { path: 'sobre', component: SobreComponent },
+      { path: 'servicos', component: ServicosComponent },
       { path: 'contacto', component: ContactoComponent },
       { path: 'utente', component: UtenteComponent },
       { path: 'login', component: LoginComponent },

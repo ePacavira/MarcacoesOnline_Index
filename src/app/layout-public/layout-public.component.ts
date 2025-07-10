@@ -51,6 +51,6 @@ export class LayoutPublicComponent {
   // Mostra os menus apenas se a rota **não** contiver 'gestao/'
   showMenus = computed(() => !this.currentUrl().includes('gestao/'));
 
-  // Não mostra o header/footer na página de login ou utente
-  isLoginPage = () => this.currentUrl().startsWith('/login') || this.currentUrl().startsWith('/utente');
+  // Não mostra o header/footer na página de login, utente ou marcações
+  isLoginPage = () => this.currentUrl().startsWith('/login') || this.currentUrl().startsWith('/utente') || this.currentUrl().startsWith('/marcacoes');
 }

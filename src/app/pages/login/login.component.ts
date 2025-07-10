@@ -32,6 +32,10 @@ export class LoginComponent {
       this.router.navigate(['/gestao']);
     }
   }
+  onCancel(): void {
+    this.router.navigate(['/']);
+  }
+
   onSubmit(): void {
       console.log(this.loginForm.value)
     if (this.loginForm.valid) {

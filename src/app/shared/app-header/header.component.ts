@@ -17,7 +17,7 @@ import { CommonModule } from "@angular/common";
         <ul class="navbar-menu">
           <li><a routerLink="/sobre" routerLinkActive="active">Sobre</a></li>
           <li><a routerLink="/servicos" routerLinkActive="active">Serviços</a></li>
-          <li><a routerLink="/contactos" routerLinkActive="active">Contactos</a></li>
+          <li><a routerLink="/contacto" routerLinkActive="active">Contacto</a></li>
         </ul>
         <!-- Botão Login à direita -->
         <div class="navbar-actions">

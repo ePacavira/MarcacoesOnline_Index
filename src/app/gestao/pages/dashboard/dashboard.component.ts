@@ -91,7 +91,7 @@ import { CommonModule } from "@angular/common"
               <button class="chart-btn">30 dias</button>
               <button class="chart-btn">90 dias</button>
             </div>
-          </div>
+                </div>
           <div class="chart-container">
             <div class="chart-placeholder">
               <div class="chart-bars">
@@ -102,7 +102,7 @@ import { CommonModule } from "@angular/common"
                 <div class="bar" style="height: 70%"></div>
                 <div class="bar" style="height: 85%"></div>
                 <div class="bar" style="height: 75%"></div>
-              </div>
+                </div>
               <div class="chart-labels">
                 <span>Seg</span>
                 <span>Ter</span>
@@ -161,7 +161,7 @@ import { CommonModule } from "@angular/common"
                 <p class="activity-text">Novo paciente registado: <strong>Ana Costa</strong></p>
                 <span class="activity-time">há 1 hora</span>
               </div>
-            </div>
+                </div>
 
             <div class="activity-item">
               <div class="activity-icon">
@@ -173,9 +173,9 @@ import { CommonModule } from "@angular/common"
               <div class="activity-content">
                 <p class="activity-text">Marcação cancelada por <strong>Pedro Lima</strong></p>
                 <span class="activity-time">há 2 horas</span>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>

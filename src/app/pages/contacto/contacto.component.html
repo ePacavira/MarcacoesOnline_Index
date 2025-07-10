@@ -1,1 +1,312 @@
-<p>contacto works!</p>
+<div class="contacto-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">Entre em <span class="highlight">Contacto</span></h1>
+        <p class="hero-subtitle">Estamos aqui para ajudar. Entre em contacto connosco para qualquer questão ou agendamento.</p>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">24h</span>
+            <span class="stat-label">Disponibilidade</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">5min</span>
+            <span class="stat-label">Tempo de Resposta</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Satisfação</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="/logo.jpg" alt="Medi Contacto" class="hero-logo">
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Information -->
+  <section class="contact-info-section">
+    <div class="container">
+      <h2 class="section-title">Informações de Contacto</h2>
+      <p class="section-subtitle">Múltiplas formas de nos contactar</p>
+      
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+          </div>
+          <h3>Telefone</h3>
+          <p class="contact-detail">+244 123 456 789</p>
+          <p class="contact-detail">+244 987 654 321</p>
+          <p class="contact-note">Disponível 24 horas por dia</p>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3>Email</h3>
+          <p class="contact-detail">geral&#64;medi.ao</p>
+          <p class="contact-detail">marcacoes&#64;medi.ao</p>
+          <p class="contact-note">Resposta em até 2 horas</p>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h3>Localização</h3>
+          <p class="contact-detail">Rua da Saúde, nº 123</p>
+          <p class="contact-detail">Bairro Central, Luanda</p>
+          <p class="contact-note">Angola</p>
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3>Horário</h3>
+          <p class="contact-detail">Segunda a Sexta: 8h-20h</p>
+          <p class="contact-detail">Sábado: 8h-18h</p>
+          <p class="contact-note">Urgências 24h</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form Section -->
+  <section class="contact-form-section">
+    <div class="container">
+      <div class="form-container">
+        <div class="form-header">
+          <h2 class="section-title">Envie-nos uma Mensagem</h2>
+          <p class="section-subtitle">Preencha o formulário abaixo e entraremos em contacto consigo</p>
+        </div>
+        
+        <form class="contact-form" (ngSubmit)="onSubmit()" #contactForm="ngForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nome">Nome Completo *</label>
+              <input 
+                type="text" 
+                id="nome" 
+                name="nome" 
+                [(ngModel)]="formData.nome" 
+                required 
+                class="form-input"
+                placeholder="Digite o seu nome completo">
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                [(ngModel)]="formData.email" 
+                required 
+                class="form-input"
+                placeholder="Digite o seu email">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input 
+                type="tel" 
+                id="telefone" 
+                name="telefone" 
+                [(ngModel)]="formData.telefone" 
+                class="form-input"
+                placeholder="Digite o seu telefone">
+            </div>
+            
+            <div class="form-group">
+              <label for="assunto">Assunto *</label>
+              <select 
+                id="assunto" 
+                name="assunto" 
+                [(ngModel)]="formData.assunto" 
+                required 
+                class="form-input">
+                <option value="">Selecione um assunto</option>
+                <option value="marcacao">Agendamento de Consulta</option>
+                <option value="informacao">Informações Gerais</option>
+                <option value="emergencia">Urgência/Emergência</option>
+                <option value="reclamacao">Reclamação</option>
+                <option value="sugestao">Sugestão</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="mensagem">Mensagem *</label>
+            <textarea 
+              id="mensagem" 
+              name="mensagem" 
+              [(ngModel)]="formData.mensagem" 
+              required 
+              class="form-textarea"
+              rows="6"
+              placeholder="Digite a sua mensagem aqui..."></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="formData.newsletter" 
+                name="newsletter"
+                class="form-checkbox">
+              <span class="checkmark"></span>
+              Desejo receber informações sobre promoções e novidades da clínica
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="submit-btn" [disabled]="!contactForm.valid || isSubmitting">
+              <span *ngIf="!isSubmitting">Enviar Mensagem</span>
+              <span *ngIf="isSubmitting">A Enviar...</span>
+            </button>
+            <button type="button" class="clear-btn" (click)="clearForm()">
+              Limpar Formulário
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map Section -->
+  <section class="map-section">
+    <div class="container">
+      <h2 class="section-title">Encontre-nos</h2>
+      <p class="section-subtitle">Visite-nos na nossa localização</p>
+      
+      <div class="map-container">
+        <div class="map-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <h3>Mapa Interativo</h3>
+          <p>Clínica Medi - Rua da Saúde, nº 123, Bairro Central, Luanda</p>
+        </div>
+        
+        <div class="map-info">
+          <div class="info-item">
+            <h4>Como Chegar</h4>
+            <p>Localizada no centro da cidade, com fácil acesso por transportes públicos e estacionamento disponível.</p>
+          </div>
+          
+          <div class="info-item">
+            <h4>Estacionamento</h4>
+            <p>Estacionamento gratuito disponível para pacientes e visitantes.</p>
+          </div>
+          
+          <div class="info-item">
+            <h4>Transportes</h4>
+            <p>Autocarros: Linhas 1, 3, 5 e 7<br>Táxis: Disponíveis 24h</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="container">
+      <h2 class="section-title">Perguntas Frequentes</h2>
+      <p class="section-subtitle">Respostas às questões mais comuns</p>
+      
+      <div class="faq-grid">
+        <div class="faq-item" (click)="toggleFaq(0)">
+          <div class="faq-question">
+            <h3>Como posso agendar uma consulta?</h3>
+            <span class="faq-icon" [class.active]="activeFaq === 0">+</span>
+          </div>
+          <div class="faq-answer" [class.active]="activeFaq === 0">
+            <p>Pode agendar uma consulta através do nosso website, por telefone ou presencialmente na clínica. O agendamento online está disponível 24 horas por dia.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" (click)="toggleFaq(1)">
+          <div class="faq-question">
+            <h3>Quais são os horários de funcionamento?</h3>
+            <span class="faq-icon" [class.active]="activeFaq === 1">+</span>
+          </div>
+          <div class="faq-answer" [class.active]="activeFaq === 1">
+            <p>Funcionamos de segunda a sexta das 8h às 20h, aos sábados das 8h às 18h. Para urgências, estamos disponíveis 24 horas por dia.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" (click)="toggleFaq(2)">
+          <div class="faq-question">
+            <h3>Aceitam seguros de saúde?</h3>
+            <span class="faq-icon" [class.active]="activeFaq === 2">+</span>
+          </div>
+          <div class="faq-answer" [class.active]="activeFaq === 2">
+            <p>Sim, aceitamos a maioria dos seguros de saúde. Entre em contacto connosco para verificar se o seu seguro está abrangido.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" (click)="toggleFaq(3)">
+          <div class="faq-question">
+            <h3>Como posso cancelar ou reagendar uma consulta?</h3>
+            <span class="faq-icon" [class.active]="activeFaq === 3">+</span>
+          </div>
+          <div class="faq-answer" [class.active]="activeFaq === 3">
+            <p>Pode cancelar ou reagendar através do nosso website, por telefone ou email com pelo menos 24 horas de antecedência.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" (click)="toggleFaq(4)">
+          <div class="faq-question">
+            <h3>Quais documentos preciso levar para a consulta?</h3>
+            <span class="faq-icon" [class.active]="activeFaq === 4">+</span>
+          </div>
+          <div class="faq-answer" [class.active]="activeFaq === 4">
+            <p>Bilhete de identidade, cartão de seguro (se aplicável) e exames anteriores relacionados com a consulta.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" (click)="toggleFaq(5)">
+          <div class="faq-question">
+            <h3>Oferecem serviços de telemedicina?</h3>
+            <span class="faq-icon" [class.active]="activeFaq === 5">+</span>
+          </div>
+          <div class="faq-answer" [class.active]="activeFaq === 5">
+            <p>Sim, oferecemos consultas online para casos que não requerem exame físico. Entre em contacto para agendar uma consulta virtual.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Precisa de ajuda imediata?</h2>
+      <p>Para urgências, ligue-nos imediatamente ou dirija-se à nossa clínica.</p>
+      <div class="cta-buttons">
+        <a href="tel:+244123456789" class="cta-btn primary">Ligar Agora</a>
+        <a routerLink="/marcacoes" class="cta-btn secondary">Agendar Consulta</a>
+      </div>
+    </div>
+  </div>
+</section>

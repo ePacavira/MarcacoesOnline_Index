@@ -2,22 +2,35 @@
   <div class="login-wrapper">
     <!-- Lado esquerdo: logo, progresso -->
     <div class="login-left">
-      <div class="login-logo">SeuLogo</div>
+      <div class="login-logo">M e d i</div>
       <ul class="login-steps">
         <li class="active">Login</li>
       </ul>
+      <div class="login-img">
+        <a routerLink="/" class="logo-link">
+          <img src="/logo.jpg" alt="medi" />
+        </a>
+      </div>
     </div>
     <!-- Lado direito: formulário -->
     <div class="login-right">
-      <h2 class="login-title">Bem-vindo de volta!</h2>
-      <p class="login-subtitle">Acesse sua conta para continuar</p>
+      <div class="login-header">
+        <button type="button" (click)="onCancel()" class="login-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="login-header-content">
+          <h2 class="login-title">Bem-vindo de volta!</h2>
+          <p class="login-subtitle">Acesse sua conta para continuar</p>
+        </div>
+      </div>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
         <label for="email">E-mail</label>
         <input type="text" id="email" formControlName="email" placeholder="seu@email.com" />
         <label for="password">Código</label>
         <input type="password" id="password" formControlName="password" placeholder="Ex-3982-192" />
         <button type="submit" class="login-btn">Acessar</button>
-        <a routerLink="/" class="login-back-link">Voltar</a>
       </form>
     </div>
   </div>

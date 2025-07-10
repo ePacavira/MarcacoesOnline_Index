@@ -1,70 +1,190 @@
-<div class="marcacoes-table-container">
-  <div class="marcacoes-table-header">
-    <div class="marcacoes-table-title">Minhas Marcações</div>
-    <div class="marcacoes-table-actions">
-      <input type="text" id="table-search" class="marcacoes-table-search" placeholder="Pesquisar pela consulta...">
-      <div class="marcacoes-table-filter">
-        <button (click)="toggleDropdown()" class="marcacoes-table-filter-btn">
-          <svg class="icon" viewBox="0 0 20 20"><path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z"/></svg>
-          {{ triggerButtonText }}
-          <svg class="icon-chevron" viewBox="0 0 10 6"><path stroke="#00548d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg>
+<div class="marcacoes-container">
+  <!-- Header da página -->
+  <div class="marcacoes-header">
+    <div class="marcacoes-header-content">
+      <h1 class="marcacoes-title">Gestão de Marcações</h1>
+      <p class="marcacoes-subtitle">Visualize e gerencie todas as marcações de consultas</p>
+    </div>
+    <div class="marcacoes-header-actions">
+      <button class="marcacoes-add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Nova Marcação
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros e pesquisa -->
+  <div class="marcacoes-filters">
+    <div class="marcacoes-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Pesquisar marcações..." 
+        class="marcacoes-search-input"
+        [(ngModel)]="searchTerm"
+      >
+    </div>
+    
+    <div class="marcacoes-filter-dropdown">
+      <button (click)="toggleDropdown()" class="marcacoes-filter-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+          </svg>
+        {{ triggerButtonText }}
+        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9l6 6 6-6"/>
+          </svg>
         </button>
+
         @if (isDropdownOpen) {
-        <div class="marcacoes-table-dropdown">
-          <ul>
+        <div class="marcacoes-dropdown-menu">
             @for (option of filterOptions; track option.id) {
-            <li>
-              <label class="marcacoes-table-dropdown-item">
-                <input [id]="option.id" type="radio" [value]="option.value" name="filter-radio"
-                  [(ngModel)]="selectedFilterValue" (change)="selectFilter(option)">
-                {{ option.label }}
-              </label>
-            </li>
+            <label class="marcacoes-dropdown-item">
+              <input 
+                [id]="option.id" 
+                type="radio" 
+                [value]="option.value" 
+                name="filter-radio"
+                [(ngModel)]="selectedFilterValue" 
+                (change)="selectFilter(option)"
+              >
+              <span class="radio-custom"></span>
+                  {{ option.label }}
+                </label>
             }
-          </ul>
         </div>
         }
+    </div>
+  </div>
+
+  <!-- Estatísticas -->
+  <div class="marcacoes-stats">
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ getPendingCount() }}</h3>
+        <p class="stat-label">Pendentes</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon confirmed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ getConfirmedCount() }}</h3>
+        <p class="stat-label">Confirmadas</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon completed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ getCompletedCount() }}</h3>
+        <p class="stat-label">Realizadas</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-number">{{ marcacoes.length }}</h3>
+        <p class="stat-label">Total</p>
       </div>
     </div>
   </div>
-  <div class="marcacoes-table-wrapper">
-    <table class="marcacoes-table">
-      <thead>
-        <tr>
-          <th>Início</th>
-          <th>Fim</th>
-          <th>H. Solicitado</th>
-          <th>Observações</th>
-          <th>Actos Clínicos</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (marcacao of marcacoes; track marcacao.id) {
-        <tr>
-          <td>{{ marcacao.dataInicioPreferida }}</td>
-          <td>{{ marcacao.dataFimPreferida }}</td>
-          <td>{{ marcacao.horarioPreferido }}</td>
-          <td>{{ marcacao.observacoes || '—' }}</td>
-          <td>
-            <ul>
-              @for (acto of marcacao?.actosClinicos; track acto?.id) {
-              <li>{{ acto.tipo }}</li>
-              }
-            </ul>
-          </td>
-          <td>
-            <span class="marcacoes-status"
-              [class.status-agendado]="marcacao.estado === 'Agendado'"
-              [class.status-pedido]="marcacao.estado === 'Pedido'"
-              [class.status-realizado]="marcacao.estado === 'Realizado'"
-            >
-              {{ marcacao.estado }}
-            </span>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+
+  <!-- Lista de marcações -->
+  <div class="marcacoes-list">
+    @if (marcacoes.length === 0) {
+      <div class="marcacoes-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <h3>Nenhuma marcação encontrada</h3>
+        <p>Comece criando uma nova marcação ou ajuste os filtros de pesquisa.</p>
+      </div>
+    } @else {
+      @for (marcacao of getFilteredMarcacoes(); track marcacao.id) {
+        <div class="marcacao-card">
+          <div class="marcacao-header">
+            <div class="marcacao-date">
+              <div class="date-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                </svg>
+              </div>
+              <div class="date-info">
+                <span class="date-range">{{ marcacao.dataInicioPreferida }} - {{ marcacao.dataFimPreferida }}</span>
+                <span class="time-preference">{{ marcacao.horarioPreferido }}</span>
+              </div>
+            </div>
+            <div class="marcacao-status">
+              <span class="status-badge"
+                [class.status-pending]="marcacao.estado === 'Pedido'"
+                [class.status-confirmed]="marcacao.estado === 'Agendado'"
+                [class.status-completed]="marcacao.estado === 'Realizado'"
+              >
+                {{ marcacao.estado }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="marcacao-content">
+            @if (marcacao.observacoes) {
+              <div class="marcacao-observations">
+                <h4>Observações:</h4>
+                <p>{{ marcacao.observacoes }}</p>
+              </div>
+            }
+            
+            @if (marcacao.actosClinicos && marcacao.actosClinicos.length > 0) {
+              <div class="marcacao-actos">
+                <h4>Actos Clínicos:</h4>
+                <div class="actos-tags">
+                  @for (acto of marcacao.actosClinicos; track acto.id) {
+                    <span class="acto-tag">{{ acto.tipo }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+          
+          <div class="marcacao-actions">
+            <button class="action-btn edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Editar
+            </button>
+            <button class="action-btn delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+              Excluir
+          </button>
+          </div>
+        </div>
+      }
+    }
   </div>
 </div>
