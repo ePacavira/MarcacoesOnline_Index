@@ -1,0 +1,171 @@
+.marcacoes-table-container {
+  max-width: 1200px;
+  margin: 2.5rem auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,84,141,0.08);
+  padding: 2rem 1.5rem;
+}
+.marcacoes-table-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+.marcacoes-table-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #00548d;
+}
+.marcacoes-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.marcacoes-table-search {
+  border: 1.5px solid #e6eaf3;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  background: #f6f8fb;
+  outline: none;
+  min-width: 220px;
+}
+.marcacoes-table-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #00548d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.marcacoes-table-filter-btn:hover {
+  background: #003a5c;
+}
+.marcacoes-table-filter .icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.3rem;
+}
+.marcacoes-table-filter .icon-chevron {
+  width: 16px;
+  height: 16px;
+  margin-left: 0.2rem;
+}
+.marcacoes-table-dropdown {
+  position: absolute;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,84,141,0.10);
+  margin-top: 0.5rem;
+  z-index: 10;
+  min-width: 180px;
+  padding: 0.5rem 0.2rem;
+}
+.marcacoes-table-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.marcacoes-table-dropdown-item:hover {
+  background: #f6f8fb;
+}
+.marcacoes-table-wrapper {
+  overflow-x: auto;
+}
+.marcacoes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  min-width: 800px;
+}
+.marcacoes-table thead th {
+  background: #00548d;
+  color: #fff;
+  font-weight: 700;
+  padding: 1rem 0.7rem;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.marcacoes-table tbody tr {
+  background: #fff;
+  transition: background 0.2s;
+}
+.marcacoes-table tbody tr:nth-child(even) {
+  background: #f6f8fb;
+}
+.marcacoes-table tbody tr:hover {
+  background: #e6eaf3;
+}
+.marcacoes-table td {
+  padding: 0.9rem 0.7rem;
+  color: #222;
+  vertical-align: top;
+}
+.marcacoes-table ul {
+  margin: 0;
+  padding: 0;
+  list-style: disc inside;
+}
+.marcacoes-status {
+  display: inline-block;
+  padding: 0.4rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  background: #e6eaf3;
+  color: #00548d;
+  letter-spacing: 0.01em;
+}
+.status-agendado {
+  background: #e6f7e6 !important;
+  color: #1bc47d !important;
+}
+.status-pedido {
+  background: #fffbe6 !important;
+  color: #e6b800 !important;
+}
+.status-realizado {
+  background: #e6f0ff !important;
+  color: #00548d !important;
+}
+@media (max-width: 900px) {
+  .marcacoes-table-container {
+    padding: 1rem 0.2rem;
+    max-width: 99vw;
+  }
+  .marcacoes-table {
+    min-width: 600px;
+    font-size: 0.97rem;
+  }
+  .marcacoes-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+}
+@media (max-width: 600px) {
+  .marcacoes-table-container {
+    padding: 0.5rem 0.1rem;
+    max-width: 100vw;
+  }
+  .marcacoes-table {
+    min-width: 400px;
+    font-size: 0.95rem;
+  }
+} 

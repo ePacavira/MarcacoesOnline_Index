@@ -4,17 +4,12 @@ import { FilterOption, PedidoMarcacao } from '../../../models/marcacao.interface
 import { MarcacaoService } from '../../../core/services/marcacao';
 import { AuthService } from '../../../core/services/auth.service';
 
-
-
-
 @Component({
   selector: 'app-marcacoes',
   imports: [ReactiveFormsModule, FormsModule],
-  templateUrl: './marcacoes.component.html'
+  templateUrl: './marcacoes.component.html',
+  styleUrls: ['./marcacoes.component.css']
 })
-
-
-
 export class MarcacoesComponent {
   marcacoes: PedidoMarcacao[] = []
   isDropdownOpen = false;
