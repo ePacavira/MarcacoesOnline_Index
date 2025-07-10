@@ -97,5 +97,5 @@ export class MarcacoesComponent {
         acto.tipo?.toLowerCase().includes(search)
       )
     );
-  }
+}
 }

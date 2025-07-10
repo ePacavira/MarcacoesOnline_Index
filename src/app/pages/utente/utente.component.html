@@ -14,7 +14,7 @@
         </a>
       </div>
     </div>
-    
+
     <!-- Lado direito: formulário -->
     <div class="utente-right">
       <div class="utente-header">
@@ -27,53 +27,53 @@
           <h2 class="utente-title">Registo de Novo Utente</h2>
           <p class="utente-subtitle">Preencha os seus dados para criar a sua conta</p>
         </div>
-      </div>
+    </div>
       
       <form [formGroup]="registoForm" (ngSubmit)="onSubmit()" class="utente-form" (ngModelChange)="onFormChange()">
         <!-- Número de Utente (não editável) -->
         <label for="numeroUtente">Número de Utente</label>
         <div class="utente-number-display">{{ registoForm.get('numeroUtente')?.value || 'A ser gerado automaticamente' }}</div>
 
-        <!-- Nome Completo -->
+    <!-- Nome Completo -->
         <label for="nomeCompleto">Nome Completo</label>
         <input id="nomeCompleto" type="text" formControlName="nomeCompleto" placeholder="Nome completo" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
-        @if (registoForm.controls['nomeCompleto'].errors?.['required']) {
-          <p class="error">Nome completo é obrigatório.</p>
-        }
+      @if (registoForm.controls['nomeCompleto'].errors?.['required']) {
+        <p class="error">Nome completo é obrigatório.</p>
+      }
 
         <!-- Género e Data de Nascimento -->
         <div class="form-row">
           <div class="form-group">
             <label for="genero">Género</label>
             <select id="genero" formControlName="genero" (focus)="onFormFieldInteraction()" (change)="onFormChange()">
-              <option value="">-- selecione --</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-              <option value="Outro">Outro</option>
-              <option value="PrefiroNaoIndicar">Prefiro não indicar</option>
-            </select>
-          </div>
+        <option value="">-- selecione --</option>
+        <option value="Masculino">Masculino</option>
+        <option value="Feminino">Feminino</option>
+        <option value="Outro">Outro</option>
+        <option value="PrefiroNaoIndicar">Prefiro não indicar</option>
+      </select>
+    </div>
           <div class="form-group">
             <label for="dataNascimento">Data de Nascimento</label>
             <input id="dataNascimento" type="date" formControlName="dataNascimento" (focus)="onFormFieldInteraction()" (change)="onFormChange()" />
             @if (registoForm.controls['dataNascimento'].errors?.['required']) {
               <p class="error">Data de nascimento é obrigatória.</p>
-            }
+        }
           </div>
-        </div>
+      </div>
 
         <!-- Email e Telemóvel -->
         <div class="form-row">
           <div class="form-group">
             <label for="email">Email</label>
             <input id="email" type="email" formControlName="email" placeholder="seu@email.com" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
-            @if (registoForm.controls['email'].errors?.['required']) {
-              <p class="error">Email é obrigatório.</p>
-            }
-            @if (registoForm.controls['email'].errors?.['email']) {
-              <p class="error">Formato de email inválido.</p>
-            }
-          </div>
+        @if (registoForm.controls['email'].errors?.['required']) {
+          <p class="error">Email é obrigatório.</p>
+        }
+        @if (registoForm.controls['email'].errors?.['email']) {
+          <p class="error">Formato de email inválido.</p>
+        }
+      </div>
           <div class="form-group">
             <label for="telemovel">Telemóvel</label>
             <input id="telemovel" type="tel" formControlName="telemovel" placeholder="Ex: 912345678" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
@@ -84,7 +84,7 @@
               <p class="error">Formato de telemóvel inválido.</p>
             }
           </div>
-        </div>
+    </div>
 
         <!-- Morada -->
         <label for="rua">Rua / Avenida / Praça</label>
@@ -100,5 +100,5 @@
         <button type="submit" class="utente-btn" [disabled]="registoForm.invalid">Criar Conta</button>
       </form>
     </div>
-  </div>
-</div> 
+    </div>
+</div>

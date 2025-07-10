@@ -1,0 +1,189 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <button 
+          (click)="goToHome()"
+          class="flex items-center text-[#00548d] hover:text-[#0077cc] transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Voltar ao Início
+        </button>
+        <div class="text-center flex-1">
+          <h1 class="text-3xl font-bold text-[#00548d]">Consultar Marcação</h1>
+          <p class="text-gray-600">Digite o código de referência da sua marcação</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+      <form [formGroup]="searchForm" (ngSubmit)="searchAppointment()" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Código de Referência *</label>
+          <div class="flex gap-4">
+            <input 
+              type="text" 
+              formControlName="referenceCode"
+              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+              placeholder="Ex: MAR123456789"
+              [class.border-red-500]="searchForm.get('referenceCode')?.invalid && searchForm.get('referenceCode')?.touched">
+            <button 
+              type="submit"
+              [disabled]="searchForm.invalid || isLoading"
+              class="px-6 py-3 bg-[#00548d] text-white rounded-lg hover:bg-[#0077cc] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+              <span *ngIf="!isLoading">Consultar</span>
+              <span *ngIf="isLoading" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Consultando...
+              </span>
+            </button>
+          </div>
+          <div *ngIf="searchForm.get('referenceCode')?.invalid && searchForm.get('referenceCode')?.touched" class="text-red-500 text-sm mt-1">
+            Código de referência inválido
+          </div>
+          <p class="text-sm text-gray-500 mt-2">
+            O código de referência foi enviado para o seu email após a confirmação da marcação.
+          </p>
+        </div>
+      </form>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex">
+          <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-red-700">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div *ngIf="showResults && appointment" class="bg-white rounded-lg shadow-lg p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-[#00548d]">Detalhes da Marcação</h2>
+        <span class="px-3 py-1 rounded-full text-sm font-medium" [ngClass]="getStatusColor(appointment.status)">
+          {{ getStatusText(appointment.status) }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Dados do Paciente -->
+        <div>
+          <h3 class="text-lg font-semibold text-[#00548d] mb-4">Dados Pessoais</h3>
+          <div class="space-y-3">
+            <div>
+              <span class="text-sm font-medium text-gray-500">Nome:</span>
+              <p class="text-gray-800">{{ appointment.patient.name }}</p>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-500">Email:</span>
+              <p class="text-gray-800">{{ appointment.patient.email }}</p>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-500">Telefone:</span>
+              <p class="text-gray-800">{{ appointment.patient.phone }}</p>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-500">Data de Nascimento:</span>
+              <p class="text-gray-800">{{ appointment.patient.birthDate | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <div *ngIf="appointment.patient.address">
+              <span class="text-sm font-medium text-gray-500">Endereço:</span>
+              <p class="text-gray-800">{{ appointment.patient.address }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados da Consulta -->
+        <div>
+          <h3 class="text-lg font-semibold text-[#00548d] mb-4">Detalhes da Consulta</h3>
+          <div class="space-y-3">
+            <div>
+              <span class="text-sm font-medium text-gray-500">Código de Referência:</span>
+              <p class="text-gray-800 font-mono">{{ appointment.referenceCode }}</p>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-500">Data:</span>
+              <p class="text-gray-800">{{ appointment.appointment.date | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-500">Hora:</span>
+              <p class="text-gray-800">{{ appointment.appointment.time }}</p>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-500">Data de Criação:</span>
+              <p class="text-gray-800">{{ appointment.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            <div *ngIf="appointment.appointment.notes">
+              <span class="text-sm font-medium text-gray-500">Observações:</span>
+              <p class="text-gray-800">{{ appointment.appointment.notes }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button 
+            *ngIf="appointment.status === 'pending'"
+            (click)="cancelAppointment()"
+            [disabled]="isLoading"
+            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+            <span *ngIf="!isLoading">Cancelar Marcação</span>
+            <span *ngIf="isLoading">Cancelando...</span>
+          </button>
+          
+          <button 
+            (click)="goToNewAppointment()"
+            class="px-6 py-3 bg-[#00548d] text-white rounded-lg hover:bg-[#0077cc] transition-colors">
+            Nova Marcação
+          </button>
+          
+          <button 
+            (click)="goToHome()"
+            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Voltar ao Início
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div *ngIf="!showResults" class="bg-white rounded-lg shadow-lg p-8">
+      <h3 class="text-lg font-semibold text-[#00548d] mb-4">Precisa de Ajuda?</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-4 bg-blue-50 rounded-lg">
+          <h4 class="font-medium text-[#00548d] mb-2">Não tem o código?</h4>
+          <p class="text-blue-700 text-sm mb-3">
+            O código de referência foi enviado para o seu email após a confirmação da marcação.
+          </p>
+          <button 
+            (click)="goToNewAppointment()"
+            class="text-[#00548d] hover:text-[#0077cc] text-sm font-medium">
+            Fazer nova marcação →
+          </button>
+        </div>
+        
+        <div class="p-4 bg-[#ffd700] bg-opacity-20 rounded-lg">
+          <h4 class="font-medium text-[#00548d] mb-2">Primeira vez aqui?</h4>
+          <p class="text-[#00548d] text-sm mb-3">
+            Faça sua primeira marcação de consulta de forma rápida e simples.
+          </p>
+          <button 
+            (click)="goToNewAppointment()"
+            class="text-[#00548d] hover:text-[#0077cc] text-sm font-medium">
+            Começar agora →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

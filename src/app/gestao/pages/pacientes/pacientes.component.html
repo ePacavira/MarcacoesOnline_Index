@@ -8,29 +8,29 @@
           <svg class="icon" viewBox="0 0 20 20"><path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z"/></svg>
           {{ triggerButtonText }}
           <svg class="icon-chevron" viewBox="0 0 10 6"><path stroke="#00548d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/></svg>
-        </button>
-        @if (isDropdownOpen) {
+                </button>
+                @if (isDropdownOpen) {
         <div class="marcacoes-table-dropdown">
           <ul>
-            @for (option of filterOptions; track option.id) {
-            <li>
+                        @for (option of filterOptions; track option.id) {
+                        <li>
               <label class="marcacoes-table-dropdown-item">
-                <input [id]="option.id" type="radio" [value]="option.value" name="filter-radio"
+                                <input [id]="option.id" type="radio" [value]="option.value" name="filter-radio"
                   [(ngModel)]="selectedFilterValue" (change)="selectFilter(option)">
-                {{ option.label }}
-              </label>
-            </li>
-            }
-          </ul>
+                                    {{ option.label }}
+                                </label>
+                        </li>
+                        }
+                    </ul>
+                </div>
+                }
+            </div>
         </div>
-        }
-      </div>
-    </div>
-  </div>
+            </div>
   <div class="marcacoes-table-wrapper">
     <table class="marcacoes-table">
       <thead>
-        <tr>
+            <tr>
           <th>Número Utente</th>
           <th>Nome</th>
           <th>Email</th>
@@ -40,11 +40,11 @@
           <th>Localização</th>
           <th>Fotografia</th>
           <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (utente of utentes; track utente.id) {
-        <tr>
+            </tr>
+        </thead>
+        <tbody>
+            @for (utente of utentes; track utente.id) {
+            <tr>
           <td>{{ utente.numeroUtente }}</td>
           <td>{{ utente.nomeCompleto }}</td>
           <td>{{ utente.email }}</td>
@@ -60,10 +60,10 @@
             >
               {{ utente.anonimo ? 'Anónimo' : 'Registrado' }}
             </span>
-          </td>
-        </tr>
-        }
-      </tbody>
+                </td>
+            </tr>
+            }
+        </tbody>
     </table>
   </div>
 </div>

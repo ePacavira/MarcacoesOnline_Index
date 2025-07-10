@@ -52,6 +52,35 @@
   align-items: center;
   gap: 1.2rem;
 }
+.navbar-btn {
+  color: #fff;
+  background: #00548d;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  padding: 0.5rem 1.1rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+.navbar-btn:hover {
+  background: #0077cc;
+  color: #fff;
+}
+.navbar-btn-secondary {
+  color: #00548d;
+  background: transparent;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  padding: 0.5rem 1.1rem;
+  border: 2px solid #00548d;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+.navbar-btn-secondary:hover {
+  background: #00548d;
+  color: #fff;
+}
 .navbar-login {
   color: #fff;
   background: #00548d;
@@ -63,7 +92,7 @@
   transition: background 0.2s, color 0.2s;
 }
 .navbar-login:hover {
-  background: #00395f;
+  background: #0077cc;
   color: #fff;
 }
 @media (max-width: 900px) {
@@ -98,6 +127,8 @@
     align-items: flex-end;
     gap: 0.5rem;
   }
+  .navbar-btn,
+  .navbar-btn-secondary,
   .navbar-login {
     width: 100%;
     margin: 0.5rem 0 0 0;

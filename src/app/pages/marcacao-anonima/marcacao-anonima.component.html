@@ -1,0 +1,316 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <button 
+          (click)="goToHome()"
+          class="flex items-center text-[#00548d] hover:text-[#0077cc] transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Voltar ao Início
+        </button>
+        <div class="text-right flex-1">
+          <h1 class="text-3xl font-bold text-[#00548d]">Marcação de Consulta</h1>
+          <p class="text-gray-600">Preencha os dados para agendar sua consulta</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div class="flex-1 flex items-center">
+          <div class="flex items-center relative">
+            <div class="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 flex items-center justify-center"
+                 [ngClass]="steps[0].isActive ? 'bg-[#00548d] border-[#00548d] text-white' : 
+                           steps[0].isCompleted ? 'bg-[#ffd700] border-[#ffd700] text-[#00548d]' : 
+                           'bg-white border-gray-300 text-gray-500'">
+              <svg *ngIf="steps[0].isCompleted" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span *ngIf="!steps[0].isCompleted">1</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium" [ngClass]="steps[0].isActive ? 'text-[#00548d]' : 'text-gray-500'">
+                Dados Pessoais
+              </p>
+            </div>
+          </div>
+          <div class="flex-auto border-t-2 transition duration-500 ease-in-out"
+               [ngClass]="steps[0].isCompleted ? 'border-[#00548d]' : 'border-gray-300'"></div>
+          
+          <div class="flex items-center relative">
+            <div class="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 flex items-center justify-center"
+                 [ngClass]="steps[1].isActive ? 'bg-[#00548d] border-[#00548d] text-white' : 
+                           steps[1].isCompleted ? 'bg-[#ffd700] border-[#ffd700] text-[#00548d]' : 
+                           'bg-white border-gray-300 text-gray-500'">
+              <svg *ngIf="steps[1].isCompleted" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span *ngIf="!steps[1].isCompleted">2</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium" [ngClass]="steps[1].isActive ? 'text-[#00548d]' : 'text-gray-500'">
+                Serviço
+              </p>
+            </div>
+          </div>
+          <div class="flex-auto border-t-2 transition duration-500 ease-in-out"
+               [ngClass]="steps[1].isCompleted ? 'border-[#00548d]' : 'border-gray-300'"></div>
+          
+          <div class="flex items-center relative">
+            <div class="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 flex items-center justify-center"
+                 [ngClass]="steps[2].isActive ? 'bg-[#00548d] border-[#00548d] text-white' : 
+                           steps[2].isCompleted ? 'bg-[#ffd700] border-[#ffd700] text-[#00548d]' : 
+                           'bg-white border-gray-300 text-gray-500'">
+              <svg *ngIf="steps[2].isCompleted" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span *ngIf="!steps[2].isCompleted">3</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium" [ngClass]="steps[2].isActive ? 'text-[#00548d]' : 'text-gray-500'">
+                Agendamento
+              </p>
+            </div>
+          </div>
+          <div class="flex-auto border-t-2 transition duration-500 ease-in-out"
+               [ngClass]="steps[2].isCompleted ? 'border-[#00548d]' : 'border-gray-300'"></div>
+          
+          <div class="flex items-center relative">
+            <div class="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 flex items-center justify-center"
+                 [ngClass]="steps[3].isActive ? 'bg-[#00548d] border-[#00548d] text-white' : 
+                           steps[3].isCompleted ? 'bg-[#ffd700] border-[#ffd700] text-[#00548d]' : 
+                           'bg-white border-gray-300 text-gray-500'">
+              <svg *ngIf="steps[3].isCompleted" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span *ngIf="!steps[3].isCompleted">4</span>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium" [ngClass]="steps[3].isActive ? 'text-[#00548d]' : 'text-gray-500'">
+                Confirmação
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <!-- Step 1: Dados Pessoais -->
+      <div *ngIf="currentStep === 1">
+        <h2 class="text-2xl font-bold text-[#00548d] mb-6">Dados Pessoais</h2>
+        <form [formGroup]="patientForm" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
+              <input 
+                type="text" 
+                formControlName="name"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+                placeholder="Digite seu nome completo">
+              <div *ngIf="patientForm.get('name')?.invalid && patientForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
+                Nome é obrigatório e deve ter pelo menos 2 caracteres
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+              <input 
+                type="email" 
+                formControlName="email"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+                placeholder="seu@email.com">
+              <div *ngIf="patientForm.get('email')?.invalid && patientForm.get('email')?.touched" class="text-red-500 text-sm mt-1">
+                Email válido é obrigatório
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Telefone *</label>
+              <input 
+                type="tel" 
+                formControlName="phone"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+                placeholder="912345678">
+              <div *ngIf="patientForm.get('phone')?.invalid && patientForm.get('phone')?.touched" class="text-red-500 text-sm mt-1">
+                Telefone deve ter 9 dígitos
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento *</label>
+              <input 
+                type="date" 
+                formControlName="birthDate"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+              <div *ngIf="patientForm.get('birthDate')?.invalid && patientForm.get('birthDate')?.touched" class="text-red-500 text-sm mt-1">
+                Data de nascimento é obrigatória
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
+            <input 
+              type="text" 
+              formControlName="address"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+              placeholder="Rua, número, cidade">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Histórico Médico</label>
+            <textarea 
+              formControlName="medicalHistory"
+              rows="3"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+              placeholder="Informações relevantes sobre sua saúde..."></textarea>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 2: Serviço e Profissional -->
+      <div *ngIf="currentStep === 2">
+        <h2 class="text-2xl font-bold text-[#00548d] mb-6">Escolha o Serviço e Profissional</h2>
+        <form [formGroup]="serviceForm" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Serviço *</label>
+            <select 
+              formControlName="serviceId"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+              <option value="">Selecione um serviço</option>
+              <option *ngFor="let service of services" [value]="service.id">
+                {{ service.name }} - €{{ service.price }}
+              </option>
+            </select>
+            <div *ngIf="serviceForm.get('serviceId')?.invalid && serviceForm.get('serviceId')?.touched" class="text-red-500 text-sm mt-1">
+              Selecione um serviço
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Profissional *</label>
+            <select 
+              formControlName="doctorId"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+              <option value="">Selecione um profissional</option>
+              <option *ngFor="let doctor of doctors" [value]="doctor.id">
+                {{ doctor.name }} - {{ doctor.specialty }}
+              </option>
+            </select>
+            <div *ngIf="serviceForm.get('doctorId')?.invalid && serviceForm.get('doctorId')?.touched" class="text-red-500 text-sm mt-1">
+              Selecione um profissional
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 3: Data e Hora -->
+      <div *ngIf="currentStep === 3">
+        <h2 class="text-2xl font-bold text-[#00548d] mb-6">Agende sua Consulta</h2>
+        <form [formGroup]="scheduleForm" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Data *</label>
+              <input 
+                type="date" 
+                formControlName="date"
+                [min]="minDate"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+              <div *ngIf="scheduleForm.get('date')?.invalid && scheduleForm.get('date')?.touched" class="text-red-500 text-sm mt-1">
+                Selecione uma data
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Hora *</label>
+              <select 
+                formControlName="time"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+                <option value="">Selecione um horário</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+              </select>
+              <div *ngIf="scheduleForm.get('time')?.invalid && scheduleForm.get('time')?.touched" class="text-red-500 text-sm mt-1">
+                Selecione um horário
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+            <textarea 
+              formControlName="notes"
+              rows="3"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+              placeholder="Informações adicionais sobre sua consulta..."></textarea>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 4: Confirmação -->
+      <div *ngIf="currentStep === 4">
+        <h2 class="text-2xl font-bold text-[#00548d] mb-6">Confirme sua Marcação</h2>
+        <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-semibold text-[#00548d] mb-2">Dados Pessoais</h3>
+              <div class="space-y-1 text-sm">
+                <p><strong>Nome:</strong> {{ appointmentData.patient?.name }}</p>
+                <p><strong>Email:</strong> {{ appointmentData.patient?.email }}</p>
+                <p><strong>Telefone:</strong> {{ appointmentData.patient?.phone }}</p>
+                <p><strong>Data Nasc.:</strong> {{ appointmentData.patient?.birthDate | date:'dd/MM/yyyy' }}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h3 class="font-semibold text-[#00548d] mb-2">Consulta</h3>
+              <div class="space-y-1 text-sm">
+                <p><strong>Serviço:</strong> {{ getSelectedService()?.name }}</p>
+                <p><strong>Profissional:</strong> {{ getSelectedDoctor()?.name }}</p>
+                <p><strong>Data:</strong> {{ getSelectedDate() }}</p>
+                <p><strong>Hora:</strong> {{ appointmentData.appointment?.time }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="appointmentData.appointment?.notes">
+            <h3 class="font-semibold text-[#00548d] mb-2">Observações</h3>
+            <p class="text-sm">{{ appointmentData.appointment?.notes }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between mt-8">
+        <button 
+          *ngIf="currentStep > 1"
+          (click)="previousStep()"
+          class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+          Anterior
+        </button>
+        
+        <div class="ml-auto">
+          <button 
+            *ngIf="currentStep < 4"
+            (click)="nextStep()"
+            [disabled]="!validateCurrentStep()"
+            class="px-6 py-3 bg-[#00548d] text-white rounded-lg hover:bg-[#0077cc] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+            Próximo
+          </button>
+          
+          <button 
+            *ngIf="currentStep === 4"
+            (click)="confirmAppointment()"
+            class="px-6 py-3 bg-[#ffd700] text-[#00548d] rounded-lg hover:bg-[#e6c200] transition-colors font-semibold">
+            Confirmar Marcação
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

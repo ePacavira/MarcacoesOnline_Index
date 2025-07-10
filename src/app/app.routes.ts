@@ -25,6 +25,14 @@ export const routes: Routes = [
       { path: 'login', component: LoginComponent },
       { path: 'marcacoes', component: ConsultaComponent },
       {
+        path: 'marcacao-anonima',
+        loadComponent: () => import('./pages/marcacao-anonima/marcacao-anonima.component').then(m => m.MarcacaoAnonimaComponent)
+      },
+      {
+        path: 'consulta-marcacao',
+        loadComponent: () => import('./pages/consulta-marcacao/consulta-marcacao.component').then(m => m.ConsultaMarcacaoComponent)
+      },
+      {
         path: 'marcacao-sucesso',
         loadComponent: () => import('./pages/marcacao-sucesso/marcacao-sucesso.component').then(m => m.MarcacaoSucessoComponent)
       }
