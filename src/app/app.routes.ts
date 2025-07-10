@@ -22,22 +22,18 @@ export const routes: Routes = [
       { path: 'utente', component: UtenteComponent },
       { path: 'login', component: LoginComponent },
       { path: 'marcacoes', component: ConsultaComponent },
-
       {
         path: 'marcacao-sucesso',
         loadComponent: () => import('./pages/marcacao-sucesso/marcacao-sucesso.component').then(m => m.MarcacaoSucessoComponent)
-      },
-      {
-        path: "gestao",
-        //canActivate: [authGuard, adminGuard],
-        loadChildren: () => import("./gestao/gestao.routes").then((m) => m.gestaoRoutes),
-      },
+      }
     ]
   },
-
-  // Privado (requer login)
-
-
+  // Privado (gestao) - fora do LayoutPublicComponent
+  {
+    path: 'gestao',
+    //canActivate: [authGuard, adminGuard],
+    loadChildren: () => import('./gestao/gestao.routes').then((m) => m.gestaoRoutes),
+  },
   // Rota coringa
   { path: '**', component: NotFoundComponent }
 ];

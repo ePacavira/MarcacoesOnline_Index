@@ -1,0 +1,20 @@
+.dashboard-layout {
+  display: block;
+  min-height: 100vh;
+  background: #f6f8fb;
+}
+.dashboard-main {
+  margin-left: 220px;
+  padding: 2.5rem 3vw 2rem 3vw;
+  width: calc(100vw - 220px);
+  max-width: 1200px;
+  min-width: 0;
+  margin-right: auto;
+}
+@media (max-width: 900px) {
+  .dashboard-main {
+    margin-left: 60px;
+    width: calc(100vw - 60px);
+    padding: 1.2rem 2vw 1rem 2vw;
+  }
+} 
