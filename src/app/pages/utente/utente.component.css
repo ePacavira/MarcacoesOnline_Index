@@ -47,22 +47,22 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+  justify-content: flex-start;
+  padding: 4rem 1.5rem 1.5rem 1.5rem;
   min-width: 200px;
 }
 
 .utente-logo {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 2.5rem;
+  margin-bottom: 4rem;
   letter-spacing: 0.03em;
 }
 
 .utente-steps {
   list-style: none;
   padding: 0;
-  margin: 0 0 2.5rem 0;
+  margin: 0 0 4rem 0;
   width: 100%;
 }
 
@@ -106,14 +106,26 @@ body {
 .utente-img {
   margin-top: auto;
   width: 100%;
-  text-align: center;
+  text-align: left;
+  padding-bottom: 0rem;
+  padding-left: 05px;
+}
+
+.logo-link {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.logo-link:hover {
+  transform: scale(1.05);
 }
 
 .utente-img img {
-  width: 120px;
+  width: 50px;
   height: auto;
-  border-radius: 12px;
-  margin-top: 2rem;
+  border-radius: 8px;
+  margin-top: 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 
@@ -126,6 +138,25 @@ body {
   justify-content: flex-start;
   overflow-y: auto;
   max-height: 600px;
+}
+
+/* Estilização do scroll com a paleta de cores */
+.utente-right::-webkit-scrollbar {
+  width: 8px;
+}
+
+.utente-right::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.utente-right::-webkit-scrollbar-thumb {
+  background: #00548d;
+  border-radius: 4px;
+}
+
+.utente-right::-webkit-scrollbar-thumb:hover {
+  background: #003a5c;
 }
 
 .utente-header {
@@ -284,16 +315,21 @@ body {
   border: none;
   cursor: pointer;
   margin-top: 1rem;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,84,141,0.2);
 }
 
 .utente-btn:hover:not(:disabled) {
-  background: #00395f;
+  background: #003a5c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,84,141,0.3);
 }
 
 .utente-btn:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .utente-back-btn {
@@ -331,7 +367,7 @@ body {
   }
   
   .utente-left {
-    padding: 2rem 1.5rem;
+    padding: 3rem 1.5rem;
   }
   
   .utente-right {

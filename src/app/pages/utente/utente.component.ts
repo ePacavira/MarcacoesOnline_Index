@@ -1,6 +1,7 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 import { Utente } from '../../models/utente.interface';
 import { UtenteService } from '../../core/services/utentes.service';
 import { MarcacaoService } from '../../core/services/marcacao';
@@ -9,7 +10,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-utente',
   standalone: true,
-  imports: [ReactiveFormsModule, HttpClientModule],
+  imports: [ReactiveFormsModule, HttpClientModule, RouterModule],
   templateUrl: './utente.component.html',
   styleUrls: ['./utente.component.css']
 })

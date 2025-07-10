@@ -2,14 +2,16 @@
   <div class="utente-wrapper">
     <!-- Lado esquerdo: logo, progresso -->
     <div class="utente-left">
-      <div class="utente-logo">CentroVita</div>
+      <div class="utente-logo">M e d i</div>
       <ul class="utente-steps">
         <li [class.active]="stepAtual() === 0">Registo</li>
         <li [class.active]="stepAtual() === 1">Dados Pessoais</li>
         <li [class.active]="stepAtual() === 2">Confirmação</li>
       </ul>
       <div class="utente-img">
-        <img src="/public/logo.jpg" alt="CentroVita" />
+        <a routerLink="/" class="logo-link">
+          <img src="/logo.jpg" alt="medi" />
+        </a>
       </div>
     </div>
     
@@ -99,4 +101,4 @@
       </form>
     </div>
   </div>
-</div>
+</div> 
