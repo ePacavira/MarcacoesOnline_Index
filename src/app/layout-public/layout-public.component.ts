@@ -9,18 +9,26 @@ import { filter } from 'rxjs/operators';
   imports: [RouterModule, HeaderComponent, AppFooterComponent],
   template: `
     @if (!authService.isAuthenticated()) {
-        <app-header></app-header>
+        @if (!isLoginPage()) {
+          <app-header></app-header>
+        }
          <router-outlet></router-outlet>
-        <app-footer></app-footer>
+        @if (!isLoginPage()) {
+          <app-footer></app-footer>
+        }
     }@else{
          @if (showMenus()) {
-        <app-header></app-header>
-      }
+          @if (!isLoginPage()) {
+            <app-header></app-header>
+          }
+        }
       <router-outlet></router-outlet>
 
           @if (showMenus()) {
-            <app-footer></app-footer>
-      }
+            @if (!isLoginPage()) {
+              <app-footer></app-footer>
+            }
+        }
     }
   `,
 })
@@ -42,4 +50,7 @@ export class LayoutPublicComponent {
 
   // Mostra os menus apenas se a rota **não** contiver 'gestao/'
   showMenus = computed(() => !this.currentUrl().includes('gestao/'));
+
+  // Não mostra o header/footer na página de login
+  isLoginPage = () => this.currentUrl().startsWith('/login');
 }

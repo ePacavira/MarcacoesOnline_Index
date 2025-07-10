@@ -1,0 +1,206 @@
+.login-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.login-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,84,141,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+.login-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 420px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.13);
+  overflow: hidden;
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+}
+body {
+  overflow: hidden !important;
+}
+.login-left {
+  background: #00548d;
+  color: #fff;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+  min-width: 180px;
+}
+.login-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.03em;
+}
+.login-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.5rem 0;
+  width: 100%;
+}
+.login-steps li {
+  font-size: 1.1rem;
+  margin-bottom: 1.2rem;
+  opacity: 0.7;
+  position: relative;
+  padding-left: 28px;
+}
+.login-steps li.active {
+  font-weight: 700;
+  opacity: 1;
+}
+.login-steps li.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #00548d;
+}
+.login-steps li:not(.active)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.4;
+}
+.login-img {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+}
+.login-img img {
+  width: 120px;
+  height: auto;
+  border-radius: 12px;
+  margin-top: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.login-right {
+  flex: 2 1 0;
+  background: #fff;
+  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.login-title {
+  color: #00548d;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.login-subtitle {
+  color: #00548d;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: stretch;
+}
+.login-form label {
+  color: #00548d;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+.login-form input {
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #b3c6d9;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.login-form input:focus {
+  border: 1.5px solid #00548d;
+}
+.login-btn {
+  background: #00548d;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.8rem 0;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-top: 1.2rem;
+  transition: background 0.2s;
+}
+.login-btn:hover {
+  background: #00395f;
+}
+.login-back-btn {
+  margin: 0.8rem auto 0 auto;
+  background: #fff;
+  color: #00548d;
+  border: 2px solid #00548d;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  display: block;
+  width: 60%;
+  max-width: 220px;
+}
+.login-back-btn:hover {
+  background: #00548d;
+  color: #fff;
+}
+.login-back-link {
+  color: #00548d;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  margin: 0.8rem auto 0 auto;
+  display: block;
+  text-decoration: none;
+  transition: text-decoration 0.2s, color 0.2s;
+}
+.login-back-link:hover {
+  text-decoration: underline;
+  color: #00395f;
+}
+@media (max-width: 800px) {
+  .login-wrapper {
+    flex-direction: column;
+    min-height: unset;
+    max-width: 98vw;
+  }
+  .login-left, .login-right {
+    min-width: 0;
+    width: 100%;
+    padding: 2rem 1rem;
+  }
+  .login-img img {
+    margin-top: 1rem;
+  }
+}
