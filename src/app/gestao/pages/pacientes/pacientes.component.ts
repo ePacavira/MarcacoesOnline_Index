@@ -1,15 +1,18 @@
 
-import { Component, inject} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UtenteService } from '../../../core/services/utentes.service';
 import { IUtente } from '../../../models/utente.interface';
 import { FilterOption } from '../../../models/marcacao.interface';
+import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-utente',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './pacientes.component.html',
+  styleUrls: ['./pacientes.component.css']
 })
 export class UtenteComponent {
   utentes: IUtente[] = [];
@@ -17,6 +20,9 @@ export class UtenteComponent {
   isDropdownOpen = false;
   selectedFilterValue: string = 'Últimos dias';
   triggerButtonText: string = 'Últimos dias';
+
+  authService = inject(AuthService)
+  currentUser = this.authService.currentUser
 
   filterOptions: FilterOption[] = [
     { id: 'filter-radio-1', value: 'Últimos dias', label: 'Últimos dias' },
@@ -26,12 +32,10 @@ export class UtenteComponent {
     { id: 'filter-radio-5', value: 'Últimos anos', label: 'Últimos anos' }
   ];
 
-  
   constructor(private utenteService: UtenteService) {
     this.updateTriggerButtonText();
     this.carregarUtentes();
   }
-
 
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
@@ -53,9 +57,15 @@ export class UtenteComponent {
   }
 
   carregarUtentes(): void {
-    // Aqui é onde você aplicaria filtros reais (datas, etc.) se necessário
     this.utenteService.getUtentes().subscribe({
-      next: (res) => (this.utentes = res),
+      next: (res) => {
+        // Verifica se o usuário atual é administrativo
+        if (this.authService.isAdminFull() && !this.authService.isUtente()) {
+          this.utentes = res.filter(u => u?.anonimo === false);
+        } else {
+          this.utentes = res;
+        }
+      },
       error: (err) => console.error('Erro ao buscar utentes:', err)
     });
   }

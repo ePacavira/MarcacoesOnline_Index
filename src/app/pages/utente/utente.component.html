@@ -1,107 +1,102 @@
-<div class="container mx-auto p-4 max-w-2xl py-30">
-  <h2 class="text-2xl font-bold mb-6 text-[#2EB3B0]">Registo de Novo Utente</h2>
-
-
-  <form [formGroup]="registoForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- Número de Utente -->
-    <div>
-      <label for="numeroUtente" class="label">Número de Utente</label>
-      <input id="numeroUtente" type="text" formControlName="numeroUtente" class="input" />
-      @if (registoForm.controls['numeroUtente'].errors?.['required']) {
-        <p class="error">Número de utente é obrigatório.</p>
-      }
+<div class="utente-bg">
+  <div class="utente-wrapper">
+    <!-- Lado esquerdo: logo, progresso -->
+    <div class="utente-left">
+      <div class="utente-logo">CentroVita</div>
+      <ul class="utente-steps">
+        <li [class.active]="stepAtual() === 0">Registo</li>
+        <li [class.active]="stepAtual() === 1">Dados Pessoais</li>
+        <li [class.active]="stepAtual() === 2">Confirmação</li>
+      </ul>
+      <div class="utente-img">
+        <img src="/public/logo.jpg" alt="CentroVita" />
+      </div>
     </div>
+    
+    <!-- Lado direito: formulário -->
+    <div class="utente-right">
+      <div class="utente-header">
+        <button type="button" (click)="onCancel()" class="utente-back-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="utente-header-content">
+          <h2 class="utente-title">Registo de Novo Utente</h2>
+          <p class="utente-subtitle">Preencha os seus dados para criar a sua conta</p>
+        </div>
+      </div>
+      
+      <form [formGroup]="registoForm" (ngSubmit)="onSubmit()" class="utente-form" (ngModelChange)="onFormChange()">
+        <!-- Número de Utente (não editável) -->
+        <label for="numeroUtente">Número de Utente</label>
+        <div class="utente-number-display">{{ registoForm.get('numeroUtente')?.value || 'A ser gerado automaticamente' }}</div>
 
-    <!-- Fotografia -->
-    <div>
-      <label for="fotografia" class="label">Fotografia</label>
-      <input id="fotografia" type="file" (change)="onFileSelected($event)" class="file-input" />
-      @if (imagePreview) {
-        <img [src]="imagePreview" alt="Pré‑visualização" class="mt-2 h-24 w-24 object-cover rounded-md" />
-      }
-    </div>
-
-    <!-- Nome Completo -->
-    <div>
-      <label for="nomeCompleto" class="label">Nome Completo</label>
-      <input id="nomeCompleto" type="text" formControlName="nomeCompleto" class="input" />
-      @if (registoForm.controls['nomeCompleto'].errors?.['required']) {
-        <p class="error">Nome completo é obrigatório.</p>
-      }
-    </div>
-
-    <!-- Data de Nascimento -->
-    <div>
-      <label for="dataNascimento" class="label">Data de Nascimento</label>
-      <input id="dataNascimento" type="date" formControlName="dataNascimento" class="input" />
-      @if (registoForm.controls['dataNascimento'].errors?.['required']) {
-        <p class="error">Data de nascimento é obrigatória.</p>
-      }
-    </div>
-
-    <!-- Género -->
-    <div>
-      <label for="genero" class="label">Género</label>
-      <select id="genero" formControlName="genero" class="input">
-        <option value="">-- selecione --</option>
-        <option value="Masculino">Masculino</option>
-        <option value="Feminino">Feminino</option>
-        <option value="Outro">Outro</option>
-        <option value="PrefiroNaoIndicar">Prefiro não indicar</option>
-      </select>
-    </div>
-
-    <!-- Telemóvel e Email -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label for="telemovel" class="label">Telemóvel</label>
-        <input id="telemovel" type="tel" formControlName="telemovel" class="input" />
-        @if (registoForm.controls['telemovel'].errors?.['required']) {
-          <p class="error">Telemóvel é obrigatório.</p>
+        <!-- Nome Completo -->
+        <label for="nomeCompleto">Nome Completo</label>
+        <input id="nomeCompleto" type="text" formControlName="nomeCompleto" placeholder="Nome completo" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
+        @if (registoForm.controls['nomeCompleto'].errors?.['required']) {
+          <p class="error">Nome completo é obrigatório.</p>
         }
-        @if (registoForm.controls['telemovel'].errors?.['pattern']) {
-          <p class="error">Formato de telemóvel inválido.</p>
-        }
-      </div>
 
-      <div>
-        <label for="email" class="label">Email</label>
-        <input id="email" type="email" formControlName="email" class="input" />
-        @if (registoForm.controls['email'].errors?.['required']) {
-          <p class="error">Email é obrigatório.</p>
-        }
-        @if (registoForm.controls['email'].errors?.['email']) {
-          <p class="error">Formato de email inválido.</p>
-        }
-      </div>
-    </div>
+        <!-- Género e Data de Nascimento -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="genero">Género</label>
+            <select id="genero" formControlName="genero" (focus)="onFormFieldInteraction()" (change)="onFormChange()">
+              <option value="">-- selecione --</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+              <option value="PrefiroNaoIndicar">Prefiro não indicar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dataNascimento">Data de Nascimento</label>
+            <input id="dataNascimento" type="date" formControlName="dataNascimento" (focus)="onFormFieldInteraction()" (change)="onFormChange()" />
+            @if (registoForm.controls['dataNascimento'].errors?.['required']) {
+              <p class="error">Data de nascimento é obrigatória.</p>
+            }
+          </div>
+        </div>
 
-    <!-- Morada (campos planos) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div>
-        <label for="rua" class="label">Rua / Avenida / Praça</label>
-        <input id="rua" type="text" formControlName="rua" class="input" />
-      </div>
-      <div>
-        <label for="numeroPorta" class="label">Nº Porta</label>
-        <input id="numeroPorta" type="text" formControlName="numeroPorta" class="input" />
-      </div>
-      <div>
-        <label for="andarLado" class="label">Andar / Lado</label>
-        <input id="andarLado" type="text" formControlName="andarLado" class="input" />
-      </div>
-      <div>
-        <label for="localidade" class="label">Localidade</label>
-        <input id="localidade" type="text" formControlName="localidade" class="input" />
-        @if (registoForm.controls['localidade'].errors?.['required']) {
-          <p class="error">Localidade é obrigatória.</p>
+        <!-- Email e Telemóvel -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" formControlName="email" placeholder="seu@email.com" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
+            @if (registoForm.controls['email'].errors?.['required']) {
+              <p class="error">Email é obrigatório.</p>
+            }
+            @if (registoForm.controls['email'].errors?.['email']) {
+              <p class="error">Formato de email inválido.</p>
+            }
+          </div>
+          <div class="form-group">
+            <label for="telemovel">Telemóvel</label>
+            <input id="telemovel" type="tel" formControlName="telemovel" placeholder="Ex: 912345678" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
+            @if (registoForm.controls['telemovel'].errors?.['required']) {
+              <p class="error">Telemóvel é obrigatório.</p>
+            }
+            @if (registoForm.controls['telemovel'].errors?.['pattern']) {
+              <p class="error">Formato de telemóvel inválido.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Morada -->
+        <label for="rua">Rua / Avenida / Praça</label>
+        <input id="rua" type="text" formControlName="rua" placeholder="Nome da rua" (focus)="onFormFieldInteraction()" (input)="onFormChange()" />
+
+        <!-- Fotografia -->
+        <label for="fotografia">Fotografia</label>
+        <input id="fotografia" type="file" (focus)="onFormFieldInteraction()" (change)="onFileSelected($event); onFormChange()" class="file-input" />
+        @if (imagePreview) {
+          <img [src]="imagePreview" alt="Pré‑visualização" class="image-preview" />
         }
-      </div>
+
+        <button type="submit" class="utente-btn" [disabled]="registoForm.invalid">Criar Conta</button>
+      </form>
     </div>
-    <!-- Botões -->
-    <div class="flex justify-end space-x-3">
-      <button type="button" (click)="onCancel()" class="btn-cancel">Cancelar</button>
-      <button type="submit" class="btn-submit" [disabled]="registoForm.invalid">Fazer Upload</button>
-    </div>
-  </form>
+  </div>
 </div>

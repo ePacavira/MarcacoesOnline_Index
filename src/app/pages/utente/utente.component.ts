@@ -23,6 +23,9 @@ export class UtenteComponent {
   isLoading = signal(false);
   errorMessage = signal('');
 
+  // Step de progresso: 0 = Registro, 1 = Dados Pessoais, 2 = Confirmação
+  stepAtual = signal(0);
+
   private http = inject(HttpClient);
 
   constructor(private fb: FormBuilder) { }
@@ -35,13 +38,43 @@ export class UtenteComponent {
       telemovel: ['', Validators.required],
       genero: ['', Validators.required],
       dataNascimento: ['', Validators.required],
-
       rua: [''],
-      numeroPorta: [''],
-      andarLado: [''],
-      localidade: ['', Validators.required],
       fotografia: [''],
     });
+  }
+
+  // Step: Volta para Registro ao clicar na seta
+  onCancel(): void {
+    this.registoForm.reset();
+    this.imagePreview = null;
+    this.selectedFile = null;
+    this.stepAtual.set(0); // Volta para Registro
+    console.log('Registo cancelado.');
+  }
+
+  // Step: Qualquer campo do formulário vai para Dados Pessoais
+  onFormFieldInteraction(): void {
+    if (this.stepAtual() === 0) {
+      this.stepAtual.set(1);
+    }
+  }
+
+  // Step: Dados Pessoais → Confirmação quando tudo preenchido
+  onFormChange(): void {
+    if (this.stepAtual() === 1) {
+      const controls = this.registoForm.controls;
+      if (
+        controls['nomeCompleto'].valid &&
+        controls['email'].valid &&
+        controls['telemovel'].valid &&
+        controls['genero'].valid &&
+        controls['dataNascimento'].valid
+      ) {
+        this.stepAtual.set(2);
+      } else {
+        this.stepAtual.set(1);
+      }
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -104,13 +137,6 @@ export class UtenteComponent {
       this.registoForm.markAllAsTouched();
       this.errorMessage.set('Por favor preencha todos os campos obrigatórios.');
     }
-  }
-
-  onCancel(): void {
-    this.registoForm.reset();
-    this.imagePreview = null;
-    this.selectedFile = null;
-    console.log('Registo cancelado.');
   }
 
   private fazerPedidoMarcacao(utenteId: string): void {
