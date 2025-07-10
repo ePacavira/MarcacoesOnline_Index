@@ -1,62 +1,86 @@
-<div class="mt-20 max-w-6xl mx-auto px-8 py-10 rounded-xl shadow-md border border-gray-300">
-    <h1 class="text-4xl font-bold mb-6 text-gray-900">Seu perfil</h1>
-
-    <div class="flex flex-col sm:flex-row gap-6">
-        <!-- Foto -->
-        <div class="flex-shrink-0">
-            <img src="/user.jpg" alt="Customer Photo"
-                class="w-40 h-48 object-cover rounded-md border border-gray-300" />
-        </div>
-
-        <!-- Dados -->
-        <div class="flex-1">
-            <!-- Nome -->
-            <div class="mb-4">
-                <p class="text-sm font-semibold text-gray-700">Nome completo</p>
-                <p class="bg-gray-100 px-4 py-2 rounded text-gray-900 font-medium">{{utente.nome}}</p>
-            </div>
-
-            <!-- Bio -->
-            <div class="mb-6">
-                <p class="text-sm font-semibold text-gray-700">Customer bio</p>
-                <p class="bg-gray-100 px-4 py-3 rounded text-gray-800 border-l-4 border-[#2EB3B0]">
-                    Fui atendido em consulta geral devido a uma dor de cabeça leve e sensação de cansaço. Durante a
-                    avaliação, o médico verificou meus sinais vitais e realizou um exame físico, e felizmente estava
-                    tudo dentro do normal. Recebi orientação para descansar, beber bastante água e foi-me receitado um
-                    analgésico leve. Caso os sintomas persistam, devo retornar para nova avaliação.
-                </p>
-            </div>
-
-            <!-- Grid de Informações -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Demographics -->
-                <div>
-                    <h3 class="font-semibold mb-2 text-[#2EB3B0]">Dados pessoas</h3>
-                    <ul class="space-y-1 text-sm text-gray-800">
-                        <li><strong>Idade:</strong> 36</li>
-                        <li><strong>Genero:</strong> Male</li>
-                        <li><strong>Estado Cível:</strong> Single</li>
-                    </ul>
-                </div>
-
-                <!-- Products or Services -->
-                <div>
-                    <h3 class="font-semibold mb-2 text-[#2EB3B0]" >Contacto</h3>
-                    <ul class="space-y-1 text-sm text-gray-800">
-                        <li>{{utente.email}}</li>
-                        <li>{{utente.telefone}}</li>
-
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-semibold mb-2 text-[#2EB3B0]">Endereço</h3>
-                    <ul class="space-y-1 text-sm text-gray-800">
-                          <li>{{utente.endereco}}</li>
-                        <li>{{utente.pais}}</li>
-                    
-                    </ul>
-                </div>
-            </div>
-        </div>
+<div class="profile-bg profile-grid">
+  <!-- Card de dados permanentes -->
+  <div class="profile-card profile-card-fixed profile-card-tall profile-card-personal">
+    <div class="profile-card-title">Dados Pessoais</div>
+    <div class="profile-avatar-section">
+      <div class="profile-avatar-edit">
+        <img [src]="utente.foto || '/user.jpg'" alt="Avatar" class="profile-avatar profile-avatar-xl" />
+        <label class="profile-avatar-upload">
+          <input type="file" (change)="onFotoChange($event)" accept="image/*" />
+          <span class="profile-avatar-edit-icon">
+            <img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/edit.svg" alt="Editar" class="profile-edit-svg" />
+          </span>
+        </label>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">{{ utente.nome }}</div>
+        <div class="profile-label">Número de Utente</div>
+        <div class="profile-value">{{ utente.numeroUtente }}</div>
+        <div class="profile-label">Tipo de Usuário</div>
+        <div class="profile-value">{{ utente.tipoUsuario }}</div>
+      </div>
     </div>
+    <hr />
+    <div class="profile-section">
+      <div class="profile-row spaced">
+        <span class="profile-label">Data de Nascimento</span>
+        <span class="profile-value">{{ utente.dataNascimento }}</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-label">Género</span>
+        <span class="profile-value">{{ utente.genero }}</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-label">Data de Cadastro</span>
+        <span class="profile-value">{{ utente.dataCadastro }}</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-label">Última Marcação</span>
+        <span class="profile-value">{{ utente.ultimaMarcacao }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-cards-right">
+    <!-- Card de dados editáveis -->
+    <div class="profile-card profile-card-editable">
+      <div class="profile-card-title">Dados de Conta</div>
+      <form #profileForm="ngForm">
+        <div class="profile-section profile-section-single-col">
+          <div class="profile-row">
+            <label class="profile-label" for="telefone">Telemóvel</label>
+            <input id="telefone" name="telefone" [(ngModel)]="utente.telefone" class="profile-input" type="text" />
+          </div>
+          <div class="profile-row">
+            <label class="profile-label" for="password">Password</label>
+            <input id="password" name="password" [(ngModel)]="utente.password" class="profile-input" type="password" />
+          </div>
+          <div class="profile-row">
+            <label class="profile-label" for="email">Email</label>
+            <input id="email" name="email" [(ngModel)]="utente.email" class="profile-input" type="email" />
+          </div>
+          <div class="profile-row">
+            <label class="profile-label" for="morada">Morada</label>
+            <input id="morada" name="morada" [(ngModel)]="utente.endereco" class="profile-input" type="text" />
+          </div>
+        </div>
+        <div class="profile-save-row">
+          <button class="profile-save" type="submit">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+    <!-- Card de aviso de segurança -->
+    <div class="profile-card profile-card-warning profile-card-standalone">
+      <div class="profile-warning-title">
+        <img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/shield.svg" alt="Segurança" class="profile-warning-icon" />
+        Segurança
+      </div>
+      <div class="profile-warning-subtitle small">Seus dados estão protegidos!</div>
+      <div class="profile-warning-text small justify">
+        A sua privacidade é a nossa prioridade. 
+        Todos os dados do seu perfil são armazenados de forma segura e nunca 
+        serão partilhados com terceiros sem o seu consentimento. <strong>Confie</strong> aqui os seus dados estão protegidos!
+      </div>
+    </div>
+  </div>
 </div>

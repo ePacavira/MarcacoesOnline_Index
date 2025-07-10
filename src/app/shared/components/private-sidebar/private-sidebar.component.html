@@ -1,16 +1,28 @@
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <img src="/logo.jpg" alt="Logo" />
+    <img src="/logo.png" alt="Logo" style="background: none; box-shadow: none; border-radius: 10px;" />
   </div>
   <nav class="sidebar-nav">
-    <a routerLink="/gestao/dashboard" routerLinkActive="active"><span class="icon">🏠</span> Dashboard</a>
-    <a routerLink="/consulta" routerLinkActive="active"><span class="icon">📅</span> Consultas</a>
-    <a routerLink="/utente" routerLinkActive="active"><span class="icon">👤</span> Clientes</a>
-    <a routerLink="/pacientes" routerLinkActive="active"><span class="icon">🗓️</span> Agendas</a>
+    <a routerLink="/gestao/dashboard" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/activity.svg" alt="Dashboard" class="sidebar-svg-icon" /></span> Dashboard
+    </a>
+    <a routerLink="/gestao/consulta" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/calendar.svg" alt="Consultas" class="sidebar-svg-icon" /></span> Consultas
+    </a>
+    <a routerLink="/gestao/pacientes" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/users.svg" alt="Clientes" class="sidebar-svg-icon" /></span> Clientes
+    </a>
+    <a routerLink="/gestao/marcacoes" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/book.svg" alt="Agendas" class="sidebar-svg-icon" /></span> Agendas
+    </a>
+    <a routerLink="/gestao/profile" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/user.svg" alt="Profile" class="sidebar-svg-icon" /></span> Profile
+    </a>
   </nav>
   <div class="sidebar-bottom">
-    <a routerLink="/gestao/settings" class="sidebar-bottom-link"><span class="icon">⚙️</span> Settings</a>
-    <a routerLink="/login" class="sidebar-bottom-link"><span class="icon">🚪</span> Log Out</a>
+    <a routerLink="/login" class="sidebar-bottom-link">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/log-out.svg" alt="Log Out" class="sidebar-svg-icon" /></span> Log Out
+    </a>
   </div>
 </aside>
 

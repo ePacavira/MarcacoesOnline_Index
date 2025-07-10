@@ -9,14 +9,12 @@ import { PrivateSidebarComponent } from "../../shared/components/private-sidebar
   standalone: true,
   imports: [CommonModule, RouterModule, PrivateSidebarComponent],
   template: `
-    <div class="dashboard-layout bg-gray-100">
+    <div class="dashboard-layout" style="display: flex; min-height: 100vh; background: #f6f8fb;">
       <!-- Sidebar -->
       <app-private-sidebar></app-private-sidebar>
       <!-- Main Content -->
-      <main class="dashboard-main overflow-auto">
-        <div class="p-6">
-          <router-outlet></router-outlet>
-        </div>
+      <main class="dashboard-main" style="flex: 1 1 0; margin-left: 240px; padding: 2.5rem 2rem; min-width: 0;">
+        <router-outlet></router-outlet>
       </main>
     </div>
   `,
