@@ -1,0 +1,14 @@
+.main-footer {
+  background: #23272b;
+  color: #f1f1f1;
+  padding: 2rem 0 1.2rem 0;
+  text-align: center;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  margin-top: 60px;
+}
+.footer-content {
+  max-width: 900px;
+  margin: 0 auto;
+  opacity: 0.95;
+}

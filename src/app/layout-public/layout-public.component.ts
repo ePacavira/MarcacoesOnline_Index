@@ -1,0 +1,45 @@
+import { Component, computed, inject, signal } from "@angular/core"
+import { HeaderComponent } from "../shared/app-header/header.component";
+import { AppFooterComponent } from "../shared/app-footer/app-footer.component";
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { AuthService } from "../core/services/auth.service";
+import { filter } from 'rxjs/operators';
+@Component({
+  selector: 'app-layout-public',
+  imports: [RouterModule, HeaderComponent, AppFooterComponent],
+  template: `
+    @if (!authService.isAuthenticated()) {
+        <app-header></app-header>
+         <router-outlet></router-outlet>
+        <app-footer></app-footer>
+    }@else{
+         @if (showMenus()) {
+        <app-header></app-header>
+      }
+      <router-outlet></router-outlet>
+
+          @if (showMenus()) {
+            <app-footer></app-footer>
+      }
+    }
+  `,
+})
+
+export class LayoutPublicComponent {
+  authService = inject(AuthService);
+  router = inject(Router);
+
+  currentUrl = signal(this.router.url);
+
+  constructor() {
+    // Atualiza a URL toda vez que houver navegação
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentUrl.set(event.urlAfterRedirects);
+      });
+  }
+
+  // Mostra os menus apenas se a rota **não** contiver 'gestao/'
+  showMenus = computed(() => !this.currentUrl().includes('gestao/'));
+}

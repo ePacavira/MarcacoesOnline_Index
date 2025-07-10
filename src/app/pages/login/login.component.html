@@ -1,0 +1,32 @@
+<div class="container mx-auto p-4 max-w-3xl py-30">
+    <h2 class="text-2xl font-bold mb-6 text-teal-700">Sua conta, seu espaço. Conecte-se com segurança.</h2>
+   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
+        <fieldset class="p-4 border border-gray-300 rounded-md">
+            <legend class="text-lg font-medium text-gray-900 px-1">Login</legend>
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mt-2">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">E-email</label>
+                    <input type="text" id="email"
+                     formControlName="email"
+                        placeholder="kambaiaalberto@isptec@co.ao"
+                        class="mt-1 block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                </div>
+
+            </div>
+            <div class="mt-3">
+                <label for="password" class="block text-sm font-medium text-gray-700">Código</label>
+                <input type="text" id="password" formControlName="password" placeholder="Ex-3982-192"
+                    class="mt-1 block w-full px-3 py-2 border placeholder-gray-400 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+            </div>
+            <div class="flex justify-end mt-4 space-x-3">
+                <button type="submit"  (click)="onSubmit()"  class="px-4 py-2 border border-transparent cursor-pointer rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
+                     disabled:bg-gray-300 disabled:cursor-not-allowed">
+                    <a>
+                        Acessar
+                    </a>
+                </button>
+            </div>
+        </fieldset>
+
+    </form>
+</div>

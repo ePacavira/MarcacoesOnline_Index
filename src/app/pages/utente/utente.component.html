@@ -1,0 +1,107 @@
+<div class="container mx-auto p-4 max-w-2xl py-30">
+  <h2 class="text-2xl font-bold mb-6 text-[#2EB3B0]">Registo de Novo Utente</h2>
+
+
+  <form [formGroup]="registoForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Número de Utente -->
+    <div>
+      <label for="numeroUtente" class="label">Número de Utente</label>
+      <input id="numeroUtente" type="text" formControlName="numeroUtente" class="input" />
+      @if (registoForm.controls['numeroUtente'].errors?.['required']) {
+        <p class="error">Número de utente é obrigatório.</p>
+      }
+    </div>
+
+    <!-- Fotografia -->
+    <div>
+      <label for="fotografia" class="label">Fotografia</label>
+      <input id="fotografia" type="file" (change)="onFileSelected($event)" class="file-input" />
+      @if (imagePreview) {
+        <img [src]="imagePreview" alt="Pré‑visualização" class="mt-2 h-24 w-24 object-cover rounded-md" />
+      }
+    </div>
+
+    <!-- Nome Completo -->
+    <div>
+      <label for="nomeCompleto" class="label">Nome Completo</label>
+      <input id="nomeCompleto" type="text" formControlName="nomeCompleto" class="input" />
+      @if (registoForm.controls['nomeCompleto'].errors?.['required']) {
+        <p class="error">Nome completo é obrigatório.</p>
+      }
+    </div>
+
+    <!-- Data de Nascimento -->
+    <div>
+      <label for="dataNascimento" class="label">Data de Nascimento</label>
+      <input id="dataNascimento" type="date" formControlName="dataNascimento" class="input" />
+      @if (registoForm.controls['dataNascimento'].errors?.['required']) {
+        <p class="error">Data de nascimento é obrigatória.</p>
+      }
+    </div>
+
+    <!-- Género -->
+    <div>
+      <label for="genero" class="label">Género</label>
+      <select id="genero" formControlName="genero" class="input">
+        <option value="">-- selecione --</option>
+        <option value="Masculino">Masculino</option>
+        <option value="Feminino">Feminino</option>
+        <option value="Outro">Outro</option>
+        <option value="PrefiroNaoIndicar">Prefiro não indicar</option>
+      </select>
+    </div>
+
+    <!-- Telemóvel e Email -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="telemovel" class="label">Telemóvel</label>
+        <input id="telemovel" type="tel" formControlName="telemovel" class="input" />
+        @if (registoForm.controls['telemovel'].errors?.['required']) {
+          <p class="error">Telemóvel é obrigatório.</p>
+        }
+        @if (registoForm.controls['telemovel'].errors?.['pattern']) {
+          <p class="error">Formato de telemóvel inválido.</p>
+        }
+      </div>
+
+      <div>
+        <label for="email" class="label">Email</label>
+        <input id="email" type="email" formControlName="email" class="input" />
+        @if (registoForm.controls['email'].errors?.['required']) {
+          <p class="error">Email é obrigatório.</p>
+        }
+        @if (registoForm.controls['email'].errors?.['email']) {
+          <p class="error">Formato de email inválido.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Morada (campos planos) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div>
+        <label for="rua" class="label">Rua / Avenida / Praça</label>
+        <input id="rua" type="text" formControlName="rua" class="input" />
+      </div>
+      <div>
+        <label for="numeroPorta" class="label">Nº Porta</label>
+        <input id="numeroPorta" type="text" formControlName="numeroPorta" class="input" />
+      </div>
+      <div>
+        <label for="andarLado" class="label">Andar / Lado</label>
+        <input id="andarLado" type="text" formControlName="andarLado" class="input" />
+      </div>
+      <div>
+        <label for="localidade" class="label">Localidade</label>
+        <input id="localidade" type="text" formControlName="localidade" class="input" />
+        @if (registoForm.controls['localidade'].errors?.['required']) {
+          <p class="error">Localidade é obrigatória.</p>
+        }
+      </div>
+    </div>
+    <!-- Botões -->
+    <div class="flex justify-end space-x-3">
+      <button type="button" (click)="onCancel()" class="btn-cancel">Cancelar</button>
+      <button type="submit" class="btn-submit" [disabled]="registoForm.invalid">Fazer Upload</button>
+    </div>
+  </form>
+</div>

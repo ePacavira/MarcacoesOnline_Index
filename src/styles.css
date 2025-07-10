@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* coloca no teu ficheiro global.scss ou tailwind.css */
+.label {
+  @apply block text-sm font-medium text-gray-700;
+}
+.input {
+  @apply mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+         focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm;
+}
+.file-input {
+  @apply mt-1 block w-full text-sm text-slate-500
+         file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+         file:text-sm file:font-semibold file:bg-blue-50 file:text-[#2EB3B0]
+         hover:file:bg-blue-100;
+}
+.error {
+  @apply text-pink-600 text-xs mt-1;
+}
+.btn-cancel {
+  @apply px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium
+         text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2
+         focus:ring-offset-2 focus:ring-blue-500;
+}
+.btn-submit {
+  @apply px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium
+         text-white bg-[#2EB3B0] hover:opacity-70 cursor-pointer focus:outline-none
+         focus:ring-2 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed;
+}
