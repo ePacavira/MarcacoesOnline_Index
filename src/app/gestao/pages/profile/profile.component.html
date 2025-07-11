@@ -4,7 +4,7 @@
     <div class="profile-card-title">Dados Pessoais</div>
     <div class="profile-avatar-section">
       <div class="profile-avatar-edit">
-        <img [src]="utente.foto || '/user.jpg'" alt="Avatar" class="profile-avatar profile-avatar-xl" />
+        <img [src]="getFotoPerfilSrc()" alt="Avatar" class="profile-avatar profile-avatar-xl" />
         <label class="profile-avatar-upload">
           <input type="file" (change)="onFotoChange($event)" accept="image/*" />
           <span class="profile-avatar-edit-icon">

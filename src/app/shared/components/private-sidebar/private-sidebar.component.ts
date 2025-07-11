@@ -45,6 +45,18 @@ export class PrivateSidebarComponent {
     return 'Utilizador';
   }
 
+  getFotoPerfilSrc(): string {
+    const foto = this.currentUser?.fotoPath;
+    if (foto) {
+      let url = foto;
+      if (url.startsWith('http://')) {
+        url = url.replace('http://', 'https://');
+      }
+      return url + '?t=' + Date.now();
+    }
+    return '/assets/default-avatar.png';
+  }
+
   logout() {
     this.authService.logout();
   }

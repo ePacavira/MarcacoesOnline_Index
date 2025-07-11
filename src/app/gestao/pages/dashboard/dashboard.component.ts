@@ -91,7 +91,7 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
           </div>
           <div class="profile-grid">
             <div class="profile-photo">
-              <img [src]="currentUser?.fotoPath || '/assets/default-avatar.png'" alt="Foto de perfil" class="avatar" />
+              <img [src]="getFotoPerfilSrc()" alt="Foto de perfil" class="avatar" />
               <button class="change-photo-btn" routerLink="/utente/profile">Alterar Foto</button>
             </div>
             <div class="profile-info">
@@ -601,5 +601,17 @@ export class DashboardComponent implements OnInit {
   verDetalhesPedido(id: number) {
     // Implementar navegação para detalhes do pedido
     console.log('Ver detalhes do pedido:', id);
+  }
+
+  getFotoPerfilSrc(): string {
+    const foto = this.currentUser?.fotoPath;
+    if (foto) {
+      let url = foto;
+      if (url.startsWith('http://')) {
+        url = url.replace('http://', 'https://');
+      }
+      return url + '?t=' + Date.now();
+    }
+    return '/assets/default-avatar.png';
   }
 }

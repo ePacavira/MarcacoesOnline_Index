@@ -70,7 +70,7 @@
   <div class="sidebar-bottom">
     <div class="user-info" *ngIf="currentUser">
       <div class="user-avatar">
-        <img [src]="currentUser.foto || '/assets/default-avatar.png'" alt="Avatar" />
+        <img [src]="getFotoPerfilSrc()" alt="Avatar" />
       </div>
       <div class="user-details">
         <span class="user-name">{{ currentUser.nomeCompleto }}</span>

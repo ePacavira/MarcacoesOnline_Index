@@ -99,7 +99,7 @@ import { FormsModule } from "@angular/forms"
           <div class="usuario-header">
             <div class="usuario-info">
               <div class="usuario-avatar">
-                <img [src]="usuario.foto || '/assets/default-avatar.png'" alt="Avatar" />
+                <img [src]="getFotoPerfilSrc(usuario)" alt="Avatar" />
               </div>
               <div class="usuario-details">
                 <h3>{{ usuario.nome }}</h3>
@@ -708,6 +708,7 @@ export class UsuariosComponent implements OnInit {
         email: 'joao.silva@email.com',
         telefone: '+351 123 456 789',
         foto: '/assets/default-avatar.png',
+        fotoPath: 'https://via.placeholder.com/150',
         perfil: 'utente',
         status: 'ativo',
         dataRegisto: new Date('2023-12-01'),
@@ -720,6 +721,7 @@ export class UsuariosComponent implements OnInit {
         email: 'maria.santos@email.com',
         telefone: '+351 987 654 321',
         foto: '/assets/default-avatar.png',
+        fotoPath: 'https://via.placeholder.com/150',
         perfil: 'administrativo',
         status: 'ativo',
         dataRegisto: new Date('2023-11-15'),
@@ -732,6 +734,7 @@ export class UsuariosComponent implements OnInit {
         email: 'carlos.oliveira@clinica.com',
         telefone: '+351 555 123 456',
         foto: '/assets/default-avatar.png',
+        fotoPath: 'https://via.placeholder.com/150',
         perfil: 'medico',
         status: 'ativo',
         dataRegisto: new Date('2023-10-01'),
@@ -744,6 +747,7 @@ export class UsuariosComponent implements OnInit {
         email: 'ana.costa@email.com',
         telefone: '+351 111 222 333',
         foto: '/assets/default-avatar.png',
+        fotoPath: 'https://via.placeholder.com/150',
         perfil: 'utente',
         status: 'bloqueado',
         dataRegisto: new Date('2023-12-20'),
@@ -894,5 +898,17 @@ export class UsuariosComponent implements OnInit {
       console.log('Eliminar utilizador:', usuario);
       alert('Utilizador eliminado com sucesso!');
     }
+  }
+
+  getFotoPerfilSrc(usuario: any): string {
+    const foto = usuario.fotoPath || usuario.foto;
+    if (foto) {
+      let url = foto;
+      if (url.startsWith('http://')) {
+        url = url.replace('http://', 'https://');
+      }
+      return url + '?t=' + Date.now();
+    }
+    return '/assets/default-avatar.png';
   }
 } 

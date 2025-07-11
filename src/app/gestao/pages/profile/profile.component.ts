@@ -61,12 +61,52 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
         </div>
       }
 
+      <!-- Modal de Alteração de Password -->
+      <div *ngIf="showPasswordModal" class="modal-overlay">
+        <div class="modal-content">
+          <h2>Alterar Password</h2>
+          <form [formGroup]="passwordForm" (ngSubmit)="submeterAlteracaoPassword()">
+            <div class="form-group">
+              <label for="currentPassword">Password Atual</label>
+              <input type="password" id="currentPassword" formControlName="currentPassword" required />
+            </div>
+            <div class="form-group">
+              <label for="newPassword">Nova Password</label>
+              <input type="password" id="newPassword" formControlName="newPassword" required />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirmar Nova Password</label>
+              <input type="password" id="confirmPassword" formControlName="confirmPassword" required />
+            </div>
+            <div class="modal-actions">
+              <button type="submit" [disabled]="passwordForm.invalid || isLoading()">Salvar</button>
+              <button type="button" (click)="fecharPasswordModal()">Cancelar</button>
+            </div>
+            <div *ngIf="passwordError" class="error-message">{{ passwordError }}</div>
+            <div *ngIf="passwordSuccess" class="success-message">{{ passwordSuccess }}</div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal de Exclusão de Conta -->
+      <div *ngIf="showDeleteModal" class="modal-overlay">
+        <div class="modal-content">
+          <h2>Confirmar Exclusão</h2>
+          <p>Tem a certeza que deseja excluir a sua conta? Esta ação é irreversível.</p>
+          <div class="modal-actions">
+            <button (click)="confirmarExcluirConta()" class="danger-btn" [disabled]="isLoading()">Excluir</button>
+            <button (click)="fecharDeleteModal()">Cancelar</button>
+          </div>
+          <div *ngIf="deleteError" class="error-message">{{ deleteError }}</div>
+        </div>
+      </div>
+
       <div class="profile-content">
         <!-- Foto de Perfil -->
         <div class="profile-photo-section">
           <div class="photo-container">
             <img 
-              [src]="fotoPerfil || '/assets/default-avatar.png'" 
+              [src]="getFotoPerfilSrc()" 
               alt="Foto de perfil" 
               class="profile-photo"
             />
@@ -97,6 +137,18 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
           <form [formGroup]="perfilForm" class="profile-form">
             <div class="form-grid">
               <div class="form-group">
+                <label for="numeroUtente">Número de Utente</label>
+                <input 
+                  type="text" 
+                  id="numeroUtente" 
+                  formControlName="numeroUtente"
+                  placeholder="123456789"
+                  readonly
+                />
+                <small class="help-text">Número de utente não pode ser alterado</small>
+              </div>
+
+              <div class="form-group">
                 <label for="nomeCompleto">Nome Completo *</label>
                 <input 
                   type="text" 
@@ -121,16 +173,6 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
                   <span *ngIf="perfilForm.get('email')?.errors?.['required']">Email é obrigatório</span>
                   <span *ngIf="perfilForm.get('email')?.errors?.['email']">Email inválido</span>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label for="telefone">Telefone</label>
-                <input 
-                  type="tel" 
-                  id="telefone" 
-                  formControlName="telefone"
-                  placeholder="+351 123 456 789"
-                />
               </div>
 
               <div class="form-group">
@@ -164,16 +206,6 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
               </div>
 
               <div class="form-group full-width">
-                <label for="endereco">Endereço</label>
-                <textarea 
-                  id="endereco" 
-                  formControlName="endereco"
-                  placeholder="Rua, número, código postal, cidade"
-                  rows="3"
-                ></textarea>
-              </div>
-
-              <div class="form-group full-width">
                 <label for="morada">Morada Completa</label>
                 <textarea 
                   id="morada" 
@@ -181,18 +213,6 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
                   placeholder="Morada completa incluindo código postal"
                   rows="3"
                 ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="numeroUtente">Número de Utente</label>
-                <input 
-                  type="text" 
-                  id="numeroUtente" 
-                  formControlName="numeroUtente"
-                  placeholder="123456789"
-                  readonly
-                />
-                <small class="help-text">Número de utente não pode ser alterado</small>
               </div>
             </div>
           </form>
@@ -207,48 +227,14 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
                 <h4>Alterar Password</h4>
                 <p>Atualize sua password para manter a conta segura</p>
               </div>
-              <button class="security-btn" (click)="alterarPassword()">
+              <button class="security-btn" (click)="abrirPasswordModal()">
                 Alterar Password
-              </button>
-            </div>
-
-            <div class="security-item">
-              <div class="security-info">
-                <h4>Autenticação de Dois Fatores</h4>
-                <p>Adicione uma camada extra de segurança à sua conta</p>
-              </div>
-              <button class="security-btn" (click)="configurar2FA()">
-                Configurar 2FA
-              </button>
-            </div>
-
-            <div class="security-item">
-              <div class="security-info">
-                <h4>Histórico de Login</h4>
-                <p>Veja onde e quando sua conta foi acedida</p>
-              </div>
-              <button class="security-btn" (click)="verHistoricoLogin()">
-                Ver Histórico
               </button>
             </div>
           </div>
         </div>
 
         <!-- Ações da Conta -->
-        <div class="form-section danger-zone">
-          <h2>Zona de Perigo</h2>
-          <div class="danger-actions">
-            <div class="danger-item">
-              <div class="danger-info">
-                <h4>Excluir Conta</h4>
-                <p>Esta ação é irreversível. Todos os seus dados serão permanentemente removidos.</p>
-              </div>
-              <button class="danger-btn" (click)="excluirConta()">
-                Excluir Conta
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   `,
@@ -544,6 +530,29 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
       background: #b91c1c;
     }
 
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      min-width: 320px;
+      max-width: 90vw;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
     @media (max-width: 768px) {
       .profile-container {
         padding: 1rem;
@@ -574,6 +583,12 @@ export class ProfileComponent implements OnInit {
   isLoading = signal(false);
   successMessage = signal("");
   errorMessage = signal("");
+  showPasswordModal = false;
+  passwordForm: FormGroup;
+  passwordError: string = '';
+  passwordSuccess: string = '';
+  showDeleteModal = false;
+  deleteError: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -591,6 +606,11 @@ export class ProfileComponent implements OnInit {
       morada: [''],
       numeroUtente: [{value: '', disabled: true}]
     });
+    this.passwordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    });
   }
 
   ngOnInit() {
@@ -607,7 +627,7 @@ export class ProfileComponent implements OnInit {
           email: user.email,
           telefone: user.telefone || '',
           telemovel: user.telemovel || '',
-          dataNascimento: user.dataNascimento,
+          dataNascimento: user.dataNascimento ? user.dataNascimento.toString().substring(0, 10) : '',
           genero: user.genero || '',
           endereco: user.endereco || '',
           morada: user.morada || '',
@@ -647,18 +667,22 @@ export class ProfileComponent implements OnInit {
       this.isLoading.set(true);
       this.errorMessage.set("");
 
-      this.userProfileService.uploadPhoto(file).subscribe({
+      const currentUser = this.authService.getCurrentUser();
+      if (!currentUser) {
+        this.errorMessage.set("Utilizador não autenticado.");
+        this.isLoading.set(false);
+        return;
+      }
+
+      this.userProfileService.uploadPhoto(file, currentUser.id).subscribe({
         next: (response) => {
           this.fotoPerfil = response.fotoPath;
           this.successMessage.set("Foto atualizada com sucesso!");
           this.isLoading.set(false);
           
           // Atualizar dados do utilizador
-          const currentUser = this.authService.getCurrentUser();
-          if (currentUser) {
-            currentUser.fotoPath = response.fotoPath;
-            this.authService.updateCurrentUser(currentUser);
-          }
+          currentUser.fotoPath = response.fotoPath;
+          this.authService.updateCurrentUser(currentUser);
         },
         error: (error) => {
           console.error('Erro ao fazer upload da foto:', error);
@@ -724,5 +748,81 @@ export class ProfileComponent implements OnInit {
   excluirConta() {
     // Implementar exclusão de conta
     console.log('Excluir conta');
+  }
+
+  abrirPasswordModal() {
+    this.passwordForm.reset();
+    this.passwordError = '';
+    this.passwordSuccess = '';
+    this.showPasswordModal = true;
+  }
+
+  fecharPasswordModal() {
+    this.showPasswordModal = false;
+  }
+
+  submeterAlteracaoPassword() {
+    if (this.passwordForm.invalid) return;
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+    if (newPassword !== confirmPassword) {
+      this.passwordError = 'A nova password e a confirmação não coincidem.';
+      return;
+    }
+    this.isLoading.set(true);
+    this.passwordError = '';
+    this.passwordSuccess = '';
+    this.userProfileService.changePassword({ currentPassword, newPassword, confirmPassword }).subscribe({
+      next: () => {
+        this.passwordSuccess = 'Password alterada com sucesso!';
+        this.isLoading.set(false);
+        setTimeout(() => this.fecharPasswordModal(), 1500);
+      },
+      error: (err) => {
+        this.passwordError = err?.error?.message || 'Erro ao alterar password.';
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  abrirDeleteModal() {
+    this.showDeleteModal = true;
+    this.deleteError = '';
+  }
+
+  fecharDeleteModal() {
+    this.showDeleteModal = false;
+  }
+
+  confirmarExcluirConta() {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      this.deleteError = 'Utilizador não autenticado.';
+      return;
+    }
+    this.isLoading.set(true);
+    this.deleteError = '';
+    this.userProfileService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.authService.logout();
+        window.location.href = '/';
+      },
+      error: (err) => {
+        this.deleteError = err?.error?.message || 'Erro ao excluir conta.';
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  getFotoPerfilSrc(): string {
+    if (this.fotoPerfil) {
+      let foto = this.fotoPerfil;
+      // Forçar https se necessário
+      if (foto.startsWith('http://')) {
+        foto = foto.replace('http://', 'https://');
+      }
+      return foto + '?t=' + Date.now();
+    }
+    return '/assets/default-avatar.png';
   }
 }

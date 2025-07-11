@@ -47,7 +47,7 @@ export class UserProfileService {
 
   // Obter dados completos do utilizador
   getUserProfile(): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/profile`);
+    return this.http.get<User>(`${this.baseUrl}/me`);
   }
 
   // Atualizar dados pessoais
@@ -61,10 +61,10 @@ export class UserProfileService {
   }
 
   // Upload de foto
-  uploadPhoto(file: File): Observable<{ fotoPath: string }> {
+  uploadPhoto(file: File, userId: number): Observable<{ fotoPath: string }> {
     const formData = new FormData();
-    formData.append('photo', file);
-    return this.http.post<{ fotoPath: string }>(`${this.baseUrl}/upload-photo`, formData);
+    formData.append('file', file);
+    return this.http.post<{ fotoPath: string }>(`${this.baseUrl}/${userId}/foto`, formData);
   }
 
   // Obter pedidos do utilizador
@@ -97,5 +97,10 @@ export class UserProfileService {
       pedidosConcluidos: number;
       pedidosCancelados: number;
     }>(`${this.baseUrl}/stats`);
+  }
+
+  // Excluir utilizador
+  deleteUser(id: number) {
+    return this.http.delete(`${this.baseUrl}/${id}`);
   }
 } 
