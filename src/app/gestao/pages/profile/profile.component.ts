@@ -1,7 +1,8 @@
-import { Component, type OnInit } from "@angular/core"
+import { Component, type OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from "@angular/forms"
 import { AuthService } from "../../../core/services/auth.service"
+import { UserProfileService } from "../../../core/services/user-profile.service"
 
 @Component({
   selector: "app-profile",
@@ -19,17 +20,46 @@ import { AuthService } from "../../../core/services/auth.service"
           <button 
             class="save-btn" 
             (click)="salvarPerfil()"
-            [disabled]="!perfilForm.valid || !perfilForm.dirty"
+            [disabled]="!perfilForm.valid || !perfilForm.dirty || isLoading()"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17,21 17,13 7,13 7,21"/>
-              <polyline points="7,3 7,8 15,8"/>
-            </svg>
-            Salvar Alterações
+            @if (isLoading()) {
+              <svg class="loading-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12a9 9 0 11-6.219-8.56"/>
+              </svg>
+              A guardar...
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17,21 17,13 7,13 7,21"/>
+                <polyline points="7,3 7,8 15,8"/>
+              </svg>
+              Salvar Alterações
+            }
           </button>
         </div>
       </div>
+
+      <!-- Mensagens de Feedback -->
+      @if (successMessage()) {
+        <div class="success-message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22,4 12,14.01 9,11.01"/>
+          </svg>
+          {{ successMessage() }}
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          {{ errorMessage() }}
+        </div>
+      }
 
       <div class="profile-content">
         <!-- Foto de Perfil -->
@@ -67,14 +97,14 @@ import { AuthService } from "../../../core/services/auth.service"
           <form [formGroup]="perfilForm" class="profile-form">
             <div class="form-grid">
               <div class="form-group">
-                <label for="nome">Nome Completo *</label>
+                <label for="nomeCompleto">Nome Completo *</label>
                 <input 
                   type="text" 
-                  id="nome" 
-                  formControlName="nome"
+                  id="nomeCompleto" 
+                  formControlName="nomeCompleto"
                   placeholder="Digite seu nome completo"
                 />
-                <div class="error-message" *ngIf="perfilForm.get('nome')?.invalid && perfilForm.get('nome')?.touched">
+                <div class="error-message" *ngIf="perfilForm.get('nomeCompleto')?.invalid && perfilForm.get('nomeCompleto')?.touched">
                   Nome é obrigatório
                 </div>
               </div>
@@ -94,36 +124,61 @@ import { AuthService } from "../../../core/services/auth.service"
               </div>
 
               <div class="form-group">
-                <label for="telefone">Telefone *</label>
+                <label for="telefone">Telefone</label>
                 <input 
                   type="tel" 
                   id="telefone" 
                   formControlName="telefone"
                   placeholder="+351 123 456 789"
                 />
-                <div class="error-message" *ngIf="perfilForm.get('telefone')?.invalid && perfilForm.get('telefone')?.touched">
-                  Telefone é obrigatório
-                </div>
               </div>
 
               <div class="form-group">
-                <label for="dataNascimento">Data de Nascimento *</label>
+                <label for="telemovel">Telemóvel</label>
+                <input 
+                  type="tel" 
+                  id="telemovel" 
+                  formControlName="telemovel"
+                  placeholder="+351 912 345 678"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="dataNascimento">Data de Nascimento</label>
                 <input 
                   type="date" 
                   id="dataNascimento" 
                   formControlName="dataNascimento"
                 />
-                <div class="error-message" *ngIf="perfilForm.get('dataNascimento')?.invalid && perfilForm.get('dataNascimento')?.touched">
-                  Data de nascimento é obrigatória
-                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="genero">Género</label>
+                <select id="genero" formControlName="genero">
+                  <option value="">Selecione...</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Outro">Outro</option>
+                  <option value="PrefiroNaoIndicar">Prefiro não indicar</option>
+                </select>
               </div>
 
               <div class="form-group full-width">
-                <label for="endereco">Endereço Completo</label>
+                <label for="endereco">Endereço</label>
                 <textarea 
                   id="endereco" 
                   formControlName="endereco"
                   placeholder="Rua, número, código postal, cidade"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="morada">Morada Completa</label>
+                <textarea 
+                  id="morada" 
+                  formControlName="morada"
+                  placeholder="Morada completa incluindo código postal"
                   rows="3"
                 ></textarea>
               </div>
@@ -200,7 +255,7 @@ import { AuthService } from "../../../core/services/auth.service"
   styles: [`
     .profile-container {
       padding: 2rem;
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
@@ -235,21 +290,61 @@ import { AuthService } from "../../../core/services/auth.service"
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
 
     .save-btn:hover:not(:disabled) {
-      background: #0077cc;
+      background: #003a5c;
     }
 
     .save-btn:disabled {
-      opacity: 0.5;
+      background: #9ca3af;
       cursor: not-allowed;
     }
 
-    .save-btn svg {
+    .loading-spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Mensagens de Feedback */
+    .success-message,
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .success-message svg {
       width: 20px;
       height: 20px;
+      color: #059669;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .error-message svg {
+      width: 20px;
+      height: 20px;
+      color: #dc2626;
     }
 
     .profile-content {
@@ -257,11 +352,15 @@ import { AuthService } from "../../../core/services/auth.service"
       gap: 2rem;
     }
 
-    .profile-photo-section {
+    .profile-photo-section,
+    .form-section {
       background: white;
       border-radius: 12px;
-      padding: 2rem;
+      padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .profile-photo-section {
       text-align: center;
     }
 
@@ -276,7 +375,7 @@ import { AuthService } from "../../../core/services/auth.service"
       height: 150px;
       border-radius: 50%;
       object-fit: cover;
-      border: 4px solid #e6f1fa;
+      border: 4px solid #f3f4f6;
     }
 
     .photo-overlay {
@@ -309,39 +408,26 @@ import { AuthService } from "../../../core/services/auth.service"
 
     .photo-info h3 {
       margin: 0 0 0.5rem 0;
-      color: #333;
+      color: #1f2937;
     }
 
     .photo-info p {
-      color: #666;
-      font-size: 0.9rem;
       margin: 0;
-    }
-
-    .form-section {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      color: #6b7280;
+      font-size: 0.9rem;
     }
 
     .form-section h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      color: #00548d;
+      color: #1f2937;
       margin: 0 0 1.5rem 0;
     }
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
     }
 
     .form-group.full-width {
@@ -349,20 +435,25 @@ import { AuthService } from "../../../core/services/auth.service"
     }
 
     .form-group label {
-      font-weight: 500;
-      color: #333;
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
     }
 
     .form-group input,
+    .form-group select,
     .form-group textarea {
+      width: 100%;
       padding: 0.75rem;
-      border: 1px solid #ddd;
+      border: 1px solid #d1d5db;
       border-radius: 6px;
       font-size: 1rem;
       transition: border-color 0.2s;
     }
 
     .form-group input:focus,
+    .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
       border-color: #00548d;
@@ -370,80 +461,30 @@ import { AuthService } from "../../../core/services/auth.service"
     }
 
     .form-group input[readonly] {
-      background: #f8f9fa;
-      color: #666;
+      background: #f9fafb;
+      color: #6b7280;
+    }
+
+    .help-text {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
     }
 
     .error-message {
       color: #dc2626;
       font-size: 0.8rem;
+      margin-top: 0.25rem;
     }
 
-    .help-text {
-      color: #666;
-      font-size: 0.8rem;
-    }
-
-    .preferences-grid {
-      display: grid;
-      gap: 1.5rem;
-    }
-
-    .preference-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .checkbox-input {
-      display: none;
-    }
-
-    .checkmark {
-      width: 20px;
-      height: 20px;
-      border: 2px solid #ddd;
-      border-radius: 4px;
-      position: relative;
-      transition: all 0.2s;
-    }
-
-    .checkbox-input:checked + .checkmark {
-      background: #00548d;
-      border-color: #00548d;
-    }
-
-    .checkbox-input:checked + .checkmark::after {
-      content: '✓';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .preference-description {
-      color: #666;
-      font-size: 0.9rem;
-      margin: 0 0 0 2rem;
-    }
-
-    .security-actions {
+    .security-actions,
+    .danger-actions {
       display: grid;
       gap: 1rem;
     }
 
-    .security-item {
+    .security-item,
+    .danger-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -452,60 +493,40 @@ import { AuthService } from "../../../core/services/auth.service"
       border-radius: 8px;
     }
 
-    .security-info h4 {
+    .security-info h4,
+    .danger-info h4 {
       margin: 0 0 0.25rem 0;
-      color: #333;
+      color: #1f2937;
     }
 
-    .security-info p {
+    .security-info p,
+    .danger-info p {
       margin: 0;
-      color: #666;
+      color: #6b7280;
       font-size: 0.9rem;
     }
 
     .security-btn {
-      background: transparent;
-      color: #00548d;
-      border: 1px solid #00548d;
+      background: #f3f4f6;
+      color: #374151;
+      border: none;
       padding: 0.5rem 1rem;
       border-radius: 6px;
+      font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
 
     .security-btn:hover {
-      background: #00548d;
-      color: white;
+      background: #e5e7eb;
     }
 
     .danger-zone {
-      border: 1px solid #fee2e2;
-      background: #fef2f2;
+      border: 1px solid #fecaca;
     }
 
     .danger-zone h2 {
       color: #dc2626;
-    }
-
-    .danger-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      background: white;
-    }
-
-    .danger-info h4 {
-      margin: 0 0 0.25rem 0;
-      color: #dc2626;
-    }
-
-    .danger-info p {
-      margin: 0;
-      color: #666;
-      font-size: 0.9rem;
     }
 
     .danger-btn {
@@ -514,6 +535,7 @@ import { AuthService } from "../../../core/services/auth.service"
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 6px;
+      font-size: 0.9rem;
       cursor: pointer;
       transition: background 0.2s;
     }
@@ -548,19 +570,26 @@ import { AuthService } from "../../../core/services/auth.service"
 })
 export class ProfileComponent implements OnInit {
   perfilForm: FormGroup;
-  fotoPerfil: string | null = null;
+  fotoPerfil: string | null | undefined;
+  isLoading = signal(false);
+  successMessage = signal("");
+  errorMessage = signal("");
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private userProfileService: UserProfileService
   ) {
     this.perfilForm = this.fb.group({
-      nome: ['', Validators.required],
+      nomeCompleto: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      telefone: ['', Validators.required],
-      dataNascimento: ['', Validators.required],
+      telefone: [''],
+      telemovel: [''],
+      dataNascimento: [''],
+      genero: [''],
       endereco: [''],
-      numeroUtente: [''],
+      morada: [''],
+      numeroUtente: [{value: '', disabled: true}]
     });
   }
 
@@ -569,19 +598,30 @@ export class ProfileComponent implements OnInit {
   }
 
   carregarDadosPerfil() {
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.perfilForm.patchValue({
-        nome: user.nomeCompleto || '',
-        email: user.email || '',
-        telefone: user.telemovel || '',
-        dataNascimento: user.dataNascimento || '',
-        endereco: user.morada || '',
-        numeroUtente: user.numeroUtente || '',
-      });
-      
-      this.fotoPerfil = user.fotoPath || null;
-    }
+    this.userProfileService.getUserProfile().subscribe({
+      next: (user) => {
+        this.fotoPerfil = user.fotoPath;
+        
+        this.perfilForm.patchValue({
+          nomeCompleto: user.nomeCompleto,
+          email: user.email,
+          telefone: user.telefone || '',
+          telemovel: user.telemovel || '',
+          dataNascimento: user.dataNascimento,
+          genero: user.genero || '',
+          endereco: user.endereco || '',
+          morada: user.morada || '',
+          numeroUtente: user.numeroUtente || ''
+        });
+
+        // Atualizar dados no AuthService
+        this.authService.updateCurrentUser(user);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar dados do perfil:', error);
+        this.errorMessage.set("Erro ao carregar dados do perfil. Tente novamente.");
+      }
+    });
   }
 
   selecionarFoto() {
@@ -592,33 +632,68 @@ export class ProfileComponent implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      // Validar tamanho (máx 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        alert('A imagem deve ter menos de 2MB');
+        this.errorMessage.set("A imagem deve ter no máximo 2MB.");
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.fotoPerfil = e.target.result;
-      };
-      reader.readAsDataURL(file);
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        this.errorMessage.set("Por favor, selecione uma imagem válida.");
+        return;
+      }
+
+      this.isLoading.set(true);
+      this.errorMessage.set("");
+
+      this.userProfileService.uploadPhoto(file).subscribe({
+        next: (response) => {
+          this.fotoPerfil = response.fotoPath;
+          this.successMessage.set("Foto atualizada com sucesso!");
+          this.isLoading.set(false);
+          
+          // Atualizar dados do utilizador
+          const currentUser = this.authService.getCurrentUser();
+          if (currentUser) {
+            currentUser.fotoPath = response.fotoPath;
+            this.authService.updateCurrentUser(currentUser);
+          }
+        },
+        error: (error) => {
+          console.error('Erro ao fazer upload da foto:', error);
+          this.errorMessage.set("Erro ao fazer upload da foto. Tente novamente.");
+          this.isLoading.set(false);
+        }
+      });
     }
   }
 
   salvarPerfil() {
     if (this.perfilForm.valid) {
-      const dadosAtualizados = {
-        ...this.perfilForm.value,
-        foto: this.fotoPerfil
-      };
+      this.isLoading.set(true);
+      this.errorMessage.set("");
+      this.successMessage.set("");
 
-      console.log('Salvando perfil:', dadosAtualizados);
+      const formData = this.perfilForm.value;
       
-      // Aqui você implementaria a chamada para o serviço
-      // this.authService.atualizarPerfil(dadosAtualizados).subscribe(...)
-      
-      alert('Perfil atualizado com sucesso!');
-      this.perfilForm.markAsPristine();
+      this.userProfileService.updateProfile(formData).subscribe({
+        next: (user) => {
+          this.successMessage.set("Perfil atualizado com sucesso!");
+          this.isLoading.set(false);
+          
+          // Atualizar dados no AuthService
+          this.authService.updateCurrentUser(user);
+          
+          // Marcar formulário como não modificado
+          this.perfilForm.markAsPristine();
+        },
+        error: (error) => {
+          console.error('Erro ao atualizar perfil:', error);
+          this.errorMessage.set("Erro ao atualizar perfil. Tente novamente.");
+          this.isLoading.set(false);
+        }
+      });
     } else {
       this.marcarCamposComoTocados();
     }
@@ -632,24 +707,22 @@ export class ProfileComponent implements OnInit {
   }
 
   alterarPassword() {
-    console.log('Abrir modal de alteração de password');
-    // Implementar modal ou navegação
+    // Implementar modal ou página para alterar password
+    console.log('Alterar password');
   }
 
   configurar2FA() {
-    console.log('Configurar autenticação de dois fatores');
-    // Implementar configuração 2FA
+    // Implementar configuração de 2FA
+    console.log('Configurar 2FA');
   }
 
   verHistoricoLogin() {
+    // Implementar histórico de login
     console.log('Ver histórico de login');
-    // Implementar visualização do histórico
   }
 
   excluirConta() {
-    if (confirm('Tem certeza que deseja excluir sua conta? Esta ação é irreversível.')) {
-      console.log('Excluir conta');
-      // Implementar exclusão da conta
-    }
+    // Implementar exclusão de conta
+    console.log('Excluir conta');
   }
 }

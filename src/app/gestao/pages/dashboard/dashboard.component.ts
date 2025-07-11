@@ -1,6 +1,7 @@
 import { Component, type OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { AuthService } from "../../../core/services/auth.service"
+import { UserProfileService } from "../../../core/services/user-profile.service"
 
 @Component({
   selector: "app-dashboard",
@@ -12,7 +13,7 @@ import { AuthService } from "../../../core/services/auth.service"
       <div class="dashboard-header">
         <div class="header-left">
           <h1 class="dashboard-title">Painel do Utente</h1>
-          <p class="dashboard-subtitle">Bem-vindo, {{ currentUser?.nome || 'Utente' }}</p>
+          <p class="dashboard-subtitle">Bem-vindo, {{ currentUser?.nomeCompleto || 'Utente' }}</p>
         </div>
         <div class="header-right">
           <div class="date-info">
@@ -31,7 +32,7 @@ import { AuthService } from "../../../core/services/auth.service"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ getPendingCount() }}</h3>
+            <h3 class="stat-number">{{ userStats().pedidosPendentes }}</h3>
             <p class="stat-label">Marcações Pendentes</p>
             <span class="stat-change neutral">Aguardando confirmação</span>
           </div>
@@ -46,7 +47,7 @@ import { AuthService } from "../../../core/services/auth.service"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ getConfirmedCount() }}</h3>
+            <h3 class="stat-number">{{ userStats().pedidosConfirmados }}</h3>
             <p class="stat-label">Marcações Confirmadas</p>
             <span class="stat-change positive">Próximas consultas</span>
           </div>
@@ -60,7 +61,7 @@ import { AuthService } from "../../../core/services/auth.service"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ getCompletedCount() }}</h3>
+            <h3 class="stat-number">{{ userStats().pedidosConcluidos }}</h3>
             <p class="stat-label">Consultas Realizadas</p>
             <span class="stat-change positive">Histórico completo</span>
           </div>
@@ -90,13 +91,13 @@ import { AuthService } from "../../../core/services/auth.service"
           </div>
           <div class="profile-grid">
             <div class="profile-photo">
-              <img [src]="currentUser?.foto || '/assets/default-avatar.png'" alt="Foto de perfil" class="avatar" />
-              <button class="change-photo-btn">Alterar Foto</button>
+              <img [src]="currentUser?.fotoPath || '/assets/default-avatar.png'" alt="Foto de perfil" class="avatar" />
+              <button class="change-photo-btn" routerLink="/utente/profile">Alterar Foto</button>
             </div>
             <div class="profile-info">
               <div class="info-row">
                 <span class="info-label">Nome:</span>
-                <span class="info-value">{{ currentUser?.nome }}</span>
+                <span class="info-value">{{ currentUser?.nomeCompleto }}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Email:</span>
@@ -104,7 +105,7 @@ import { AuthService } from "../../../core/services/auth.service"
               </div>
               <div class="info-row">
                 <span class="info-label">Telefone:</span>
-                <span class="info-value">{{ currentUser?.telefone }}</span>
+                <span class="info-value">{{ currentUser?.telefone || currentUser?.telemovel || 'Não informado' }}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Data de Nascimento:</span>
@@ -112,11 +113,11 @@ import { AuthService } from "../../../core/services/auth.service"
               </div>
               <div class="info-row">
                 <span class="info-label">Endereço:</span>
-                <span class="info-value">{{ currentUser?.endereco }}</span>
+                <span class="info-value">{{ currentUser?.endereco || currentUser?.morada || 'Não informado' }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Tipo de Usuário:</span>
-                <span class="info-value">{{ currentUser?.tipoUsuario }}</span>
+                <span class="info-label">Género:</span>
+                <span class="info-value">{{ currentUser?.genero || 'Não informado' }}</span>
               </div>
             </div>
           </div>
@@ -129,24 +130,29 @@ import { AuthService } from "../../../core/services/auth.service"
             <button class="view-all-btn" routerLink="/utente/minhas-marcacoes">Ver Todas</button>
           </div>
           <div class="appointments-list">
-            <div *ngFor="let marcacao of proximasMarcacoes" class="appointment-item">
-              <div class="appointment-date">
-                <span class="day">{{ marcacao.dataInicioPreferida | date:'dd' }}</span>
-                <span class="month">{{ marcacao.dataInicioPreferida | date:'MMM' }}</span>
+            @if (proximasMarcacoes().length > 0) {
+              @for (marcacao of proximasMarcacoes(); track marcacao.id) {
+                <div class="appointment-item">
+                  <div class="appointment-date">
+                    <span class="day">{{ marcacao.dataInicioPreferida | date:'dd' }}</span>
+                    <span class="month">{{ marcacao.dataInicioPreferida | date:'MMM' }}</span>
+                  </div>
+                  <div class="appointment-details">
+                    <h4>{{ marcacao.actosClinicos[0]?.tipo || 'Consulta' }}</h4>
+                    <p>{{ marcacao.horarioPreferido }} - {{ marcacao.actosClinicos[0]?.profissional || 'Médico' }}</p>
+                    <span class="status" [class]="getStatusClass(marcacao.estado)">{{ getStatusText(marcacao.estado) }}</span>
+                  </div>
+                  <div class="appointment-actions">
+                    <button class="action-btn" (click)="verDetalhesPedido(marcacao.id)">Ver Detalhes</button>
+                  </div>
+                </div>
+              }
+            } @else {
+              <div class="no-appointments">
+                <p>Não tem consultas agendadas</p>
+                <button class="schedule-btn" routerLink="/marcacoes">Agendar Consulta</button>
               </div>
-              <div class="appointment-details">
-                <h4>{{ marcacao.tipoConsulta }}</h4>
-                <p>{{ marcacao.horarioPreferido }} - {{ marcacao.medico }}</p>
-                <span class="status confirmed">Confirmada</span>
-              </div>
-              <div class="appointment-actions">
-                <button class="action-btn">Ver Detalhes</button>
-              </div>
-            </div>
-            <div *ngIf="proximasMarcacoes.length === 0" class="no-appointments">
-              <p>Não tem consultas agendadas</p>
-              <button class="schedule-btn" routerLink="/marcacao-anonima">Agendar Consulta</button>
-            </div>
+            }
           </div>
         </div>
       </div>
@@ -207,19 +213,30 @@ import { AuthService } from "../../../core/services/auth.service"
     .stat-icon {
       width: 48px;
       height: 48px;
-      background: #e6f1fa;
+      background: #00548d;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #00548d;
+      color: white;
+      flex-shrink: 0;
     }
 
-    .stat-content h3 {
-      font-size: 1.8rem;
+    .stat-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-number {
+      font-size: 2rem;
       font-weight: 700;
       color: #00548d;
       margin: 0;
+      line-height: 1;
     }
 
     .stat-label {
@@ -233,16 +250,25 @@ import { AuthService } from "../../../core/services/auth.service"
       font-weight: 500;
     }
 
-    .stat-change.positive { color: #10b981; }
-    .stat-change.negative { color: #ef4444; }
-    .stat-change.neutral { color: #6b7280; }
+    .stat-change.positive {
+      color: #059669;
+    }
+
+    .stat-change.negative {
+      color: #dc2626;
+    }
+
+    .stat-change.neutral {
+      color: #6b7280;
+    }
 
     .dashboard-content {
       display: grid;
       gap: 2rem;
     }
 
-    .profile-section, .upcoming-section {
+    .profile-section,
+    .upcoming-section {
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
@@ -259,11 +285,12 @@ import { AuthService } from "../../../core/services/auth.service"
     .section-header h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      color: #00548d;
+      color: #1f2937;
       margin: 0;
     }
 
-    .edit-btn, .view-all-btn {
+    .edit-btn,
+    .view-all-btn {
       background: #00548d;
       color: white;
       border: none;
@@ -274,8 +301,9 @@ import { AuthService } from "../../../core/services/auth.service"
       transition: background 0.2s;
     }
 
-    .edit-btn:hover, .view-all-btn:hover {
-      background: #0077cc;
+    .edit-btn:hover,
+    .view-all-btn:hover {
+      background: #003a5c;
     }
 
     .profile-grid {
@@ -294,24 +322,23 @@ import { AuthService } from "../../../core/services/auth.service"
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 4px solid #e6f1fa;
+      border: 4px solid #f3f4f6;
       margin-bottom: 1rem;
     }
 
     .change-photo-btn {
-      background: transparent;
-      color: #00548d;
-      border: 1px solid #00548d;
+      background: #f3f4f6;
+      color: #374151;
+      border: none;
       padding: 0.5rem 1rem;
       border-radius: 6px;
       font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
 
     .change-photo-btn:hover {
-      background: #00548d;
-      color: white;
+      background: #e5e7eb;
     }
 
     .profile-info {
@@ -322,16 +349,18 @@ import { AuthService } from "../../../core/services/auth.service"
     .info-row {
       display: flex;
       gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6;
     }
 
     .info-label {
       font-weight: 600;
-      color: #666;
-      min-width: 120px;
+      color: #374151;
+      min-width: 140px;
     }
 
     .info-value {
-      color: #333;
+      color: #6b7280;
     }
 
     .appointments-list {
@@ -346,12 +375,11 @@ import { AuthService } from "../../../core/services/auth.service"
       padding: 1rem;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      transition: all 0.2s;
+      transition: border-color 0.2s;
     }
 
     .appointment-item:hover {
       border-color: #00548d;
-      box-shadow: 0 2px 8px rgba(0,84,141,0.1);
     }
 
     .appointment-date {
@@ -359,17 +387,17 @@ import { AuthService } from "../../../core/services/auth.service"
       min-width: 60px;
     }
 
-    .appointment-date .day {
+    .day {
       display: block;
       font-size: 1.5rem;
       font-weight: 700;
       color: #00548d;
     }
 
-    .appointment-date .month {
+    .month {
       display: block;
       font-size: 0.8rem;
-      color: #666;
+      color: #6b7280;
       text-transform: uppercase;
     }
 
@@ -379,47 +407,62 @@ import { AuthService } from "../../../core/services/auth.service"
 
     .appointment-details h4 {
       margin: 0 0 0.25rem 0;
-      color: #333;
+      color: #1f2937;
     }
 
     .appointment-details p {
       margin: 0 0 0.5rem 0;
-      color: #666;
+      color: #6b7280;
       font-size: 0.9rem;
     }
 
     .status {
-      font-size: 0.8rem;
-      font-weight: 500;
+      display: inline-block;
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
     }
 
-    .status.confirmed {
+    .status.pendente {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status.confirmado {
       background: #d1fae5;
       color: #065f46;
     }
 
+    .status.concluido {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status.cancelado {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
     .action-btn {
-      background: transparent;
-      color: #00548d;
-      border: 1px solid #00548d;
+      background: #f3f4f6;
+      color: #374151;
+      border: none;
       padding: 0.5rem 1rem;
       border-radius: 6px;
       font-size: 0.9rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
 
     .action-btn:hover {
-      background: #00548d;
-      color: white;
+      background: #e5e7eb;
     }
 
     .no-appointments {
       text-align: center;
       padding: 2rem;
-      color: #666;
+      color: #6b7280;
     }
 
     .schedule-btn {
@@ -435,7 +478,7 @@ import { AuthService } from "../../../core/services/auth.service"
     }
 
     .schedule-btn:hover {
-      background: #0077cc;
+      background: #003a5c;
     }
 
     @media (max-width: 768px) {
@@ -462,51 +505,101 @@ import { AuthService } from "../../../core/services/auth.service"
 export class DashboardComponent implements OnInit {
   currentDate = '';
   currentUser: any = null;
-  proximasMarcacoes: any[] = [];
+  proximasMarcacoes = signal<any[]>([]);
+  userStats = signal({
+    totalPedidos: 0,
+    pedidosPendentes: 0,
+    pedidosConfirmados: 0,
+    pedidosConcluidos: 0,
+    pedidosCancelados: 0
+  });
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userProfileService: UserProfileService
+  ) {}
 
   ngOnInit() {
-    this.currentDate = new Date().toLocaleDateString('pt-BR', {
+    this.currentDate = new Date().toLocaleDateString('pt-PT', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-    
-    this.currentUser = this.authService.getCurrentUser();
+
+    this.carregarDadosUtente();
+    this.carregarEstatisticas();
     this.carregarProximasMarcacoes();
   }
 
-  carregarProximasMarcacoes() {
-    // Mock data - em produção viria do serviço
-    this.proximasMarcacoes = [
-      {
-        dataInicioPreferida: new Date('2024-01-15'),
-        tipoConsulta: 'Consulta Geral',
-        horarioPreferido: '10:00',
-        medico: 'Dr. João Silva',
-        estado: 'Confirmada'
+  carregarDadosUtente() {
+    this.currentUser = this.authService.getCurrentUser();
+    
+    // Se não temos dados completos, carregar da API
+    if (this.currentUser && !this.currentUser.nomeCompleto) {
+      this.userProfileService.getUserProfile().subscribe({
+        next: (user) => {
+          this.currentUser = user;
+          // Atualizar dados no AuthService
+          this.authService.updateCurrentUser(user);
+        },
+        error: (error) => {
+          console.error('Erro ao carregar dados do utilizador:', error);
+        }
+      });
+    }
+  }
+
+  carregarEstatisticas() {
+    this.userProfileService.getUserStats().subscribe({
+      next: (stats) => {
+        this.userStats.set(stats);
       },
-      {
-        dataInicioPreferida: new Date('2024-01-20'),
-        tipoConsulta: 'Exame Clínico',
-        horarioPreferido: '14:30',
-        medico: 'Dra. Maria Santos',
-        estado: 'Confirmada'
+      error: (error) => {
+        console.error('Erro ao carregar estatísticas:', error);
       }
-    ];
+    });
   }
 
-  getPendingCount(): number {
-    return 2; // Mock data
+  carregarProximasMarcacoes() {
+    this.userProfileService.getUserPedidos().subscribe({
+      next: (pedidos) => {
+        // Filtrar apenas pedidos confirmados e pendentes, ordenados por data
+        const proximos = pedidos
+          .filter(pedido => pedido.estado === 0 || pedido.estado === 1) // Pendente ou Confirmado
+          .sort((a, b) => new Date(a.dataInicioPreferida).getTime() - new Date(b.dataInicioPreferida).getTime())
+          .slice(0, 5); // Apenas os próximos 5
+        
+        this.proximasMarcacoes.set(proximos);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar marcações:', error);
+      }
+    });
   }
 
-  getConfirmedCount(): number {
-    return 3; // Mock data
+  getStatusText(estado: number): string {
+    switch (estado) {
+      case 0: return 'Pendente';
+      case 1: return 'Confirmado';
+      case 2: return 'Concluído';
+      case 3: return 'Cancelado';
+      default: return 'Desconhecido';
+    }
   }
 
-  getCompletedCount(): number {
-    return 15; // Mock data
+  getStatusClass(estado: number): string {
+    switch (estado) {
+      case 0: return 'pendente';
+      case 1: return 'confirmado';
+      case 2: return 'concluido';
+      case 3: return 'cancelado';
+      default: return 'pendente';
+    }
+  }
+
+  verDetalhesPedido(id: number) {
+    // Implementar navegação para detalhes do pedido
+    console.log('Ver detalhes do pedido:', id);
   }
 }

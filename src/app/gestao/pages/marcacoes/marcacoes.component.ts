@@ -1,9 +1,8 @@
-import { Component, type OnInit } from "@angular/core"
+import { Component, type OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { AuthService } from "../../../core/services/auth.service"
-import { MarcacaoService } from "../../../core/services/marcacao.service"
-import { HttpClient } from "@angular/common/http"
+import { UserProfileService } from "../../../core/services/user-profile.service"
 
 @Component({
   selector: "app-marcacoes",
@@ -18,7 +17,7 @@ import { HttpClient } from "@angular/common/http"
           <p class="page-subtitle">Gerencie todas as suas consultas e marcações</p>
         </div>
         <div class="header-right">
-          <button class="new-appointment-btn" routerLink="/marcacao-anonima">
+          <button class="new-appointment-btn" routerLink="/marcacoes">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -35,30 +34,32 @@ import { HttpClient } from "@angular/common/http"
             <label for="statusFilter">Estado:</label>
             <select id="statusFilter" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
               <option value="">Todos</option>
-              <option value="pendente">Pendentes</option>
-              <option value="confirmada">Confirmadas</option>
-              <option value="cancelada">Canceladas</option>
-              <option value="realizada">Realizadas</option>
+              <option value="0">Pendentes</option>
+              <option value="1">Confirmados</option>
+              <option value="2">Concluídos</option>
+              <option value="3">Cancelados</option>
             </select>
           </div>
+          
           <div class="filter-group">
             <label for="dateFilter">Período:</label>
-            <select id="dateFilter" [(ngModel)]="filtroPeriodo" (change)="aplicarFiltros()">
+            <select id="dateFilter" [(ngModel)]="filtroData" (change)="aplicarFiltros()">
               <option value="">Todos</option>
-              <option value="hoje">Hoje</option>
-              <option value="semana">Esta Semana</option>
-              <option value="mes">Este Mês</option>
-              <option value="passado">Passado</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 3 meses</option>
+              <option value="365">Último ano</option>
             </select>
           </div>
         </div>
+        
         <div class="filters-right">
           <div class="search-box">
             <input 
               type="text" 
-              placeholder="Pesquisar marcações..." 
-              [(ngModel)]="termoPesquisa"
+              [(ngModel)]="termoPesquisa" 
               (input)="aplicarFiltros()"
+              placeholder="Pesquisar marcações..."
             />
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/>
@@ -68,147 +69,126 @@ import { HttpClient } from "@angular/common/http"
         </div>
       </div>
 
-      <!-- Estatísticas Rápidas -->
-      <div class="stats-overview">
+      <!-- Estatísticas -->
+      <div class="stats-section">
         <div class="stat-item">
-          <span class="stat-number">{{ getTotalMarcacoes() }}</span>
+          <span class="stat-number">{{ estatisticas().total }}</span>
           <span class="stat-label">Total</span>
         </div>
-        <div class="stat-item pending">
-          <span class="stat-number">{{ getMarcacoesPendentes() }}</span>
+        <div class="stat-item">
+          <span class="stat-number">{{ estatisticas().pendentes }}</span>
           <span class="stat-label">Pendentes</span>
         </div>
-        <div class="stat-item confirmed">
-          <span class="stat-number">{{ getMarcacoesConfirmadas() }}</span>
-          <span class="stat-label">Confirmadas</span>
+        <div class="stat-item">
+          <span class="stat-number">{{ estatisticas().confirmados }}</span>
+          <span class="stat-label">Confirmados</span>
         </div>
-        <div class="stat-item completed">
-          <span class="stat-number">{{ getMarcacoesRealizadas() }}</span>
-          <span class="stat-label">Realizadas</span>
+        <div class="stat-item">
+          <span class="stat-number">{{ estatisticas().concluidos }}</span>
+          <span class="stat-label">Concluídos</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ estatisticas().cancelados }}</span>
+          <span class="stat-label">Cancelados</span>
         </div>
       </div>
 
       <!-- Lista de Marcações -->
       <div class="marcacoes-list">
-        <div *ngFor="let marcacao of marcacoesFiltradas" class="marcacao-item">
-          <div class="marcacao-header">
-            <div class="marcacao-date">
-              <div class="date-circle">
-                <span class="day">{{ marcacao.dataInicioPreferida | date:'dd' }}</span>
-                <span class="month">{{ marcacao.dataInicioPreferida | date:'MMM' }}</span>
-              </div>
-            </div>
-            <div class="marcacao-info">
-              <h3 class="marcacao-title">{{ marcacao.tipoConsulta }}</h3>
-              <div class="marcacao-details">
-                <span class="detail-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12,6 12,12 16,14"/>
-                  </svg>
-                  {{ marcacao.horarioPreferido }}
-                </span>
-                <span class="detail-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  {{ marcacao.medico }}
-                </span>
-                <span class="detail-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  {{ marcacao.local }}
-                </span>
-              </div>
-            </div>
-            <div class="marcacao-status">
-              <span class="status-badge" [class]="'status-' + marcacao.estado.toLowerCase()">
-                {{ getStatusLabel(marcacao.estado) }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="marcacao-body">
-            <div class="marcacao-notes" *ngIf="marcacao.observacoes">
-              <strong>Observações:</strong> {{ marcacao.observacoes }}
-            </div>
-            <div class="marcacao-actions">
-              <button class="action-btn primary" (click)="verDetalhes(marcacao)">
-                Ver Detalhes
-              </button>
-              <button 
-                class="action-btn secondary" 
-                (click)="cancelarMarcacao(marcacao)"
-                *ngIf="marcacao.estado === 'Confirmada' || marcacao.estado === 'Pendente'"
-              >
-                Cancelar
-              </button>
-              <button 
-                class="action-btn success" 
-                (click)="reagendarMarcacao(marcacao)"
-                *ngIf="marcacao.estado === 'Confirmada'"
-              >
-                Reagendar
-              </button>
-              <button 
-                class="action-btn pdf" 
-                (click)="exportarPDF(marcacao)"
-                [disabled]="exportandoPDF === marcacao.id"
-              >
-                <svg *ngIf="exportandoPDF !== marcacao.id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10,9 9,9 8,9"/>
-                </svg>
-                <svg *ngIf="exportandoPDF === marcacao.id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinning">
-                  <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                </svg>
-                {{ exportandoPDF === marcacao.id ? 'Exportando...' : 'Exportar PDF' }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado vazio -->
-        <div *ngIf="marcacoesFiltradas.length === 0" class="empty-state">
-          <div class="empty-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="8" y1="12" x2="16" y2="12"/>
+        @if (isLoading()) {
+          <div class="loading-container">
+            <svg class="loading-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 11-6.219-8.56"/>
             </svg>
+            <p>A carregar marcações...</p>
           </div>
-          <h3>Nenhuma marcação encontrada</h3>
-          <p>Não foram encontradas marcações com os filtros aplicados.</p>
-          <button class="new-appointment-btn" routerLink="/marcacao-anonima">
-            Fazer Primeira Marcação
-          </button>
-        </div>
-      </div>
-
-      <!-- Paginação -->
-      <div class="pagination" *ngIf="marcacoesFiltradas.length > 0">
-        <button 
-          class="pagination-btn" 
-          [disabled]="paginaAtual === 1"
-          (click)="mudarPagina(paginaAtual - 1)"
-        >
-          Anterior
-        </button>
-        <span class="pagination-info">
-          Página {{ paginaAtual }} de {{ totalPaginas }}
-        </span>
-        <button 
-          class="pagination-btn" 
-          [disabled]="paginaAtual === totalPaginas"
-          (click)="mudarPagina(paginaAtual + 1)"
-        >
-          Próxima
-        </button>
+        } @else if (marcacoesFiltradas().length === 0) {
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+            </svg>
+            <h3>Nenhuma marcação encontrada</h3>
+            <p>Não foram encontradas marcações com os filtros aplicados.</p>
+            <button class="new-appointment-btn" routerLink="/marcacoes">Fazer Nova Marcação</button>
+          </div>
+        } @else {
+          @for (marcacao of marcacoesFiltradas(); track marcacao.id) {
+            <div class="marcacao-card">
+              <div class="marcacao-header">
+                <div class="marcacao-info">
+                  <h3 class="marcacao-title">
+                    {{ marcacao.actosClinicos[0]?.tipo || 'Consulta' }}
+                  </h3>
+                  <p class="marcacao-subtitle">
+                    {{ marcacao.actosClinicos[0]?.profissional || 'Médico' }} • 
+                    {{ marcacao.actosClinicos[0]?.subsistemaSaude || 'SNS' }}
+                  </p>
+                </div>
+                <div class="marcacao-status">
+                  <span class="status-badge" [class]="getStatusClass(marcacao.estado)">
+                    {{ getStatusText(marcacao.estado) }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="marcacao-details">
+                <div class="detail-row">
+                  <span class="detail-label">Data Preferida:</span>
+                  <span class="detail-value">
+                    {{ marcacao.dataInicioPreferida | date:'dd/MM/yyyy' }} - 
+                    {{ marcacao.dataFimPreferida | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Horário:</span>
+                  <span class="detail-value">{{ marcacao.horarioPreferido }}</span>
+                </div>
+                @if (marcacao.observacoes) {
+                  <div class="detail-row">
+                    <span class="detail-label">Observações:</span>
+                    <span class="detail-value">{{ marcacao.observacoes }}</span>
+                  </div>
+                }
+                <div class="detail-row">
+                  <span class="detail-label">Actos Clínicos:</span>
+                  <span class="detail-value">
+                    {{ marcacao.actosClinicos.length }} acto(s)
+                  </span>
+                </div>
+              </div>
+              
+              <div class="marcacao-actions">
+                <button class="action-btn secondary" (click)="verDetalhes(marcacao.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  Ver Detalhes
+                </button>
+                
+                @if (marcacao.estado === 0) {
+                  <button class="action-btn danger" (click)="cancelarMarcacao(marcacao.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                    Cancelar
+                  </button>
+                }
+                
+                <button class="action-btn primary" (click)="exportarPDF(marcacao.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                  </svg>
+                  Exportar PDF
+                </button>
+              </div>
+            </div>
+          }
+        }
       </div>
     </div>
   `,
@@ -254,12 +234,7 @@ import { HttpClient } from "@angular/common/http"
     }
 
     .new-appointment-btn:hover {
-      background: #0077cc;
-    }
-
-    .new-appointment-btn svg {
-      width: 20px;
-      height: 20px;
+      background: #003a5c;
     }
 
     .filters-section {
@@ -282,14 +257,14 @@ import { HttpClient } from "@angular/common/http"
     }
 
     .filter-group label {
+      font-weight: 600;
+      color: #374151;
       font-size: 0.9rem;
-      font-weight: 500;
-      color: #666;
     }
 
     .filter-group select {
       padding: 0.5rem;
-      border: 1px solid #ddd;
+      border: 1px solid #d1d5db;
       border-radius: 6px;
       font-size: 0.9rem;
     }
@@ -301,8 +276,8 @@ import { HttpClient } from "@angular/common/http"
     }
 
     .search-box input {
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      border: 1px solid #ddd;
+      padding: 0.5rem 2.5rem 0.5rem 1rem;
+      border: 1px solid #d1d5db;
       border-radius: 6px;
       font-size: 0.9rem;
       width: 250px;
@@ -310,13 +285,13 @@ import { HttpClient } from "@angular/common/http"
 
     .search-box svg {
       position: absolute;
-      left: 0.75rem;
+      right: 0.75rem;
       width: 16px;
       height: 16px;
-      color: #666;
+      color: #6b7280;
     }
 
-    .stats-overview {
+    .stats-section {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 1rem;
@@ -331,10 +306,6 @@ import { HttpClient } from "@angular/common/http"
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .stat-item.pending { border-left: 4px solid #f59e0b; }
-    .stat-item.confirmed { border-left: 4px solid #10b981; }
-    .stat-item.completed { border-left: 4px solid #3b82f6; }
-
     .stat-number {
       display: block;
       font-size: 1.5rem;
@@ -344,85 +315,42 @@ import { HttpClient } from "@angular/common/http"
 
     .stat-label {
       font-size: 0.8rem;
-      color: #666;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .marcacoes-list {
       display: grid;
       gap: 1rem;
-      margin-bottom: 2rem;
     }
 
-    .marcacao-item {
+    .marcacao-card {
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: all 0.2s;
-    }
-
-    .marcacao-item:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      border: 1px solid #e5e7eb;
     }
 
     .marcacao-header {
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 1rem;
     }
 
-    .date-circle {
-      width: 60px;
-      height: 60px;
-      background: #e6f1fa;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #00548d;
-    }
-
-    .date-circle .day {
-      font-size: 1.2rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .date-circle .month {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-    }
-
-    .marcacao-info {
-      flex: 1;
-    }
-
     .marcacao-title {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 600;
-      color: #333;
-      margin: 0 0 0.5rem 0;
+      color: #1f2937;
+      margin: 0 0 0.25rem 0;
     }
 
-    .marcacao-details {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .detail-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .marcacao-subtitle {
+      color: #6b7280;
+      margin: 0;
       font-size: 0.9rem;
-      color: #666;
-    }
-
-    .detail-item svg {
-      width: 16px;
-      height: 16px;
     }
 
     .status-badge {
@@ -432,38 +360,48 @@ import { HttpClient } from "@angular/common/http"
       font-weight: 500;
     }
 
-    .status-pendente {
+    .status-badge.pendente {
       background: #fef3c7;
       color: #92400e;
     }
 
-    .status-confirmada {
+    .status-badge.confirmado {
       background: #d1fae5;
       color: #065f46;
     }
 
-    .status-cancelada {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .status-realizada {
+    .status-badge.concluido {
       background: #dbeafe;
       color: #1e40af;
     }
 
-    .marcacao-body {
-      border-top: 1px solid #e5e7eb;
-      padding-top: 1rem;
+    .status-badge.cancelado {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    .marcacao-notes {
-      margin-bottom: 1rem;
-      padding: 0.75rem;
-      background: #f8f9fa;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      color: #666;
+    .marcacao-details {
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .detail-value {
+      color: #6b7280;
     }
 
     .marcacao-actions {
@@ -474,19 +412,14 @@ import { HttpClient } from "@angular/common/http"
 
     .action-btn {
       padding: 0.5rem 1rem;
+      border: none;
       border-radius: 6px;
       font-size: 0.9rem;
       cursor: pointer;
-      border: none;
-      transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-    }
-
-    .action-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+      transition: all 0.2s;
     }
 
     .action-btn.primary {
@@ -494,50 +427,39 @@ import { HttpClient } from "@angular/common/http"
       color: white;
     }
 
-    .action-btn.primary:hover:not(:disabled) {
-      background: #0077cc;
+    .action-btn.primary:hover {
+      background: #003a5c;
     }
 
     .action-btn.secondary {
-      background: transparent;
-      color: #dc2626;
-      border: 1px solid #dc2626;
+      background: #f3f4f6;
+      color: #374151;
     }
 
-    .action-btn.secondary:hover:not(:disabled) {
-      background: #dc2626;
-      color: white;
+    .action-btn.secondary:hover {
+      background: #e5e7eb;
     }
 
-    .action-btn.success {
-      background: transparent;
-      color: #059669;
-      border: 1px solid #059669;
+    .action-btn.danger {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    .action-btn.success:hover:not(:disabled) {
-      background: #059669;
-      color: white;
+    .action-btn.danger:hover {
+      background: #fecaca;
     }
 
-    .action-btn.pdf {
-      background: transparent;
-      color: #dc2626;
-      border: 1px solid #dc2626;
+    .loading-container {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
     }
 
-    .action-btn.pdf:hover:not(:disabled) {
-      background: #dc2626;
-      color: white;
-    }
-
-    .action-btn.pdf svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .spinning {
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
       animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
     }
 
     @keyframes spin {
@@ -548,50 +470,23 @@ import { HttpClient } from "@angular/common/http"
     .empty-state {
       text-align: center;
       padding: 3rem;
-      color: #666;
+      color: #6b7280;
     }
 
-    .empty-icon {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 1rem;
-      color: #ddd;
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      color: #d1d5db;
     }
 
     .empty-state h3 {
       margin: 0 0 0.5rem 0;
-      color: #333;
+      color: #374151;
     }
 
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .pagination-btn {
-      padding: 0.5rem 1rem;
-      border: 1px solid #ddd;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .pagination-btn:hover:not(:disabled) {
-      background: #f8f9fa;
-    }
-
-    .pagination-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .pagination-info {
-      font-size: 0.9rem;
-      color: #666;
+    .empty-state p {
+      margin: 0 0 1.5rem 0;
     }
 
     @media (max-width: 768px) {
@@ -611,7 +506,7 @@ import { HttpClient } from "@angular/common/http"
       }
 
       .filters-left {
-        justify-content: center;
+        flex-direction: column;
       }
 
       .search-box input {
@@ -620,34 +515,38 @@ import { HttpClient } from "@angular/common/http"
 
       .marcacao-header {
         flex-direction: column;
-        text-align: center;
-      }
-
-      .marcacao-details {
-        justify-content: center;
+        gap: 1rem;
       }
 
       .marcacao-actions {
         justify-content: center;
       }
+
+      .detail-row {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
     }
   `]
 })
 export class MarcacoesComponent implements OnInit {
-  filtroEstado = '';
-  filtroPeriodo = '';
-  termoPesquisa = '';
-  paginaAtual = 1;
-  itensPorPagina = 10;
-  exportandoPDF: number | null = null;
-  
-  todasMarcacoes: any[] = [];
-  marcacoesFiltradas: any[] = [];
+  isLoading = signal(false);
+  filtroEstado = signal("");
+  filtroData = signal("");
+  termoPesquisa = signal("");
+  todasMarcacoes = signal<any[]>([]);
+  marcacoesFiltradas = signal<any[]>([]);
+  estatisticas = signal({
+    total: 0,
+    pendentes: 0,
+    confirmados: 0,
+    concluidos: 0,
+    cancelados: 0
+  });
 
   constructor(
     private authService: AuthService,
-    private marcacaoService: MarcacaoService,
-    private http: HttpClient
+    private userProfileService: UserProfileService
   ) {}
 
   ngOnInit() {
@@ -655,137 +554,110 @@ export class MarcacoesComponent implements OnInit {
   }
 
   carregarMarcacoes() {
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.marcacaoService.getMarcacoesUtente(user.id).subscribe(marcacoes => {
-        this.todasMarcacoes = marcacoes;
+    this.isLoading.set(true);
+    
+    this.userProfileService.getUserPedidos().subscribe({
+      next: (pedidos) => {
+        this.todasMarcacoes.set(pedidos);
+        this.calcularEstatisticas();
         this.aplicarFiltros();
-      });
-    }
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Erro ao carregar marcações:', error);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  calcularEstatisticas() {
+    const pedidos = this.todasMarcacoes();
+    const stats = {
+      total: pedidos.length,
+      pendentes: pedidos.filter(p => p.estado === 0).length,
+      confirmados: pedidos.filter(p => p.estado === 1).length,
+      concluidos: pedidos.filter(p => p.estado === 2).length,
+      cancelados: pedidos.filter(p => p.estado === 3).length
+    };
+    this.estatisticas.set(stats);
   }
 
   aplicarFiltros() {
-    let filtradas = [...this.todasMarcacoes];
+    let filtrados = this.todasMarcacoes();
 
     // Filtro por estado
-    if (this.filtroEstado) {
-      filtradas = filtradas.filter(m => 
-        m.estado.toLowerCase() === this.filtroEstado.toLowerCase()
-      );
+    if (this.filtroEstado()) {
+      filtrados = filtrados.filter(m => m.estado === parseInt(this.filtroEstado()));
     }
 
-    // Filtro por período
-    if (this.filtroPeriodo) {
-      const hoje = new Date();
-      const inicioSemana = new Date(hoje);
-      inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-      const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-
-      filtradas = filtradas.filter(m => {
+    // Filtro por data
+    if (this.filtroData()) {
+      const dias = parseInt(this.filtroData());
+      const dataLimite = new Date();
+      dataLimite.setDate(dataLimite.getDate() - dias);
+      
+      filtrados = filtrados.filter(m => {
         const dataMarcacao = new Date(m.dataInicioPreferida);
-        switch (this.filtroPeriodo) {
-          case 'hoje':
-            return dataMarcacao.toDateString() === hoje.toDateString();
-          case 'semana':
-            return dataMarcacao >= inicioSemana;
-          case 'mes':
-            return dataMarcacao >= inicioMes;
-          case 'passado':
-            return dataMarcacao < hoje;
-          default:
-            return true;
-        }
+        return dataMarcacao >= dataLimite;
       });
     }
 
     // Filtro por pesquisa
-    if (this.termoPesquisa) {
-      const termo = this.termoPesquisa.toLowerCase();
-      filtradas = filtradas.filter(m =>
-        m.tipoConsulta.toLowerCase().includes(termo) ||
-        m.medico.toLowerCase().includes(termo) ||
-        m.local.toLowerCase().includes(termo)
+    if (this.termoPesquisa()) {
+      const termo = this.termoPesquisa().toLowerCase();
+      filtrados = filtrados.filter(m => 
+        m.actosClinicos.some((acto: any) => 
+          acto.tipo.toLowerCase().includes(termo) ||
+          acto.profissional.toLowerCase().includes(termo) ||
+          acto.subsistemaSaude.toLowerCase().includes(termo)
+        ) ||
+        m.observacoes?.toLowerCase().includes(termo)
       );
     }
 
-    this.marcacoesFiltradas = filtradas;
-    this.paginaAtual = 1;
+    this.marcacoesFiltradas.set(filtrados);
   }
 
-  getStatusLabel(estado: string): string {
-    const labels: { [key: string]: string } = {
-      'Pendente': 'Pendente',
-      'Confirmada': 'Confirmada',
-      'Cancelada': 'Cancelada',
-      'Realizada': 'Realizada'
-    };
-    return labels[estado] || estado;
-  }
-
-  getTotalMarcacoes(): number {
-    return this.todasMarcacoes.length;
-  }
-
-  getMarcacoesPendentes(): number {
-    return this.todasMarcacoes.filter(m => m.estado === 'Pendente').length;
-  }
-
-  getMarcacoesConfirmadas(): number {
-    return this.todasMarcacoes.filter(m => m.estado === 'Confirmada').length;
-  }
-
-  getMarcacoesRealizadas(): number {
-    return this.todasMarcacoes.filter(m => m.estado === 'Realizada').length;
-  }
-
-  get totalPaginas(): number {
-    return Math.ceil(this.marcacoesFiltradas.length / this.itensPorPagina);
-  }
-
-  mudarPagina(pagina: number) {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaAtual = pagina;
+  getStatusText(estado: number): string {
+    switch (estado) {
+      case 0: return 'Pendente';
+      case 1: return 'Confirmado';
+      case 2: return 'Concluído';
+      case 3: return 'Cancelado';
+      default: return 'Desconhecido';
     }
   }
 
-  verDetalhes(marcacao: any) {
-    console.log('Ver detalhes da marcação:', marcacao);
-    // Implementar modal ou navegação para detalhes
+  getStatusClass(estado: number): string {
+    switch (estado) {
+      case 0: return 'pendente';
+      case 1: return 'confirmado';
+      case 2: return 'concluido';
+      case 3: return 'cancelado';
+      default: return 'pendente';
+    }
   }
 
-  cancelarMarcacao(marcacao: any) {
+  verDetalhes(id: number) {
+    // Implementar navegação para detalhes
+    console.log('Ver detalhes do pedido:', id);
+  }
+
+  cancelarMarcacao(id: number) {
     if (confirm('Tem certeza que deseja cancelar esta marcação?')) {
-      console.log('Cancelar marcação:', marcacao);
-      // Implementar lógica de cancelamento
+      this.userProfileService.cancelPedido(id).subscribe({
+        next: () => {
+          this.carregarMarcacoes(); // Recarregar lista
+        },
+        error: (error) => {
+          console.error('Erro ao cancelar marcação:', error);
+        }
+      });
     }
   }
 
-  reagendarMarcacao(marcacao: any) {
-    console.log('Reagendar marcação:', marcacao);
-    // Implementar navegação para reagendamento
+  exportarPDF(id: number) {
+    // Implementar exportação PDF
+    console.log('Exportar PDF do pedido:', id);
   }
-
-  exportarPDF(marcacao: any) {
-    this.exportandoPDF = marcacao.id;
-    
-    // Simular chamada à API
-    setTimeout(() => {
-      // Em produção, usar a rota real:
-      // this.http.get(`/api/PedidoMarcacao/${marcacao.id}/exportar`, { responseType: 'blob' })
-      //   .subscribe(blob => {
-      //     const url = window.URL.createObjectURL(blob);
-      //     const link = document.createElement('a');
-      //     link.href = url;
-      //     link.download = `marcacao-${marcacao.codigoReferencia}.pdf`;
-      //     link.click();
-      //     window.URL.revokeObjectURL(url);
-      //     this.exportandoPDF = null;
-      //   });
-      
-      // Simulação para desenvolvimento
-      console.log('Exportando PDF para marcação:', marcacao.id);
-      alert(`PDF da marcação ${marcacao.codigoReferencia} exportado com sucesso!`);
-      this.exportandoPDF = null;
-    }, 2000);
-}
 }
