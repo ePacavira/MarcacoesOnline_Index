@@ -5,7 +5,9 @@ import { RouterModule } from '@angular/router';
 import { Utente } from '../../models/utente.interface';
 import { UtenteService } from '../../core/services/utentes.service';
 import { MarcacaoService } from '../../core/services/marcacao';
+import { Marcacao } from '../../core/services/marcacao.service';
 import { Router } from '@angular/router';
+import { PedidoMarcacao } from '../../models/marcacao.interface';
 
 @Component({
   selector: 'app-utente',
@@ -29,6 +31,11 @@ export class UtenteComponent {
 
   private http = inject(HttpClient);
 
+  marcacoes: PedidoMarcacao[] = [];
+  totalPendentes = 0;
+  totalConfirmadas = 0;
+  totalRealizadas = 0;
+
   constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
@@ -42,6 +49,26 @@ export class UtenteComponent {
       rua: [''],
       fotografia: [''],
     });
+
+    // Puxar marcações do utente autenticado (exemplo: id guardado no localStorage)
+    const utenteId = localStorage.getItem('utenteId');
+    if (utenteId) {
+      this.marcacaoService.getMarcacoes().subscribe({
+        next: (marcacoes: PedidoMarcacao[]) => {
+          const minhasMarcacoes = marcacoes.filter(m => m.utenteId == utenteId);
+          this.marcacoes = minhasMarcacoes;
+          this.totalPendentes = minhasMarcacoes.filter(m => m.estado === 'Pendente').length;
+          this.totalConfirmadas = minhasMarcacoes.filter(m => m.estado === 'Confirmada').length;
+          this.totalRealizadas = minhasMarcacoes.filter(m => m.estado === 'Realizada').length;
+        },
+        error: () => {
+          this.marcacoes = [];
+          this.totalPendentes = 0;
+          this.totalConfirmadas = 0;
+          this.totalRealizadas = 0;
+        }
+      });
+    }
   }
 
   // Step: Volta para Registro ao clicar na seta

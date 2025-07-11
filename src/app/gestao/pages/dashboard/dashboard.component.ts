@@ -2,6 +2,8 @@ import { Component, type OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { AuthService } from "../../../core/services/auth.service"
 import { UserProfileService } from "../../../core/services/user-profile.service"
+import { MarcacaoService } from '../../../core/services/marcacao';
+import { PedidoMarcacao } from '../../../models/marcacao.interface';
 
 @Component({
   selector: "app-dashboard",
@@ -32,7 +34,7 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ userStats().pedidosPendentes }}</h3>
+            <h3 class="stat-number">{{ totalPendentes }}</h3>
             <p class="stat-label">Marcações Pendentes</p>
             <span class="stat-change neutral">Aguardando confirmação</span>
           </div>
@@ -47,7 +49,7 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ userStats().pedidosConfirmados }}</h3>
+            <h3 class="stat-number">{{ totalConfirmadas }}</h3>
             <p class="stat-label">Marcações Confirmadas</p>
             <span class="stat-change positive">Próximas consultas</span>
           </div>
@@ -61,7 +63,7 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ userStats().pedidosConcluidos }}</h3>
+            <h3 class="stat-number">{{ totalRealizadas }}</h3>
             <p class="stat-label">Consultas Realizadas</p>
             <span class="stat-change positive">Histórico completo</span>
           </div>
@@ -513,10 +515,15 @@ export class DashboardComponent implements OnInit {
     pedidosConcluidos: 0,
     pedidosCancelados: 0
   });
+  marcacoes: any[] = [];
+  totalPendentes = 0;
+  totalConfirmadas = 0;
+  totalRealizadas = 0;
 
   constructor(
     private authService: AuthService,
-    private userProfileService: UserProfileService
+    private userProfileService: UserProfileService,
+    private marcacaoService: MarcacaoService
   ) {}
 
   ngOnInit() {
@@ -530,6 +537,7 @@ export class DashboardComponent implements OnInit {
     this.carregarDadosUtente();
     this.carregarEstatisticas();
     this.carregarProximasMarcacoes();
+    this.carregarMarcacoesUtente();
   }
 
   carregarDadosUtente() {
@@ -553,9 +561,24 @@ export class DashboardComponent implements OnInit {
   carregarEstatisticas() {
     this.userProfileService.getUserStats().subscribe({
       next: (stats) => {
-        this.userStats.set(stats);
+        // Garante que todos os campos são números válidos
+        this.userStats.set({
+          totalPedidos: stats?.totalPedidos ?? 0,
+          pedidosPendentes: stats?.pedidosPendentes ?? 0,
+          pedidosConfirmados: stats?.pedidosConfirmados ?? 0,
+          pedidosConcluidos: stats?.pedidosConcluidos ?? 0,
+          pedidosCancelados: stats?.pedidosCancelados ?? 0
+        });
       },
       error: (error) => {
+        // Em caso de erro, zera os contadores
+        this.userStats.set({
+          totalPedidos: 0,
+          pedidosPendentes: 0,
+          pedidosConfirmados: 0,
+          pedidosConcluidos: 0,
+          pedidosCancelados: 0
+        });
         console.error('Erro ao carregar estatísticas:', error);
       }
     });
@@ -564,16 +587,36 @@ export class DashboardComponent implements OnInit {
   carregarProximasMarcacoes() {
     this.userProfileService.getUserPedidos().subscribe({
       next: (pedidos) => {
+        // Garante que pedidos é sempre array
+        const pedidosArray = Array.isArray(pedidos) ? pedidos : [];
         // Filtrar apenas pedidos confirmados e pendentes, ordenados por data
-        const proximos = pedidos
+        const proximos = pedidosArray
           .filter(pedido => pedido.estado === 0 || pedido.estado === 1) // Pendente ou Confirmado
           .sort((a, b) => new Date(a.dataInicioPreferida).getTime() - new Date(b.dataInicioPreferida).getTime())
           .slice(0, 5); // Apenas os próximos 5
-        
         this.proximasMarcacoes.set(proximos);
       },
       error: (error) => {
+        // Em caso de erro, lista vazia
+        this.proximasMarcacoes.set([]);
         console.error('Erro ao carregar marcações:', error);
+      }
+    });
+  }
+
+  carregarMarcacoesUtente() {
+    this.userProfileService.getUserPedidos().subscribe({
+      next: (pedidos: any[]) => {
+        this.marcacoes = pedidos || [];
+        this.totalPendentes = this.marcacoes.filter(m => m.estado === 0).length;
+        this.totalConfirmadas = this.marcacoes.filter(m => m.estado === 1).length;
+        this.totalRealizadas = this.marcacoes.filter(m => m.estado === 2).length;
+      },
+      error: () => {
+        this.marcacoes = [];
+        this.totalPendentes = 0;
+        this.totalConfirmadas = 0;
+        this.totalRealizadas = 0;
       }
     });
   }
