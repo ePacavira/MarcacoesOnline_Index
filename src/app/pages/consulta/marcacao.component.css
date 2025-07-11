@@ -211,18 +211,84 @@ body {
 }
 
 .marcacao-title {
-  color: #00548d;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
+  color: #1f2937;
   margin: 0 0 0.5rem 0;
   line-height: 1.2;
 }
 
 .marcacao-subtitle {
-  color: #64748b;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  color: #6b7280;
   margin: 0;
   line-height: 1.5;
+}
+
+/* Mensagens de Sucesso, Erro e Loading */
+.success-message,
+.error-message,
+.loading-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.success-message {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.success-message svg {
+  width: 20px;
+  height: 20px;
+  color: #059669;
+  flex-shrink: 0;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.error-message svg {
+  width: 20px;
+  height: 20px;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.loading-message {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.loading-message svg {
+  width: 20px;
+  height: 20px;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Formulário */

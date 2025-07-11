@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PedidoMarcacao  } from '../../models/marcacao.interface';
+import { PedidoMarcacao, CreatePedidoMarcacao } from '../../models/marcacao.interface';
 
 
 @Injectable({
@@ -20,7 +20,7 @@ export class MarcacaoService {
     return this.http.get<PedidoMarcacao>(`${this.baseUrl}/${id}`);
   }
 
-  createMarcacao(data: Partial<PedidoMarcacao>): Observable<PedidoMarcacao> {
+  createMarcacao(data: CreatePedidoMarcacao): Observable<PedidoMarcacao> {
     return this.http.post<PedidoMarcacao>(this.baseUrl, data);
   }
 
@@ -34,7 +34,7 @@ export class MarcacaoService {
   enviarCredenciais(pedidoId:  string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/enviar-credenciais`, { pedidoId });
   }
-  criarMarcacaoAnonima(data: Partial<PedidoMarcacao>): Observable<PedidoMarcacao> {
+  criarMarcacaoAnonima(data: CreatePedidoMarcacao): Observable<PedidoMarcacao> {
     return this.http.post<PedidoMarcacao>(`${environment.apiUrl}/anonimo`, data);
   }
 }

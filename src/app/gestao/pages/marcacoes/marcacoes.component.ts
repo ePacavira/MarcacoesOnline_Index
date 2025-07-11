@@ -787,5 +787,5 @@ export class MarcacoesComponent implements OnInit {
       alert(`PDF da marcação ${marcacao.codigoReferencia} exportado com sucesso!`);
       this.exportandoPDF = null;
     }, 2000);
-  }
+}
 }
