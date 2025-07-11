@@ -70,7 +70,7 @@ export const routes: Routes = [
   // Área Administrativa
   {
     path: 'admintr',
-    //canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./gestao/layout/gestao-layout.component').then((m) => m.GestaoLayoutComponent),
     children: [
       {
@@ -95,7 +95,7 @@ export const routes: Routes = [
   // Área Super Administrador
   {
     path: 'super',
-    //canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./gestao/layout/gestao-layout.component').then((m) => m.GestaoLayoutComponent),
     children: [
       {

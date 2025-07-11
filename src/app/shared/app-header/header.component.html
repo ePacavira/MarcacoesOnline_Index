@@ -19,8 +19,8 @@
       <a routerLink="/marcacao-anonima" class="navbar-btn">Marcar Consulta</a>
       
       <!-- Mostrar área do utente se logado, senão mostrar login -->
-      <a *ngIf="!isLoggedIn()" routerLink="/login" class="navbar-login">Login</a>
-      <a *ngIf="isLoggedIn()" routerLink="/utente/dashboard" class="navbar-login">Minha Área</a>
+      <a *ngIf="!isLoggedIn" routerLink="/login" class="navbar-login">Login</a>
+      <a *ngIf="isLoggedIn" routerLink="/utente/dashboard" class="navbar-login">Minha Área</a>
     </div>
   </div>
 </nav>

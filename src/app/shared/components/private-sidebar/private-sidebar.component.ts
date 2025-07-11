@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserRoleLabels } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-private-sidebar',
@@ -22,28 +23,26 @@ export class PrivateSidebarComponent {
   }
 
   isUtente(): boolean {
-    return this.currentUser?.tipoUsuario === 'utente';
+    return this.authService.isUtente();
   }
 
   isAdmin(): boolean {
-    return this.currentUser?.tipoUsuario === 'admin';
+    return this.authService.isAdmin();
   }
 
   isSuperAdmin(): boolean {
-    return this.currentUser?.tipoUsuario === 'admin' && this.currentUser?.perfil === 'Super Administrador';
+    return this.authService.isSuperAdmin();
   }
 
   isAdministrativo(): boolean {
-    return this.currentUser?.perfil === 'Administrativo';
+    return this.authService.isAdministrativo();
   }
 
-  getRoleLabel(tipoUsuario: string): string {
-    const labels: { [key: string]: string } = {
-      'utente': 'Utente',
-      'admin': 'Administrador',
-      'medico': 'Médico'
-    };
-    return labels[tipoUsuario] || 'Utilizador';
+  getRoleLabel(): string {
+    if (this.currentUser?.perfil !== undefined) {
+      return UserRoleLabels[this.currentUser.perfil as keyof typeof UserRoleLabels] || 'Utilizador';
+    }
+    return 'Utilizador';
   }
 
   logout() {

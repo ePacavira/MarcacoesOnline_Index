@@ -73,8 +73,8 @@
         <img [src]="currentUser.foto || '/assets/default-avatar.png'" alt="Avatar" />
       </div>
       <div class="user-details">
-        <span class="user-name">{{ currentUser.nome }}</span>
-        <span class="user-role">{{ getRoleLabel(currentUser.tipoUsuario) }}</span>
+        <span class="user-name">{{ currentUser.nomeCompleto }}</span>
+        <span class="user-role">{{ getRoleLabel() }}</span>
       </div>
     </div>
     <a (click)="logout()" class="sidebar-bottom-link" style="cursor: pointer;">

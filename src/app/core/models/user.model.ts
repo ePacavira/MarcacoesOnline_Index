@@ -1,49 +1,60 @@
 export interface User {
-  id: number
-  nome: string
-  email: string
-  telefone?: string
-  dataNascimento?: Date
-  endereco?: string
-  nif?: string
-  numeroUtente?: string
-  tipoUsuario: 'utente' | 'admin' | 'medico'
-  perfil: UserRole
-  foto?: string | null
-  notificacoesEmail?: boolean
-  notificacoesSMS?: boolean
-  newsletter?: boolean
-  createdAt?: Date
-  updatedAt?: Date
+  id: number;
+  nomeCompleto: string;
+  email: string;
+  telefone?: string;
+  telemovel?: string;
+  dataNascimento?: string;
+  endereco?: string;
+  nif?: string;
+  numeroUtente?: string;
+  genero?: string;
+  morada?: string;
+  fotoPath?: string;
+  perfil: UserRole;
+  notificacoesEmail?: boolean;
+  notificacoesSMS?: boolean;
+  newsletter?: boolean;
+  pedidos?: any[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum UserRole {
-  ADMIN = "Administrador",
-  REGISTADO = "Registado",
-  ADMINISTRATIVO = "Administrativo",
-  ANONIMO = "Anonimo"
+  ANONIMO = 0,
+  REGISTADO = 1,
+  ADMINISTRATIVO = 2,
+  ADMIN = 3
 }
 
+// Mapeamento para facilitar comparações
+export const UserRoleLabels = {
+  [UserRole.ANONIMO]: 'Anónimo',
+  [UserRole.REGISTADO]: 'Registado',
+  [UserRole.ADMINISTRATIVO]: 'Administrativo',
+  [UserRole.ADMIN]: 'Administrador'
+};
+
 export interface LoginRequest {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
-  user: User
-  token: string
-  refreshToken: string
+  user: User;
+  token: string;
+  refreshToken?: string;
 }
 
 export interface PerfilUpdateRequest {
-  nome?: string
-  email?: string
-  telefone?: string
-  dataNascimento?: Date
-  endereco?: string
-  nif?: string
-  foto?: string
-  notificacoesEmail?: boolean
-  notificacoesSMS?: boolean
-  newsletter?: boolean
+  nomeCompleto?: string;
+  email?: string;
+  telefone?: string;
+  dataNascimento?: string;
+  endereco?: string;
+  nif?: string;
+  fotoPath?: string;
+  notificacoesEmail?: boolean;
+  notificacoesSMS?: boolean;
+  newsletter?: boolean;
 }

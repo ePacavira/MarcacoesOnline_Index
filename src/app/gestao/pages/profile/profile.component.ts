@@ -129,16 +129,6 @@ import { AuthService } from "../../../core/services/auth.service"
               </div>
 
               <div class="form-group">
-                <label for="nif">NIF</label>
-                <input 
-                  type="text" 
-                  id="nif" 
-                  formControlName="nif"
-                  placeholder="123456789"
-                />
-              </div>
-
-              <div class="form-group">
                 <label for="numeroUtente">Número de Utente</label>
                 <input 
                   type="text" 
@@ -151,57 +141,6 @@ import { AuthService } from "../../../core/services/auth.service"
               </div>
             </div>
           </form>
-        </div>
-
-        <!-- Preferências -->
-        <div class="form-section">
-          <h2>Preferências de Comunicação</h2>
-          <div class="preferences-grid">
-            <div class="preference-item">
-              <label class="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  formControlName="notificacoesEmail"
-                  class="checkbox-input"
-                />
-                <span class="checkmark"></span>
-                Receber notificações por email
-              </label>
-              <p class="preference-description">
-                Receba lembretes de consultas e atualizações por email
-              </p>
-            </div>
-
-            <div class="preference-item">
-              <label class="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  formControlName="notificacoesSMS"
-                  class="checkbox-input"
-                />
-                <span class="checkmark"></span>
-                Receber notificações por SMS
-              </label>
-              <p class="preference-description">
-                Receba lembretes de consultas por mensagem de texto
-              </p>
-            </div>
-
-            <div class="preference-item">
-              <label class="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  formControlName="newsletter"
-                  class="checkbox-input"
-                />
-                <span class="checkmark"></span>
-                Receber newsletter da clínica
-              </label>
-              <p class="preference-description">
-                Receba informações sobre serviços e promoções
-              </p>
-            </div>
-          </div>
         </div>
 
         <!-- Informações de Segurança -->
@@ -621,11 +560,7 @@ export class ProfileComponent implements OnInit {
       telefone: ['', Validators.required],
       dataNascimento: ['', Validators.required],
       endereco: [''],
-      nif: [''],
       numeroUtente: [''],
-      notificacoesEmail: [true],
-      notificacoesSMS: [true],
-      newsletter: [false]
     });
   }
 
@@ -637,19 +572,15 @@ export class ProfileComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     if (user) {
       this.perfilForm.patchValue({
-        nome: user.nome || '',
+        nome: user.nomeCompleto || '',
         email: user.email || '',
-        telefone: user.telefone || '',
+        telefone: user.telemovel || '',
         dataNascimento: user.dataNascimento || '',
-        endereco: user.endereco || '',
-        nif: user.nif || '',
+        endereco: user.morada || '',
         numeroUtente: user.numeroUtente || '',
-        notificacoesEmail: user.notificacoesEmail !== false,
-        notificacoesSMS: user.notificacoesSMS !== false,
-        newsletter: user.newsletter || false
       });
       
-      this.fotoPerfil = user.foto || null;
+      this.fotoPerfil = user.fotoPath || null;
     }
   }
 
