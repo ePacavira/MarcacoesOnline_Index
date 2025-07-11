@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-not-found',
+  selector: 'app-unauthorized',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
@@ -12,18 +12,18 @@ import { RouterModule } from '@angular/router';
         <div class="error-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
-            <line x1="8" y1="12" x2="16" y2="12"/>
-            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
         </div>
         
-        <h1 class="error-title">Página Não Encontrada</h1>
+        <h1 class="error-title">Acesso Negado</h1>
         <p class="error-message">
-          A página que está a procurar não existe ou foi movida. 
-          Verifique o URL ou navegue para uma das páginas disponíveis.
+          Não tem permissão para aceder a esta página. 
+          Contacte o administrador se acredita que isto é um erro.
         </p>
         
-        <div class="error-code">404</div>
+        <div class="error-code">403</div>
         
         <div class="error-actions">
           <button class="btn-primary" routerLink="/">
@@ -34,61 +34,23 @@ import { RouterModule } from '@angular/router';
             Voltar ao Início
           </button>
           
-          <button class="btn-secondary" (click)="voltarPaginaAnterior()">
+          <button class="btn-secondary" routerLink="/contacto">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
             </svg>
-            Voltar Atrás
+            Contactar Suporte
           </button>
         </div>
         
         <div class="error-help">
-          <h3>Páginas Disponíveis</h3>
-          <div class="pages-grid">
-            <a routerLink="/" class="page-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9,22 9,12 15,12 15,22"/>
-              </svg>
-              <span>Início</span>
-            </a>
-            <a routerLink="/sobre" class="page-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-              <span>Sobre</span>
-            </a>
-            <a routerLink="/servicos" class="page-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-              </svg>
-              <span>Serviços</span>
-            </a>
-            <a routerLink="/contacto" class="page-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              <span>Contacto</span>
-            </a>
-            <a routerLink="/marcacao-anonima" class="page-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              <span>Marcar Consulta</span>
-            </a>
-            <a routerLink="/consulta-marcacao" class="page-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
-              </svg>
-              <span>Consultar Marcação</span>
-            </a>
-          </div>
+          <h3>Precisa de ajuda?</h3>
+          <ul>
+            <li>Verifique se está autenticado no sistema</li>
+            <li>Confirme se tem as permissões necessárias</li>
+            <li>Contacte o administrador do sistema</li>
+            <li>Consulte a documentação de ajuda</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -108,7 +70,7 @@ import { RouterModule } from '@angular/router';
       border-radius: 16px;
       padding: 3rem;
       text-align: center;
-      max-width: 700px;
+      max-width: 600px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
 
@@ -116,12 +78,12 @@ import { RouterModule } from '@angular/router';
       width: 120px;
       height: 120px;
       margin: 0 auto 2rem;
-      background: #fef3c7;
+      background: #fee2e2;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #f59e0b;
+      color: #dc2626;
     }
 
     .error-icon svg {
@@ -204,49 +166,35 @@ import { RouterModule } from '@angular/router';
       margin-top: 3rem;
       padding-top: 2rem;
       border-top: 1px solid #e5e7eb;
+      text-align: left;
     }
 
     .error-help h3 {
       font-size: 1.2rem;
       font-weight: 600;
       color: #1f2937;
-      margin: 0 0 1.5rem 0;
+      margin: 0 0 1rem 0;
     }
 
-    .pages-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
+    .error-help ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
-    .page-link {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      text-decoration: none;
+    .error-help li {
+      padding: 0.5rem 0;
       color: #6b7280;
-      transition: all 0.2s;
+      position: relative;
+      padding-left: 1.5rem;
     }
 
-    .page-link:hover {
-      border-color: #00548d;
+    .error-help li:before {
+      content: "•";
       color: #00548d;
-      background: #f8f9fa;
-      transform: translateY(-2px);
-    }
-
-    .page-link svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    .page-link span {
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
     }
 
     @media (max-width: 768px) {
@@ -273,15 +221,7 @@ import { RouterModule } from '@angular/router';
       .btn-primary, .btn-secondary {
         justify-content: center;
       }
-
-      .pages-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
   `]
 })
-export class NotFoundComponent {
-  voltarPaginaAnterior() {
-    window.history.back();
-  }
-}
+export class UnauthorizedComponent {} 

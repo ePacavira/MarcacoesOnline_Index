@@ -6,11 +6,18 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService)
   const router = inject(Router)
 
+  // Se não estiver autenticado, redirecionar para login
+  if (!authService.isAuthenticated()) {
+    router.navigate(["/login"], { queryParams: { returnUrl: state.url } })
+    return false
+  }
+
+  // Se estiver autenticado mas não tiver permissão de admin, redirecionar para unauthorized
   if (authService.isAdminFull() || authService.isAdmin() || authService.isUtente()) {
     return true
   }
 
-  router.navigate(["/login"])
+  router.navigate(["/unauthorized"])
   return false
 }
 
@@ -22,6 +29,6 @@ export const utenteOnlyGuard: CanActivateFn = () => {
     return true
   }
 
-  router.navigate(["/"])
+  router.navigate(["/unauthorized"])
   return false
 }

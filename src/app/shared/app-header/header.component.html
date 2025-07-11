@@ -17,7 +17,10 @@
     <div class="navbar-actions">
       <a routerLink="/consulta-marcacao" class="navbar-btn-secondary">Consultar</a>
       <a routerLink="/marcacao-anonima" class="navbar-btn">Marcar Consulta</a>
-      <a routerLink="/login" class="navbar-login">Login</a>
+      
+      <!-- Mostrar área do utente se logado, senão mostrar login -->
+      <a *ngIf="!isLoggedIn()" routerLink="/login" class="navbar-login">Login</a>
+      <a *ngIf="isLoggedIn()" routerLink="/utente/dashboard" class="navbar-login">Minha Área</a>
     </div>
   </div>
 </nav>

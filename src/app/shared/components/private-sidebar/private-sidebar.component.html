@@ -2,7 +2,22 @@
   <div class="sidebar-logo">
     <img src="/logo.jpg" alt="Logo" style="background: none; box-shadow: none; border-radius: 10px;" />
   </div>
-  <nav class="sidebar-nav">
+  
+  <!-- Menu para Super Administradores -->
+  <nav class="sidebar-nav" *ngIf="isSuperAdmin()">
+    <a routerLink="/super/dashboard" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/activity.svg" alt="Dashboard" class="sidebar-svg-icon" /></span> Dashboard
+    </a>
+    <a routerLink="/super/usuarios" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/users.svg" alt="Utilizadores" class="sidebar-svg-icon" /></span> Gestão de Utilizadores
+    </a>
+    <a routerLink="/gestao/profile" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/user.svg" alt="Profile" class="sidebar-svg-icon" /></span> Profile
+    </a>
+  </nav>
+
+  <!-- Menu para Administradores -->
+  <nav class="sidebar-nav" *ngIf="isAdmin() && !isSuperAdmin()">
     <a routerLink="/gestao/dashboard" routerLinkActive="active">
       <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/activity.svg" alt="Dashboard" class="sidebar-svg-icon" /></span> Dashboard
     </a>
@@ -19,9 +34,51 @@
       <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/user.svg" alt="Profile" class="sidebar-svg-icon" /></span> Profile
     </a>
   </nav>
+
+  <!-- Menu para Administrativos -->
+  <nav class="sidebar-nav" *ngIf="isAdministrativo()">
+    <a routerLink="/admintr/dashboard" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/activity.svg" alt="Dashboard" class="sidebar-svg-icon" /></span> Dashboard
+    </a>
+    <a routerLink="/admintr/pedidos" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/list.svg" alt="Pedidos" class="sidebar-svg-icon" /></span> Gestão de Pedidos
+    </a>
+    <a routerLink="/gestao/profile" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/user.svg" alt="Profile" class="sidebar-svg-icon" /></span> Profile
+    </a>
+  </nav>
+
+  <!-- Menu para Utentes -->
+  <nav class="sidebar-nav" *ngIf="isUtente()">
+    <a routerLink="/utente/dashboard" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/home.svg" alt="Painel" class="sidebar-svg-icon" /></span> Meu Painel
+    </a>
+    <a routerLink="/utente/minhas-marcacoes" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/calendar.svg" alt="Minhas Marcações" class="sidebar-svg-icon" /></span> Minhas Marcações
+    </a>
+    <a routerLink="/marcacao-anonima" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/plus-circle.svg" alt="Nova Marcação" class="sidebar-svg-icon" /></span> Nova Marcação
+    </a>
+    <a routerLink="/consulta-marcacao" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/search.svg" alt="Consultar" class="sidebar-svg-icon" /></span> Consultar Marcação
+    </a>
+    <a routerLink="/utente/profile" routerLinkActive="active">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/user.svg" alt="Perfil" class="sidebar-svg-icon" /></span> Meu Perfil
+    </a>
+  </nav>
+
   <div class="sidebar-bottom">
-    <a routerLink="/login" class="sidebar-bottom-link">
-      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/log-out.svg" alt="Log Out" class="sidebar-svg-icon" /></span> Log Out
+    <div class="user-info" *ngIf="currentUser">
+      <div class="user-avatar">
+        <img [src]="currentUser.foto || '/assets/default-avatar.png'" alt="Avatar" />
+      </div>
+      <div class="user-details">
+        <span class="user-name">{{ currentUser.nome }}</span>
+        <span class="user-role">{{ getRoleLabel(currentUser.tipoUsuario) }}</span>
+      </div>
+    </div>
+    <a (click)="logout()" class="sidebar-bottom-link" style="cursor: pointer;">
+      <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/log-out.svg" alt="Log Out" class="sidebar-svg-icon" /></span> Sair
     </a>
   </div>
 </aside>

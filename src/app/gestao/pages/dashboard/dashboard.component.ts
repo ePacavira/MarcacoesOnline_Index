@@ -1,5 +1,6 @@
 import { Component, type OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
+import { AuthService } from "../../../core/services/auth.service"
 
 @Component({
   selector: "app-dashboard",
@@ -7,11 +8,11 @@ import { CommonModule } from "@angular/common"
   imports: [CommonModule],
   template: `
     <div class="dashboard-container">
-      <!-- Header -->
+      <!-- Header do Utente -->
       <div class="dashboard-header">
         <div class="header-left">
-          <h1 class="dashboard-title">Dashboard</h1>
-          <p class="dashboard-subtitle">Bem-vindo ao painel de gestão</p>
+          <h1 class="dashboard-title">Painel do Utente</h1>
+          <p class="dashboard-subtitle">Bem-vindo, {{ currentUser?.nome || 'Utente' }}</p>
         </div>
         <div class="header-right">
           <div class="date-info">
@@ -20,7 +21,7 @@ import { CommonModule } from "@angular/common"
         </div>
       </div>
 
-      <!-- Cards de Estatísticas -->
+      <!-- Cards de Estatísticas do Utente -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon">
@@ -30,9 +31,38 @@ import { CommonModule } from "@angular/common"
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">1,234</h3>
-            <p class="stat-label">Total de Marcações</p>
-            <span class="stat-change positive">+12% este mês</span>
+            <h3 class="stat-number">{{ getPendingCount() }}</h3>
+            <p class="stat-label">Marcações Pendentes</p>
+            <span class="stat-change neutral">Aguardando confirmação</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4"/>
+              <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"/>
+              <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ getConfirmedCount() }}</h3>
+            <p class="stat-label">Marcações Confirmadas</p>
+            <span class="stat-change positive">Próximas consultas</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ getCompletedCount() }}</h3>
+            <p class="stat-label">Consultas Realizadas</p>
+            <span class="stat-change positive">Histórico completo</span>
           </div>
         </div>
 
@@ -41,141 +71,83 @@ import { CommonModule } from "@angular/common"
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">856</h3>
-            <p class="stat-label">Pacientes Ativos</p>
-            <span class="stat-change positive">+8% este mês</span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-            </svg>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-number">92%</h3>
-            <p class="stat-label">Taxa de Satisfação</p>
-            <span class="stat-change positive">+3% este mês</span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12,6 12,12 16,14"/>
-            </svg>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-number">15min</h3>
-            <p class="stat-label">Tempo Médio de Espera</p>
-            <span class="stat-change negative">-5% este mês</span>
+            <h3 class="stat-number">{{ currentUser?.numeroUtente || 'N/A' }}</h3>
+            <p class="stat-label">Número de Utente</p>
+            <span class="stat-change neutral">Identificação única</span>
           </div>
         </div>
       </div>
 
-      <!-- Conteúdo Principal -->
+      <!-- Dados Pessoais -->
       <div class="dashboard-content">
-        <!-- Gráfico Principal -->
-        <div class="chart-section">
-          <div class="chart-header">
-            <h2>Marcações por Mês</h2>
-            <div class="chart-actions">
-              <button class="chart-btn active">7 dias</button>
-              <button class="chart-btn">30 dias</button>
-              <button class="chart-btn">90 dias</button>
-            </div>
-                </div>
-          <div class="chart-container">
-            <div class="chart-placeholder">
-              <div class="chart-bars">
-                <div class="bar" style="height: 60%"></div>
-                <div class="bar" style="height: 80%"></div>
-                <div class="bar" style="height: 45%"></div>
-                <div class="bar" style="height: 90%"></div>
-                <div class="bar" style="height: 70%"></div>
-                <div class="bar" style="height: 85%"></div>
-                <div class="bar" style="height: 75%"></div>
-                </div>
-              <div class="chart-labels">
-                <span>Seg</span>
-                <span>Ter</span>
-                <span>Qua</span>
-                <span>Qui</span>
-                <span>Sex</span>
-                <span>Sáb</span>
-                <span>Dom</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabela de Atividades Recentes -->
-        <div class="recent-section">
+        <div class="profile-section">
           <div class="section-header">
-            <h2>Atividades Recentes</h2>
-            <button class="view-all-btn">Ver Todas</button>
+            <h2>Dados Pessoais</h2>
+            <button class="edit-btn" routerLink="/utente/profile">Editar Perfil</button>
           </div>
-          <div class="activity-list">
-            <div class="activity-item">
-              <div class="activity-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                </svg>
+          <div class="profile-grid">
+            <div class="profile-photo">
+              <img [src]="currentUser?.foto || '/assets/default-avatar.png'" alt="Foto de perfil" class="avatar" />
+              <button class="change-photo-btn">Alterar Foto</button>
+            </div>
+            <div class="profile-info">
+              <div class="info-row">
+                <span class="info-label">Nome:</span>
+                <span class="info-value">{{ currentUser?.nome }}</span>
               </div>
-              <div class="activity-content">
-                <p class="activity-text">Nova marcação criada por <strong>João Silva</strong></p>
-                <span class="activity-time">há 5 minutos</span>
+              <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ currentUser?.email }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Telefone:</span>
+                <span class="info-value">{{ currentUser?.telefone }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Data de Nascimento:</span>
+                <span class="info-value">{{ currentUser?.dataNascimento | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Endereço:</span>
+                <span class="info-value">{{ currentUser?.endereco }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Tipo de Usuário:</span>
+                <span class="info-value">{{ currentUser?.tipoUsuario }}</span>
               </div>
             </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"/>
-                  <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"/>
-                </svg>
-              </div>
-              <div class="activity-content">
-                <p class="activity-text">Consulta confirmada para <strong>Maria Santos</strong></p>
-                <span class="activity-time">há 15 minutos</span>
-              </div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                </svg>
-              </div>
-              <div class="activity-content">
-                <p class="activity-text">Novo paciente registado: <strong>Ana Costa</strong></p>
-                <span class="activity-time">há 1 hora</span>
-              </div>
-                </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-              </div>
-              <div class="activity-content">
-                <p class="activity-text">Marcação cancelada por <strong>Pedro Lima</strong></p>
-                <span class="activity-time">há 2 horas</span>
           </div>
         </div>
-      </div>
+
+        <!-- Próximas Consultas -->
+        <div class="upcoming-section">
+          <div class="section-header">
+            <h2>Próximas Consultas</h2>
+            <button class="view-all-btn" routerLink="/utente/minhas-marcacoes">Ver Todas</button>
+          </div>
+          <div class="appointments-list">
+            <div *ngFor="let marcacao of proximasMarcacoes" class="appointment-item">
+              <div class="appointment-date">
+                <span class="day">{{ marcacao.dataInicioPreferida | date:'dd' }}</span>
+                <span class="month">{{ marcacao.dataInicioPreferida | date:'MMM' }}</span>
+              </div>
+              <div class="appointment-details">
+                <h4>{{ marcacao.tipoConsulta }}</h4>
+                <p>{{ marcacao.horarioPreferido }} - {{ marcacao.medico }}</p>
+                <span class="status confirmed">Confirmada</span>
+              </div>
+              <div class="appointment-actions">
+                <button class="action-btn">Ver Detalhes</button>
+              </div>
+            </div>
+            <div *ngIf="proximasMarcacoes.length === 0" class="no-appointments">
+              <p>Não tem consultas agendadas</p>
+              <button class="schedule-btn" routerLink="/marcacao-anonima">Agendar Consulta</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -202,18 +174,22 @@ import { CommonModule } from "@angular/common"
     }
 
     .dashboard-subtitle {
+      font-size: 1.1rem;
       color: #666;
       margin: 0.5rem 0 0 0;
     }
 
     .current-date {
-      color: #00548d;
-      font-weight: 500;
+      font-size: 1rem;
+      color: #666;
+      background: #f8f9fa;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
     }
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
@@ -222,38 +198,24 @@ import { CommonModule } from "@angular/common"
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,84,141,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
       gap: 1rem;
-      transition: transform 0.2s;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
     }
 
     .stat-icon {
       width: 48px;
       height: 48px;
-      background: #00548d;
+      background: #e6f1fa;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #00548d;
     }
 
-    .stat-icon svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    .stat-content {
-      flex: 1;
-    }
-
-    .stat-number {
+    .stat-content h3 {
       font-size: 1.8rem;
       font-weight: 700;
       color: #00548d;
@@ -261,201 +223,248 @@ import { CommonModule } from "@angular/common"
     }
 
     .stat-label {
+      font-size: 0.9rem;
       color: #666;
       margin: 0.25rem 0;
     }
 
     .stat-change {
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       font-weight: 500;
     }
 
-    .stat-change.positive {
-      color: #10b981;
-    }
-
-    .stat-change.negative {
-      color: #ef4444;
-    }
+    .stat-change.positive { color: #10b981; }
+    .stat-change.negative { color: #ef4444; }
+    .stat-change.neutral { color: #6b7280; }
 
     .dashboard-content {
       display: grid;
-      grid-template-columns: 2fr 1fr;
       gap: 2rem;
     }
 
-    .chart-section, .recent-section {
+    .profile-section, .upcoming-section {
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,84,141,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .chart-header, .section-header {
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.5rem;
     }
 
-    .chart-header h2, .section-header h2 {
-      font-size: 1.25rem;
+    .section-header h2 {
+      font-size: 1.5rem;
       font-weight: 600;
       color: #00548d;
       margin: 0;
     }
 
-    .chart-actions {
-      display: flex;
-      gap: 0.5rem;
+    .edit-btn, .view-all-btn {
+      background: #00548d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
     }
 
-    .chart-btn {
+    .edit-btn:hover, .view-all-btn:hover {
+      background: #0077cc;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .profile-photo {
+      text-align: center;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #e6f1fa;
+      margin-bottom: 1rem;
+    }
+
+    .change-photo-btn {
+      background: transparent;
+      color: #00548d;
+      border: 1px solid #00548d;
       padding: 0.5rem 1rem;
-      border: 1px solid #e5e7eb;
-      background: white;
       border-radius: 6px;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .chart-btn.active, .chart-btn:hover {
+    .change-photo-btn:hover {
       background: #00548d;
       color: white;
-      border-color: #00548d;
     }
 
-    .chart-container {
-      height: 300px;
-      display: flex;
-      align-items: end;
-      justify-content: center;
-      padding: 1rem 0;
-    }
-
-    .chart-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .chart-bars {
-      display: flex;
-      align-items: end;
+    .profile-info {
+      display: grid;
       gap: 1rem;
-      height: 200px;
     }
 
-    .bar {
-      width: 40px;
-      background: linear-gradient(to top, #00548d, #0077cc);
-      border-radius: 4px 4px 0 0;
-      min-height: 20px;
-    }
-
-    .chart-labels {
+    .info-row {
       display: flex;
       gap: 1rem;
-      font-size: 0.875rem;
+    }
+
+    .info-label {
+      font-weight: 600;
       color: #666;
+      min-width: 120px;
     }
 
-    .view-all-btn {
-      padding: 0.5rem 1rem;
-      background: #00548d;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: background 0.2s;
+    .info-value {
+      color: #333;
     }
 
-    .view-all-btn:hover {
-      background: #003a5c;
-    }
-
-    .activity-list {
-      display: flex;
-      flex-direction: column;
+    .appointments-list {
+      display: grid;
       gap: 1rem;
     }
 
-    .activity-item {
+    .appointment-item {
       display: flex;
       align-items: center;
       gap: 1rem;
       padding: 1rem;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
-      background: #f8fafc;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
-    .activity-item:hover {
-      background: #e6eaf3;
+    .appointment-item:hover {
+      border-color: #00548d;
+      box-shadow: 0 2px 8px rgba(0,84,141,0.1);
     }
 
-    .activity-icon {
-      width: 40px;
-      height: 40px;
-      background: #00548d;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
+    .appointment-date {
+      text-align: center;
+      min-width: 60px;
     }
 
-    .activity-icon svg {
-      width: 20px;
-      height: 20px;
+    .appointment-date .day {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00548d;
     }
 
-    .activity-content {
+    .appointment-date .month {
+      display: block;
+      font-size: 0.8rem;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    .appointment-details {
       flex: 1;
     }
 
-    .activity-text {
-      margin: 0;
+    .appointment-details h4 {
+      margin: 0 0 0.25rem 0;
       color: #333;
-      font-size: 0.875rem;
     }
 
-    .activity-time {
+    .appointment-details p {
+      margin: 0 0 0.5rem 0;
       color: #666;
-      font-size: 0.75rem;
+      font-size: 0.9rem;
     }
 
-    @media (max-width: 1024px) {
-      .dashboard-content {
-        grid-template-columns: 1fr;
-      }
+    .status {
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .status.confirmed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .action-btn {
+      background: transparent;
+      color: #00548d;
+      border: 1px solid #00548d;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: #00548d;
+      color: white;
+    }
+
+    .no-appointments {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    .schedule-btn {
+      background: #00548d;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.2s;
+    }
+
+    .schedule-btn:hover {
+      background: #0077cc;
     }
 
     @media (max-width: 768px) {
       .dashboard-container {
         padding: 1rem;
       }
-      
+
       .stats-grid {
         grid-template-columns: 1fr;
       }
-      
-      .dashboard-header {
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .appointment-item {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+        text-align: center;
       }
     }
   `]
 })
-
 export class DashboardComponent implements OnInit {
   currentDate = '';
+  currentUser: any = null;
+  proximasMarcacoes: any[] = [];
+
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
     this.currentDate = new Date().toLocaleDateString('pt-BR', {
@@ -464,5 +473,40 @@ export class DashboardComponent implements OnInit {
       month: 'long',
       day: 'numeric'
     });
+    
+    this.currentUser = this.authService.getCurrentUser();
+    this.carregarProximasMarcacoes();
+  }
+
+  carregarProximasMarcacoes() {
+    // Mock data - em produção viria do serviço
+    this.proximasMarcacoes = [
+      {
+        dataInicioPreferida: new Date('2024-01-15'),
+        tipoConsulta: 'Consulta Geral',
+        horarioPreferido: '10:00',
+        medico: 'Dr. João Silva',
+        estado: 'Confirmada'
+      },
+      {
+        dataInicioPreferida: new Date('2024-01-20'),
+        tipoConsulta: 'Exame Clínico',
+        horarioPreferido: '14:30',
+        medico: 'Dra. Maria Santos',
+        estado: 'Confirmada'
+      }
+    ];
+  }
+
+  getPendingCount(): number {
+    return 2; // Mock data
+  }
+
+  getConfirmedCount(): number {
+    return 3; // Mock data
+  }
+
+  getCompletedCount(): number {
+    return 15; // Mock data
   }
 }

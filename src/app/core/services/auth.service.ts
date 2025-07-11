@@ -1,9 +1,10 @@
 import { Injectable, inject, signal } from "@angular/core"
 import { HttpClient } from "@angular/common/http"
 import { Router } from "@angular/router"
-import { type Observable, BehaviorSubject, tap, catchError, throwError } from "rxjs"
-import type { User, LoginRequest, LoginResponse } from "../models/user.model"
+import { type Observable, BehaviorSubject, tap, catchError, throwError, of } from "rxjs"
+import { User, LoginRequest, LoginResponse, UserRole } from "../models/user.model"
 import { environment } from "../../../environments/environment"
+import { delay } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -19,20 +20,96 @@ export class AuthService {
   public isAuthenticated = signal(false)
   public currentUser = signal<User | null>(null)
 
+  // Dados de exemplo para desenvolvimento
+  private usuariosExemplo: User[] = [
+    {
+      id: 1,
+      nome: "João Silva",
+      email: "joao.silva@email.com",
+      telefone: "+351 123 456 789",
+      dataNascimento: new Date('1985-03-15'),
+      endereco: "Rua das Flores, 123, 1000-001 Lisboa",
+      nif: "123456789",
+      numeroUtente: "123456789",
+      tipoUsuario: "utente",
+      perfil: UserRole.REGISTADO,
+      foto: "/assets/user.jpg",
+      notificacoesEmail: true,
+      notificacoesSMS: true,
+      newsletter: false
+    },
+    {
+      id: 2,
+      nome: "Maria Santos",
+      email: "maria.santos@email.com",
+      telefone: "+351 987 654 321",
+      dataNascimento: new Date('1990-07-22'),
+      endereco: "Avenida da Liberdade, 456, 4000-001 Porto",
+      nif: "987654321",
+      numeroUtente: "987654321",
+      tipoUsuario: "utente",
+      perfil: UserRole.REGISTADO,
+      foto: undefined,
+      notificacoesEmail: true,
+      notificacoesSMS: false,
+      newsletter: true
+    },
+    {
+      id: 3,
+      nome: "Admin Sistema",
+      email: "admin@clinicamedi.pt",
+      telefone: "+351 555 123 456",
+      dataNascimento: new Date('1980-01-01'),
+      endereco: "Clínica Medi, Rua Principal, 1000-001 Lisboa",
+      nif: "111222333",
+      numeroUtente: undefined,
+      tipoUsuario: "admin",
+      perfil: UserRole.ADMIN,
+      foto: undefined,
+      notificacoesEmail: true,
+      notificacoesSMS: false,
+      newsletter: false
+    }
+  ];
+
   constructor() {
     this.loadUserFromStorage()
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/Auth/login`, credentials).pipe(
-      tap((response) => {
-        this.setSession(response)
-      }),
-      catchError((error) => {
-        console.error("Erro no login:", error)
-        return throwError(() => error)
-      }),
-    )
+    // Simulação de login para desenvolvimento
+    const usuario = this.usuariosExemplo.find(u => 
+      u.email === credentials.email && 
+      credentials.password === '123456' // Password padrão para todos os usuários
+    );
+
+    if (usuario) {
+      const response: LoginResponse = {
+        token: 'mock-jwt-token-' + usuario.id,
+        refreshToken: 'mock-refresh-token-' + usuario.id,
+        user: usuario
+      };
+
+      this.setSession(response);
+      return of(response).pipe(
+        tap(() => {
+          console.log('Login bem-sucedido:', usuario.nome);
+        })
+      );
+    } else {
+      return throwError(() => new Error('Credenciais inválidas'));
+    }
+
+    // Código original para produção:
+    // return this.http.post<LoginResponse>(`${environment.apiUrl}/Auth/login`, credentials).pipe(
+    //   tap((response) => {
+    //     this.setSession(response)
+    //   }),
+    //   catchError((error) => {
+    //     console.error("Erro no login:", error)
+    //     return throwError(() => error)
+    //   }),
+    // )
   }
 
   logout(): void {
@@ -86,12 +163,11 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token'); // ou 'user', 'auth', etc.
+    return !!localStorage.getItem('token');
   }
 
   hasRole(role: string): boolean {
     const user = this.currentUser();
-    console.log(user)
     return user?.perfil === role
   }
 
@@ -105,5 +181,50 @@ export class AuthService {
 
   isUtente(): boolean {
     return this.hasRole("Registado")
+  }
+
+  // Método para atualizar perfil do usuário
+  atualizarPerfil(dadosAtualizados: Partial<User>): Observable<User> {
+    const userAtual = this.currentUser();
+    if (!userAtual) {
+      return throwError(() => new Error('Usuário não autenticado'));
+    }
+
+    const userAtualizado = { ...userAtual, ...dadosAtualizados };
+    
+    // Atualizar no storage
+    localStorage.setItem("user", JSON.stringify(userAtualizado));
+    
+    // Atualizar no estado
+    this.currentUserSubject.next(userAtualizado);
+    this.currentUser.set(userAtualizado);
+
+    return of(userAtualizado);
+  }
+
+  // Método para obter usuário atual
+  getCurrentUser(): User | null {
+    return this.currentUser();
+  }
+
+  // Método para simular criação de conta
+  criarConta(dadosConta: any): Observable<any> {
+    // Simular criação de conta
+    const novaConta = {
+      email: dadosConta.email,
+      password: dadosConta.password,
+      numeroUtente: this.gerarNumeroUtente(),
+      tipoConta: 'Utente Registado'
+    };
+
+    // Salvar dados temporariamente para a página de sucesso
+    localStorage.setItem('contaCriada', JSON.stringify(novaConta));
+
+    return of(novaConta).pipe(delay(1000));
+  }
+
+  // Gerar número de utente único
+  private gerarNumeroUtente(): string {
+    return Math.floor(100000000 + Math.random() * 900000000).toString();
   }
 }

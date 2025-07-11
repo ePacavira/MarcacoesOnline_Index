@@ -1,6 +1,7 @@
 import { RouterModule } from "@angular/router";
 import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { AuthService } from "../../core/services/auth.service";
 
 @Component({
   selector: "app-header",
@@ -19,9 +20,14 @@ import { CommonModule } from "@angular/common";
           <li><a routerLink="/servicos" routerLinkActive="active">Serviços</a></li>
           <li><a routerLink="/contacto" routerLinkActive="active">Contacto</a></li>
         </ul>
-        <!-- Botão Login à direita -->
+        <!-- Botões de ação -->
         <div class="navbar-actions">
-          <a routerLink="/login" class="navbar-login">Login</a>
+          <a routerLink="/consulta-marcacao" class="navbar-btn-secondary">Consultar</a>
+          <a routerLink="/marcacao-anonima" class="navbar-btn">Marcar Consulta</a>
+          
+          <!-- Mostrar área do utente se logado, senão mostrar login -->
+          <a *ngIf="!isLoggedIn()" routerLink="/login" class="navbar-login">Login</a>
+          <a *ngIf="isLoggedIn()" routerLink="/utente/dashboard" class="navbar-login">Minha Área</a>
         </div>
       </div>
     </header>
@@ -29,4 +35,10 @@ import { CommonModule } from "@angular/common";
   styleUrls: ['./header.component.css']
 })
 
-export class HeaderComponent {}
+export class HeaderComponent {
+  constructor(private authService: AuthService) {}
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+}

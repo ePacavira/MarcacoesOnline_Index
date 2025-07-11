@@ -35,14 +35,94 @@ export const routes: Routes = [
       {
         path: 'marcacao-sucesso',
         loadComponent: () => import('./pages/marcacao-sucesso/marcacao-sucesso.component').then(m => m.MarcacaoSucessoComponent)
+      },
+      {
+        path: 'conta-criada',
+        loadComponent: () => import('./pages/conta-criada/conta-criada.component').then(m => m.ContaCriadaComponent)
       }
+    ]
+  },
+  // Área do Utente
+  {
+    path: 'utente',
+    canActivate: [authGuard],
+    loadComponent: () => import('./gestao/layout/gestao-layout.component').then((m) => m.GestaoLayoutComponent),
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./gestao/pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+      },
+      {
+        path: 'minhas-marcacoes',
+        loadComponent: () => import('./gestao/pages/marcacoes/marcacoes.component').then((m) => m.MarcacoesComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./gestao/pages/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+    ]
+  },
+  // Área Administrativa
+  {
+    path: 'admintr',
+    //canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./gestao/layout/gestao-layout.component').then((m) => m.GestaoLayoutComponent),
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./admintr/pages/dashboard/dashboard.component').then((m) => m.AdmintrDashboardComponent),
+      },
+      {
+        path: 'pedidos',
+        loadComponent: () => import('./admintr/pages/pedidos/pedidos.component').then((m) => m.PedidosComponent),
+      },
+      {
+        path: 'pedido/:id',
+        loadComponent: () => import('./admintr/pages/pedido-detalhe/pedido-detalhe.component').then((m) => m.PedidoDetalheComponent),
+      },
+    ]
+  },
+  // Área Super Administrador
+  {
+    path: 'super',
+    //canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./gestao/layout/gestao-layout.component').then((m) => m.GestaoLayoutComponent),
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./super/pages/dashboard/dashboard.component').then((m) => m.SuperDashboardComponent),
+      },
+      {
+        path: 'usuarios',
+        loadComponent: () => import('./super/pages/usuarios/usuarios.component').then((m) => m.UsuariosComponent),
+      },
     ]
   },
   // Privado (gestao) - fora do LayoutPublicComponent
   {
     path: 'gestao',
-    //canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./gestao/gestao.routes').then((m) => m.gestaoRoutes),
+  },
+  // Páginas de Erro
+  { 
+    path: 'unauthorized', 
+    loadComponent: () => import('./pages/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent) 
   },
   // Rota coringa
   { path: '**', component: NotFoundComponent }

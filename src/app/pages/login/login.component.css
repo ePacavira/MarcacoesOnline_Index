@@ -167,6 +167,32 @@ body {
 .login-btn:hover {
   background: #00395f;
 }
+
+.login-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.login-footer p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.create-account-link {
+  color: #00548d;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.create-account-link:hover {
+  color: #0077cc;
+  text-decoration: underline;
+}
+
 .login-back-btn {
   margin: 0.8rem auto 0 auto;
   background: #fff;

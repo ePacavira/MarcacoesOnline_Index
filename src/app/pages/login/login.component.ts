@@ -48,8 +48,12 @@ export class LoginComponent {
       this.authService.login(credentials).subscribe({
         next: (response) => {
           this.isLoading.set(false)
-          // Redirecionar sempre para /gestao após login bem-sucedido
-          this.router.navigate(["/gestao"])
+          // Redirecionar baseado no tipo de usuário
+          if (response.user.tipoUsuario === 'utente') {
+            this.router.navigate(["/utente/dashboard"])
+          } else {
+            this.router.navigate(["/gestao/dashboard"])
+          }
         },
         error: (error) => {
           this.isLoading.set(false)
