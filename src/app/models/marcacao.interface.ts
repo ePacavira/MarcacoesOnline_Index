@@ -16,6 +16,7 @@ export interface PedidoMarcacao {
   id?: string;
   dataInicioPreferida: string; // ou Date, se usares objetos de data
   dataFimPreferida: string;
+  dataCriacao?: string; // Data de criação da marcação (opcional)
   horarioPreferido: 'Manhã' | 'Tarde' | 'Noite' | string;
   observacoes: string;
   estado: 'Agendado' | 'Pendente' | 'Cancelado' | 'Concluído' | string;

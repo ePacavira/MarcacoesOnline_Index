@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AnonymousAppointment, AnonymousAppointmentStep, APPOINTMENT_STEPS } from '../../core/models/anonymous-appointment.model';
 import { AnonymousAppointmentService } from '../../core/services/anonymous-appointment.service';
@@ -22,6 +22,7 @@ export class MarcacaoAnonimaComponent implements OnInit {
   patientForm!: FormGroup;
   serviceForm!: FormGroup;
   scheduleForm!: FormGroup;
+  actosClinicosForm: FormArray;
   
   // Dados temporários
   appointmentData: Partial<AnonymousAppointment> = {
@@ -52,26 +53,58 @@ export class MarcacaoAnonimaComponent implements OnInit {
     '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
   ];
 
+  dataInicioPreferida: string = '';
+  dataFimPreferida: string = '';
+  horarioPreferido: string = '';
+
   constructor(
-    private fb: FormBuilder,
+    public fb: FormBuilder,
     private router: Router,
     private appointmentService: AnonymousAppointmentService
   ) {
     this.minDate = new Date().toISOString().split('T')[0];
     this.initializeForms();
+    this.actosClinicosForm = this.fb.array([
+      this.createActoClinicoGroup()
+    ]);
+  }
+
+  createActoClinicoGroup(): FormGroup {
+    return this.fb.group({
+      tipo: ['', Validators.required],
+      subsistemaSaude: ['', Validators.required],
+      profissional: ['', Validators.required]
+    });
+  }
+
+  addActoClinico() {
+    this.actosClinicosForm.push(this.createActoClinicoGroup());
+  }
+
+  removeActoClinico(index: number) {
+    if (this.actosClinicosForm.length > 1) {
+      this.actosClinicosForm.removeAt(index);
+    }
   }
 
   ngOnInit(): void {
+    // Gerar número de utente aleatório (exemplo)
+    const numeroUtente = Math.floor(100000000 + Math.random() * 900000000).toString();
+    this.patientForm.get('numeroUtente')?.setValue(numeroUtente);
+    this.patientForm.get('numeroUtente')?.updateValueAndValidity();
+    this.patientForm.updateValueAndValidity();
     this.updateStepStatus();
   }
 
   private initializeForms(): void {
     // Formulário dos dados do paciente
     this.patientForm = this.fb.group({
+      numeroUtente: [{ value: '', disabled: true }], // sem Validators.required
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
       birthDate: ['', Validators.required],
+      genero: ['', Validators.required],
       address: [''],
       medicalHistory: ['']
     });
@@ -84,8 +117,10 @@ export class MarcacaoAnonimaComponent implements OnInit {
 
     // Formulário da data e hora
     this.scheduleForm = this.fb.group({
-      date: ['', Validators.required],
-      time: ['', Validators.required],
+      dataInicioPreferida: ['', Validators.required],
+      horaInicioPreferida: ['', Validators.required],
+      dataFimPreferida: ['', Validators.required],
+      horaFimPreferida: ['', Validators.required],
       notes: ['']
     });
   }
@@ -113,7 +148,7 @@ export class MarcacaoAnonimaComponent implements OnInit {
       case 1:
         return this.patientForm.valid;
       case 2:
-        return this.serviceForm.valid;
+        return this.actosClinicosForm.valid;
       case 3:
         return this.scheduleForm.valid;
       default:
@@ -135,13 +170,10 @@ export class MarcacaoAnonimaComponent implements OnInit {
         }
         break;
       case 3:
-        const dateValue = this.scheduleForm.get('date')?.value;
-        const timeValue = this.scheduleForm.get('time')?.value || '';
+        this.dataInicioPreferida = this.scheduleForm.get('dataInicioPreferida')?.value + 'T' + this.scheduleForm.get('horaInicioPreferida')?.value;
+        this.dataFimPreferida = this.scheduleForm.get('dataFimPreferida')?.value + 'T' + this.scheduleForm.get('horaFimPreferida')?.value;
         const notesValue = this.scheduleForm.get('notes')?.value || '';
-        
-        if (this.appointmentData.appointment && dateValue) {
-          this.appointmentData.appointment.date = new Date(dateValue);
-          this.appointmentData.appointment.time = timeValue;
+        if (this.appointmentData.appointment) {
           this.appointmentData.appointment.notes = notesValue;
         }
         break;
@@ -155,29 +187,78 @@ export class MarcacaoAnonimaComponent implements OnInit {
     });
   }
 
+  // Função para garantir formato ISO com segundos
+  private formatDateTime(date: string): string {
+    return date && date.length === 16 ? date + ':00' : date;
+  }
+
   confirmAppointment(): void {
     if (this.validateCurrentStep()) {
       this.isLoading = true;
       this.saveStepData();
-      
-      // Criar a marcação usando o serviço
-      this.appointmentService.createAppointment({
-        patient: this.appointmentData.patient!,
-        appointment: this.appointmentData.appointment!
-      }).subscribe({
+      // Montar DTO exatamente como o backend espera
+      const dto = {
+        numeroUtente: this.patientForm.get('numeroUtente')?.value || '',
+        nomeCompleto: this.patientForm.get('name')?.value,
+        dataNascimento: this.patientForm.get('birthDate')?.value,
+        genero: this.patientForm.get('genero')?.value,
+        telemovel: this.patientForm.get('phone')?.value,
+        email: this.patientForm.get('email')?.value,
+        morada: this.patientForm.get('address')?.value,
+        dataInicioPreferida: this.formatDateTime(this.dataInicioPreferida),
+        dataFimPreferida: this.formatDateTime(this.dataFimPreferida),
+        horarioPreferido: this.horarioPreferido || 'Manhã',
+        observacoes: this.appointmentData.appointment?.notes || '',
+        actosClinicos: this.actosClinicosForm.value
+      };
+      console.log('Enviando DTO para backend:', dto);
+      this.appointmentService.createAppointment(dto).subscribe({
         next: (appointment) => {
-          // Enviar confirmações
-          this.appointmentService.sendConfirmationEmail(appointment).subscribe();
-          this.appointmentService.sendConfirmationSMS(appointment).subscribe();
-          
-          // Redirecionar para página de sucesso
-          this.router.navigate(['/marcacao-sucesso'], {
-            queryParams: { reference: appointment.referenceCode }
-          });
+          console.log('Resposta do backend:', appointment);
+          // Guardar a resposta completa para exibição imediata
+          this.appointmentData = {
+            patient: {
+              name: appointment.nomeCompleto || appointment.nome || appointment.name,
+              email: appointment.email,
+              phone: appointment.telemovel || appointment.telefone || appointment.phone,
+              birthDate: appointment.dataNascimento || appointment.birthDate,
+              address: appointment.morada || appointment.address
+            },
+            appointment: {
+              doctorId: appointment.doctorId || '',
+              serviceId: appointment.serviceId || '',
+              date: appointment.dataInicioPreferida || appointment.date,
+              time: appointment.horaInicioPreferida || appointment.time,
+              notes: appointment.observacoes || appointment.notes
+            },
+            createdAt: appointment.createdAt || new Date(),
+            status: appointment.status,
+            referenceCode: appointment.referenceCode || appointment.codigoReferencia
+          };
+          const ref = appointment.referenceCode || appointment.codigoReferencia;
+          if (appointment && ref) {
+            // Navega imediatamente para a tela de sucesso
+            this.router.navigate(['/marcacao-sucesso'], {
+              queryParams: { reference: ref }
+            });
+            // Tenta enviar email/SMS, mas não bloqueia a navegação
+            try {
+              this.appointmentService.sendConfirmationEmail(appointment).subscribe({
+                error: (e) => console.error('Erro ao enviar email:', e)
+              });
+              this.appointmentService.sendConfirmationSMS(appointment).subscribe({
+                error: (e) => console.error('Erro ao enviar SMS:', e)
+              });
+            } catch (e) {
+              console.error('Erro ao tentar enviar email/SMS:', e);
+            }
+          } else {
+            alert('Marcação criada mas não foi possível obter o código de referência.');
+          }
         },
         error: (error) => {
           console.error('Erro ao criar marcação:', error);
-          // Aqui poderia mostrar uma mensagem de erro para o usuário
+          alert('Erro ao criar marcação: ' + (error?.message || error));
         },
         complete: () => {
           this.isLoading = false;

@@ -260,8 +260,31 @@ export class MarcacaoService {
 
   // Enviar notificação de cancelamento
   enviarNotificacaoCancelamento(marcacao: Marcacao): Observable<boolean> {
-    console.log('Enviando notificação de cancelamento para:', marcacao);
-    // Aqui implementaria a lógica de envio de email/SMS
-    return of(true).pipe(delay(1000));
+    // Simular envio de notificação
+    return of(true).pipe(delay(300));
+  }
+
+  // Obter marcações recentes para o dashboard
+  getMarcacoesRecentes(): Observable<Marcacao[]> {
+    // Retornar as marcações mais recentes
+    const recentes = [...this.marcacoes]
+      .sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
+      .slice(0, 10);
+    return of(recentes).pipe(delay(400));
+  }
+
+  // Confirmar marcação
+  confirmar(id: number): Observable<Marcacao | null> {
+    return this.atualizarMarcacao(id, { estado: 'Confirmada' });
+  }
+
+  // Marcar como realizada
+  realizar(id: number): Observable<Marcacao | null> {
+    return this.atualizarMarcacao(id, { estado: 'Realizada' });
+  }
+
+  // Obter todas as marcações
+  getAll(): Observable<Marcacao[]> {
+    return of(this.marcacoes).pipe(delay(500));
   }
 } 

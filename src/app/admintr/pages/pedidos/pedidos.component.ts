@@ -2,6 +2,9 @@ import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { RouterModule } from "@angular/router"
+import { PedidosService, PedidoMarcacao } from "../../../core/services/pedidos.service"
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 @Component({
   selector: "app-pedidos",
@@ -99,14 +102,14 @@ import { RouterModule } from "@angular/router"
           <div class="pedido-header">
             <div class="pedido-info">
               <div class="pedido-main">
-                <h3>{{ pedido.tipoConsulta }}</h3>
+                <h3>{{ pedido.actosClinicos && pedido.actosClinicos.length > 0 ? pedido.actosClinicos[0].tipo : 'Consulta' }}</h3>
                 <div class="pedido-details">
                   <span class="detail-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                       <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    {{ pedido.nomeUtente }}
+                    {{ pedido.user?.nomeCompleto || 'Utente Anónimo' }}
                   </span>
                   <span class="detail-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -120,15 +123,12 @@ import { RouterModule } from "@angular/router"
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                       <circle cx="12" cy="10" r="3"/>
                     </svg>
-                    {{ pedido.local }}
+                    {{ pedido.actosClinicos && pedido.actosClinicos.length > 0 ? pedido.actosClinicos[0].subsistemaSaude : '' }}
                   </span>
                 </div>
               </div>
               <div class="pedido-meta">
-                <span class="tipo-badge" [class]="'tipo-' + pedido.tipo.toLowerCase()">
-                  {{ pedido.tipo }}
-                </span>
-                <span class="status-badge" [class]="'status-' + pedido.estado.toLowerCase()">
+                <span class="status-badge" [class]="'status-' + getStatusClass(pedido.estado)">
                   {{ getStatusLabel(pedido.estado) }}
                 </span>
               </div>
@@ -137,10 +137,8 @@ import { RouterModule } from "@angular/router"
               <button class="action-btn primary" [routerLink]="['/admintr/pedido', pedido.id]">
                 Ver Detalhes
               </button>
-              
-              <!-- Ações baseadas no estado -->
               <button 
-                *ngIf="pedido.estado === 'Pedido'" 
+                *ngIf="pedido.estado === 0" 
                 class="action-btn success" 
                 (click)="agendarPedido(pedido)"
               >
@@ -150,9 +148,8 @@ import { RouterModule } from "@angular/router"
                 </svg>
                 Agendar
               </button>
-              
               <button 
-                *ngIf="pedido.estado === 'Agendado'" 
+                *ngIf="pedido.estado === 1" 
                 class="action-btn completed" 
                 (click)="realizarPedido(pedido)"
               >
@@ -162,23 +159,8 @@ import { RouterModule } from "@angular/router"
                 </svg>
                 Realizar
               </button>
-              
-              <button 
-                *ngIf="pedido.tipo === 'Anónimo' && pedido.estado === 'Agendado'" 
-                class="action-btn promote" 
-                (click)="promoverUtente(pedido)"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="8.5" cy="7" r="4"/>
-                  <line x1="20" y1="8" x2="20" y2="14"/>
-                  <line x1="23" y1="11" x2="17" y2="11"/>
-                </svg>
-                Promover
-              </button>
             </div>
           </div>
-          
           <div class="pedido-body" *ngIf="pedido.observacoes">
             <div class="pedido-notes">
               <strong>Observações:</strong> {{ pedido.observacoes }}
@@ -504,6 +486,15 @@ import { RouterModule } from "@angular/router"
       background: #7c3aed;
     }
 
+    .action-btn.secondary {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .action-btn.secondary:hover {
+      background: #4338ca;
+    }
+
     .action-btn svg {
       width: 16px;
       height: 16px;
@@ -615,78 +606,50 @@ export class PedidosComponent implements OnInit {
   paginaAtual = 1;
   itensPorPagina = 10;
   
-  todosPedidos: any[] = [];
-  pedidosFiltrados: any[] = [];
+  todosPedidos: PedidoMarcacao[] = [];
+  pedidosFiltrados: PedidoMarcacao[] = [];
 
-  constructor() {}
+  constructor(private pedidosService: PedidosService) {}
 
   ngOnInit() {
     this.carregarPedidos();
   }
 
   carregarPedidos() {
-    // Mock data - em produção viria do serviço
-    this.todosPedidos = [
-      {
-        id: 1,
-        tipoConsulta: 'Consulta Geral',
-        nomeUtente: 'João Silva',
-        dataInicioPreferida: new Date('2024-01-15 10:00'),
-        local: 'Clínica Medi - Lisboa',
-        estado: 'Pedido',
-        tipo: 'Registado',
-        observacoes: 'Trazer exames recentes'
+    this.pedidosService.getAll().subscribe({
+      next: (pedidos) => {
+        this.todosPedidos = pedidos;
+        this.aplicarFiltros();
       },
-      {
-        id: 2,
-        tipoConsulta: 'Exame Clínico',
-        nomeUtente: 'Maria Santos',
-        dataInicioPreferida: new Date('2024-01-16 14:30'),
-        local: 'Clínica Medi - Porto',
-        estado: 'Agendado',
-        tipo: 'Anónimo',
-        observacoes: ''
-      },
-      {
-        id: 3,
-        tipoConsulta: 'Consulta de Especialidade',
-        nomeUtente: 'Carlos Oliveira',
-        dataInicioPreferida: new Date('2024-01-14 09:00'),
-        local: 'Clínica Medi - Lisboa',
-        estado: 'Realizado',
-        tipo: 'Registado',
-        observacoes: 'Consulta realizada com sucesso'
-      },
-      {
-        id: 4,
-        tipoConsulta: 'Exame de Sangue',
-        nomeUtente: 'Ana Costa',
-        dataInicioPreferida: new Date('2024-01-17 08:00'),
-        local: 'Clínica Medi - Lisboa',
-        estado: 'Pedido',
-        tipo: 'Anónimo',
-        observacoes: 'Primeira consulta'
+      error: (error) => {
+        console.error('Erro ao carregar pedidos:', error);
       }
-    ];
-    
-    this.aplicarFiltros();
+    });
   }
 
   aplicarFiltros() {
-    let filtradas = [...this.todosPedidos];
+    let filtrados = [...this.todosPedidos];
 
     // Filtro por estado
     if (this.filtroEstado) {
-      filtradas = filtradas.filter(p => 
-        p.estado.toLowerCase() === this.filtroEstado.toLowerCase()
-      );
+      const estadoMap: { [key: string]: number } = {
+        'pedido': 0,
+        'agendado': 1,
+        'realizado': 2
+      };
+      const estadoNumero = estadoMap[this.filtroEstado];
+      if (estadoNumero !== undefined) {
+        filtrados = filtrados.filter(p => p.estado === estadoNumero);
+      }
     }
 
-    // Filtro por tipo
+    // Filtro por tipo (anónimo vs registado)
     if (this.filtroTipo) {
-      filtradas = filtradas.filter(p => 
-        p.tipo.toLowerCase() === this.filtroTipo.toLowerCase()
-      );
+      if (this.filtroTipo === 'anonimo') {
+        filtrados = filtrados.filter(p => p.user?.perfil === 0);
+      } else if (this.filtroTipo === 'registado') {
+        filtrados = filtrados.filter(p => p.user?.perfil === 1);
+      }
     }
 
     // Filtro por período
@@ -696,8 +659,10 @@ export class PedidosComponent implements OnInit {
       inicioSemana.setDate(hoje.getDate() - hoje.getDay());
       const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
-      filtradas = filtradas.filter(p => {
+      filtrados = filtrados.filter(p => {
+        if (!p.dataInicioPreferida) return false;
         const dataPedido = new Date(p.dataInicioPreferida);
+        
         switch (this.filtroPeriodo) {
           case 'hoje':
             return dataPedido.toDateString() === hoje.toDateString();
@@ -714,24 +679,39 @@ export class PedidosComponent implements OnInit {
     // Filtro por pesquisa
     if (this.termoPesquisa) {
       const termo = this.termoPesquisa.toLowerCase();
-      filtradas = filtradas.filter(p =>
-        p.tipoConsulta.toLowerCase().includes(termo) ||
-        p.nomeUtente.toLowerCase().includes(termo) ||
-        p.local.toLowerCase().includes(termo)
-      );
+      filtrados = filtrados.filter(p => {
+        const tipoConsulta = p.actosClinicos && p.actosClinicos.length > 0 ? p.actosClinicos[0].tipo : '';
+        const nomeUtente = p.user?.nomeCompleto || '';
+        const subsistema = p.actosClinicos && p.actosClinicos.length > 0 ? p.actosClinicos[0].subsistemaSaude : '';
+        
+        return tipoConsulta.toLowerCase().includes(termo) ||
+               nomeUtente.toLowerCase().includes(termo) ||
+               subsistema.toLowerCase().includes(termo);
+      });
     }
 
-    this.pedidosFiltrados = filtradas;
+    this.pedidosFiltrados = filtrados;
     this.paginaAtual = 1;
   }
 
-  getStatusLabel(estado: string): string {
-    const labels: { [key: string]: string } = {
-      'Pedido': 'Pedido',
-      'Agendado': 'Agendado',
-      'Realizado': 'Realizado'
+  getStatusLabel(estado: number): string {
+    const labels: { [key: number]: string } = {
+      0: 'Pendente',
+      1: 'Agendado',
+      2: 'Realizado',
+      3: 'Cancelado'
     };
-    return labels[estado] || estado;
+    return labels[estado] || 'Desconhecido';
+  }
+
+  getStatusClass(estado: number): string {
+    const classes: { [key: number]: string } = {
+      0: 'pedido',
+      1: 'agendado',
+      2: 'realizado',
+      3: 'cancelado'
+    };
+    return classes[estado] || 'unknown';
   }
 
   getTotalPedidos(): number {
@@ -739,15 +719,15 @@ export class PedidosComponent implements OnInit {
   }
 
   getPedidosPendentes(): number {
-    return this.todosPedidos.filter(p => p.estado === 'Pedido').length;
+    return this.todosPedidos.filter(p => p.estado === 0).length;
   }
 
   getPedidosAgendados(): number {
-    return this.todosPedidos.filter(p => p.estado === 'Agendado').length;
+    return this.todosPedidos.filter(p => p.estado === 1).length;
   }
 
   getPedidosRealizados(): number {
-    return this.todosPedidos.filter(p => p.estado === 'Realizado').length;
+    return this.todosPedidos.filter(p => p.estado === 2).length;
   }
 
   get totalPaginas(): number {
@@ -755,38 +735,143 @@ export class PedidosComponent implements OnInit {
   }
 
   mudarPagina(pagina: number) {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaAtual = pagina;
+    this.paginaAtual = pagina;
+  }
+
+  agendarPedido(pedido: PedidoMarcacao) {
+    const nomeUtente = pedido.user?.nomeCompleto || 'Utente';
+    if (confirm(`Confirmar agendamento para ${nomeUtente}?`)) {
+      if (pedido.id) {
+        this.pedidosService.agendar(pedido.id).subscribe({
+          next: () => {
+            console.log('Pedido agendado com sucesso');
+            this.carregarPedidos();
+          },
+          error: (error) => {
+            console.error('Erro ao agendar pedido:', error);
+          }
+        });
+      }
     }
   }
 
-  agendarPedido(pedido: any) {
-    if (confirm(`Confirmar agendamento para ${pedido.nomeUtente}?`)) {
-      console.log('Agendar pedido:', pedido);
-      // Implementar lógica de agendamento
-      alert('Pedido agendado com sucesso! Email de confirmação enviado.');
-    }
-  }
-
-  realizarPedido(pedido: any) {
-    if (confirm(`Confirmar realização da consulta para ${pedido.nomeUtente}?`)) {
-      console.log('Realizar pedido:', pedido);
-      // Implementar lógica de realização
-      alert('Consulta realizada com sucesso!');
-    }
-  }
-
-  promoverUtente(pedido: any) {
-    if (confirm(`Promover ${pedido.nomeUtente} para utente registado?`)) {
-      console.log('Promover utente:', pedido);
-      // Implementar lógica de promoção
-      alert('Utente promovido com sucesso! Email com credenciais enviado.');
+  realizarPedido(pedido: PedidoMarcacao) {
+    const nomeUtente = pedido.user?.nomeCompleto || 'Utente';
+    if (confirm(`Confirmar realização da consulta para ${nomeUtente}?`)) {
+      if (pedido.id) {
+        this.pedidosService.realizar(pedido.id).subscribe({
+          next: () => {
+            console.log('Pedido marcado como realizado');
+            this.carregarPedidos();
+          },
+          error: (error) => {
+            console.error('Erro ao marcar pedido como realizado:', error);
+          }
+        });
+      }
     }
   }
 
   exportarRelatorio() {
-    console.log('Exportar relatório');
-    // Implementar exportação de relatório
-    alert('Relatório exportado com sucesso!');
+    // Criar um relatório com os pedidos filtrados
+    const pedidosParaExportar = this.pedidosFiltrados.length > 0 ? this.pedidosFiltrados : this.todosPedidos;
+    
+    if (pedidosParaExportar.length === 0) {
+      alert('Não há pedidos para exportar.');
+      return;
+    }
+
+    // Gerar PDF
+    this.gerarPDF(pedidosParaExportar);
+  }
+
+  private gerarPDF(pedidos: PedidoMarcacao[]) {
+    const doc = new jsPDF();
+    
+    // Título
+    doc.setFontSize(20);
+    doc.setTextColor(0, 84, 141); // #00548d
+    doc.text('Relatório de Pedidos de Marcação', 20, 20);
+    
+    // Data e hora
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    const horaAtual = new Date().toLocaleTimeString('pt-BR');
+    doc.text(`Gerado em ${dataAtual} às ${horaAtual}`, 20, 30);
+    
+    // Estatísticas
+    doc.setFontSize(14);
+    doc.setTextColor(0, 84, 141);
+    doc.text('Estatísticas:', 20, 45);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Total: ${this.getTotalPedidos()}`, 20, 55);
+    doc.text(`Pendentes: ${this.getPedidosPendentes()}`, 20, 65);
+    doc.text(`Agendados: ${this.getPedidosAgendados()}`, 20, 75);
+    doc.text(`Realizados: ${this.getPedidosRealizados()}`, 20, 85);
+    
+    // Preparar dados da tabela
+    const tableData = pedidos.map(pedido => {
+      const nomeUtente = pedido.user?.nomeCompleto || 'Utente Anónimo';
+      const tipoConsulta = pedido.actosClinicos && pedido.actosClinicos.length > 0 ? pedido.actosClinicos[0].tipo : 'Consulta';
+      const subsistema = pedido.actosClinicos && pedido.actosClinicos.length > 0 ? pedido.actosClinicos[0].subsistemaSaude : '';
+      const dataFormatada = pedido.dataInicioPreferida ? new Date(pedido.dataInicioPreferida).toLocaleDateString('pt-BR') : '';
+      const estadoLabel = this.getStatusLabel(pedido.estado);
+      
+      return [
+        pedido.id?.toString() || '',
+        nomeUtente,
+        tipoConsulta,
+        dataFormatada,
+        pedido.horarioPreferido || '',
+        subsistema,
+        estadoLabel,
+        pedido.observacoes || ''
+      ];
+    });
+    
+    // Cabeçalho da tabela
+    const headers = [
+      'ID',
+      'Utente', 
+      'Tipo Consulta',
+      'Data Preferida',
+      'Horário',
+      'Subsistema',
+      'Estado',
+      'Observações'
+    ];
+    
+    // Gerar tabela
+    autoTable(doc, {
+      head: [headers],
+      body: tableData,
+      startY: 100,
+      styles: {
+        fontSize: 8,
+        cellPadding: 2
+      },
+      headStyles: {
+        fillColor: [0, 84, 141],
+        textColor: 255
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      }
+    });
+    
+    // Gerar PDF e abrir numa nova aba
+    const pdfOutput = doc.output('blob');
+    const url = URL.createObjectURL(pdfOutput);
+    
+    // Abrir numa nova aba
+    window.open(url, '_blank');
+    
+    // Limpar URL após um tempo
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
   }
 } 

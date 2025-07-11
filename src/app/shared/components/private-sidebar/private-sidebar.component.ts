@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserRoleLabels } from '../../../core/models/user.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-private-sidebar',
@@ -14,7 +15,7 @@ export class PrivateSidebarComponent {
   isUserMenuOpen = false;
   currentUser: any = null;
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService, private router: Router) {
     this.currentUser = this.authService.getCurrentUser();
   }
 
@@ -59,5 +60,6 @@ export class PrivateSidebarComponent {
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

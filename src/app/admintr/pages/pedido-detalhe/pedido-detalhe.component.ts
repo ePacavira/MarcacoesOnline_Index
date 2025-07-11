@@ -1,6 +1,7 @@
 import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule, ActivatedRoute, Router } from "@angular/router"
+import { PedidosService } from "../../../core/services/pedidos.service"
 
 @Component({
   selector: "app-pedido-detalhe",
@@ -19,7 +20,7 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
           </button>
           <div class="header-content">
             <h1 class="page-title">Detalhe do Pedido #{{ pedido?.id }}</h1>
-            <p class="page-subtitle">{{ pedido?.tipoConsulta }}</p>
+            <p class="page-subtitle">{{ getTipoConsulta(pedido) }}</p>
           </div>
         </div>
         <div class="header-right">
@@ -47,27 +48,27 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
             </div>
             <div class="info-item">
               <span class="info-label">Tipo de Consulta:</span>
-              <span class="info-value">{{ pedido?.tipoConsulta }}</span>
+              <span class="info-value">{{ getTipoConsulta(pedido) }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Estado:</span>
-              <span class="status-badge" [class]="'status-' + pedido?.estado?.toLowerCase()">
+              <span class="status-badge" [class]="'status-' + getStatusClass(pedido?.estado)">
                 {{ getStatusLabel(pedido?.estado) }}
               </span>
             </div>
             <div class="info-item">
               <span class="info-label">Tipo de Utente:</span>
-              <span class="tipo-badge" [class]="'tipo-' + pedido?.tipo?.toLowerCase()">
-                {{ pedido?.tipo }}
+              <span class="tipo-badge" [class]="'tipo-' + getTipoUtente(pedido)">
+                {{ getTipoUtente(pedido) }}
               </span>
             </div>
             <div class="info-item">
-              <span class="info-label">Data de Criação:</span>
-              <span class="info-value">{{ pedido?.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="info-label">Data Preferida:</span>
+              <span class="info-value">{{ pedido?.dataInicioPreferida | date:'dd/MM/yyyy' }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Última Atualização:</span>
-              <span class="info-value">{{ pedido?.dataAtualizacao | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="info-label">Horário Preferido:</span>
+              <span class="info-value">{{ pedido?.horarioPreferido }}</span>
             </div>
           </div>
         </div>
@@ -78,27 +79,27 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">Nome:</span>
-              <span class="info-value">{{ pedido?.nomeUtente }}</span>
+              <span class="info-value">{{ pedido?.user?.nomeCompleto || 'Utente Anónimo' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Email:</span>
-              <span class="info-value">{{ pedido?.email }}</span>
+              <span class="info-value">{{ pedido?.user?.email || 'Não informado' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Telefone:</span>
-              <span class="info-value">{{ pedido?.telefone }}</span>
+              <span class="info-value">{{ pedido?.user?.telemovel || 'Não informado' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Data de Nascimento:</span>
-              <span class="info-value">{{ pedido?.dataNascimento | date:'dd/MM/yyyy' }}</span>
+              <span class="info-value">{{ pedido?.user?.dataNascimento | date:'dd/MM/yyyy' }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">NIF:</span>
-              <span class="info-value">{{ pedido?.nif || 'Não informado' }}</span>
+              <span class="info-label">Número de Utente:</span>
+              <span class="info-value">{{ pedido?.user?.numeroUtente || 'Não informado' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Endereço:</span>
-              <span class="info-value">{{ pedido?.endereco || 'Não informado' }}</span>
+              <span class="info-value">{{ pedido?.user?.morada || 'Não informado' }}</span>
             </div>
           </div>
         </div>
@@ -112,16 +113,20 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
               <span class="info-value">{{ pedido?.dataInicioPreferida | date:'dd/MM/yyyy' }}</span>
             </div>
             <div class="info-item">
+              <span class="info-label">Data Fim Preferida:</span>
+              <span class="info-value">{{ pedido?.dataFimPreferida | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-item">
               <span class="info-label">Horário Preferido:</span>
               <span class="info-value">{{ pedido?.horarioPreferido }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Local:</span>
-              <span class="info-value">{{ pedido?.local }}</span>
+              <span class="info-label">Subsistema:</span>
+              <span class="info-value">{{ getSubsistema(pedido) }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Médico:</span>
-              <span class="info-value">{{ pedido?.medico || 'A definir' }}</span>
+              <span class="info-label">Profissional:</span>
+              <span class="info-value">{{ getProfissional(pedido) || 'A definir' }}</span>
             </div>
             <div class="info-item full-width">
               <span class="info-label">Observações:</span>
@@ -133,16 +138,15 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
         <!-- Atos Clínicos -->
         <div class="info-section">
           <h2>Atos Clínicos Associados</h2>
-          <div class="atos-clinicos" *ngIf="atosClinicos.length > 0; else noAtos">
-            <div *ngFor="let ato of atosClinicos" class="ato-item">
+          <div class="atos-clinicos" *ngIf="pedido?.actosClinicos && pedido.actosClinicos.length > 0; else noAtos">
+            <div *ngFor="let ato of pedido.actosClinicos" class="ato-item">
               <div class="ato-header">
                 <h4>{{ ato.tipo }}</h4>
-                <span class="ato-date">{{ ato.data | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="ato-subsistema">{{ ato.subsistemaSaude }}</span>
               </div>
               <div class="ato-content">
-                <p><strong>Descrição:</strong> {{ ato.descricao }}</p>
-                <p><strong>Médico:</strong> {{ ato.medico }}</p>
-                <p><strong>Resultados:</strong> {{ ato.resultados }}</p>
+                <p><strong>Subsistema:</strong> {{ ato.subsistemaSaude }}</p>
+                <p *ngIf="ato.profissional"><strong>Profissional:</strong> {{ ato.profissional }}</p>
               </div>
             </div>
           </div>
@@ -152,30 +156,13 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
             </div>
           </ng-template>
         </div>
-
-        <!-- Histórico de Alterações -->
-        <div class="info-section">
-          <h2>Histórico de Alterações</h2>
-          <div class="historico">
-            <div *ngFor="let alteracao of historico" class="alteracao-item">
-              <div class="alteracao-header">
-                <span class="alteracao-date">{{ alteracao.data | date:'dd/MM/yyyy HH:mm' }}</span>
-                <span class="alteracao-user">{{ alteracao.usuario }}</span>
-              </div>
-              <div class="alteracao-content">
-                <p><strong>Ação:</strong> {{ alteracao.acao }}</p>
-                <p *ngIf="alteracao.detalhes"><strong>Detalhes:</strong> {{ alteracao.detalhes }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Ações -->
       <div class="actions-section">
         <div class="actions-grid">
           <button 
-            *ngIf="pedido?.estado === 'Pedido'" 
+            *ngIf="pedido?.estado === 0" 
             class="action-btn success" 
             (click)="agendarPedido()"
           >
@@ -187,7 +174,7 @@ import { RouterModule, ActivatedRoute, Router } from "@angular/router"
           </button>
           
           <button 
-            *ngIf="pedido?.estado === 'Agendado'" 
+            *ngIf="pedido?.estado === 1" 
             class="action-btn completed" 
             (click)="realizarPedido()"
           >
@@ -561,87 +548,78 @@ export class PedidoDetalheComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private pedidosService: PedidosService
   ) {}
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.carregarPedido(parseInt(id));
-    }
+    this.route.params.subscribe(params => {
+      const id = +params['id'];
+      if (id) {
+        this.carregarPedido(id);
+      }
+    });
   }
 
   carregarPedido(id: number) {
-    // Mock data - em produção viria do serviço
-    this.pedido = {
-      id: id,
-      tipoConsulta: 'Consulta Geral',
-      nomeUtente: 'João Silva',
-      email: 'joao.silva@email.com',
-      telefone: '+351 123 456 789',
-      dataNascimento: new Date('1985-03-15'),
-      nif: '123456789',
-      endereco: 'Rua das Flores, 123, 1000-001 Lisboa',
-      dataInicioPreferida: new Date('2024-01-15 10:00'),
-      horarioPreferido: '10:00',
-      local: 'Clínica Medi - Lisboa',
-      medico: 'Dr. Carlos Oliveira',
-      estado: 'Agendado',
-      tipo: 'Registado',
-      observacoes: 'Trazer exames recentes',
-      dataCriacao: new Date('2024-01-10 14:30'),
-      dataAtualizacao: new Date('2024-01-12 09:15')
-    };
-
-    this.carregarAtosClinicos(id);
-    this.carregarHistorico(id);
-  }
-
-  carregarAtosClinicos(pedidoId: number) {
-    // Mock data
-    this.atosClinicos = [
-      {
-        tipo: 'Consulta Geral',
-        data: new Date('2024-01-15 10:00'),
-        descricao: 'Consulta de rotina com avaliação geral',
-        medico: 'Dr. Carlos Oliveira',
-        resultados: 'Paciente em bom estado geral'
+    this.pedidosService.getById(id).subscribe({
+      next: (pedido) => {
+        this.pedido = pedido;
       },
-      {
-        tipo: 'Exame de Sangue',
-        data: new Date('2024-01-16 08:00'),
-        descricao: 'Análises sanguíneas de rotina',
-        medico: 'Dra. Ana Costa',
-        resultados: 'Valores dentro dos parâmetros normais'
+      error: (error) => {
+        console.error('Erro ao carregar pedido:', error);
       }
-    ];
+    });
   }
 
-  carregarHistorico(pedidoId: number) {
-    // Mock data
-    this.historico = [
-      {
-        data: new Date('2024-01-12 09:15'),
-        usuario: 'Dr. Carlos Oliveira',
-        acao: 'Pedido agendado',
-        detalhes: 'Consulta marcada para 15/01/2024 às 10:00'
-      },
-      {
-        data: new Date('2024-01-10 14:30'),
-        usuario: 'Sistema',
-        acao: 'Pedido criado',
-        detalhes: 'Pedido de marcação recebido'
-      }
-    ];
-  }
-
-  getStatusLabel(estado: string): string {
-    const labels: { [key: string]: string } = {
-      'Pedido': 'Pedido',
-      'Agendado': 'Agendado',
-      'Realizado': 'Realizado'
+  getStatusLabel(estado: number): string {
+    const labels: { [key: number]: string } = {
+      0: 'Pendente',
+      1: 'Agendado',
+      2: 'Realizado',
+      3: 'Cancelado'
     };
-    return labels[estado] || estado;
+    return labels[estado] || 'Desconhecido';
+  }
+
+  getStatusClass(estado: number): string {
+    const classes: { [key: number]: string } = {
+      0: 'pendente',
+      1: 'agendado',
+      2: 'realizado',
+      3: 'cancelado'
+    };
+    return classes[estado] || 'unknown';
+  }
+
+  getTipoConsulta(pedido: any): string {
+    if (pedido?.actosClinicos && pedido.actosClinicos.length > 0) {
+      return pedido.actosClinicos[0].tipo || 'Consulta';
+    }
+    return 'Consulta';
+  }
+
+  getTipoUtente(pedido: any): string {
+    if (pedido?.user?.perfil === 0) {
+      return 'Anónimo';
+    } else if (pedido?.user?.perfil === 1) {
+      return 'Registado';
+    }
+    return 'Desconhecido';
+  }
+
+  getSubsistema(pedido: any): string {
+    if (pedido?.actosClinicos && pedido.actosClinicos.length > 0) {
+      return pedido.actosClinicos[0].subsistemaSaude || '';
+    }
+    return '';
+  }
+
+  getProfissional(pedido: any): string {
+    if (pedido?.actosClinicos && pedido.actosClinicos.length > 0) {
+      return pedido.actosClinicos[0].profissional || '';
+    }
+    return '';
   }
 
   voltar() {
@@ -649,24 +627,52 @@ export class PedidoDetalheComponent implements OnInit {
   }
 
   exportarPDF() {
-    console.log('Exportar PDF do pedido:', this.pedido?.id);
-    // Implementar exportação PDF
-    alert('PDF exportado com sucesso!');
+    if (!this.pedido?.id) return;
+    
+    this.pedidosService.exportarPdf(this.pedido.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      },
+      error: (error) => {
+        alert('Erro ao exportar PDF da marcação!');
+        console.error(error);
+      }
+    });
   }
 
   agendarPedido() {
-    if (confirm('Confirmar agendamento desta consulta?')) {
-      console.log('Agendar pedido:', this.pedido?.id);
-      // Implementar agendamento
-      alert('Pedido agendado com sucesso!');
+    if (!this.pedido?.id) return;
+    
+    const nomeUtente = this.pedido.user?.nomeCompleto || 'Utente';
+    if (confirm(`Confirmar agendamento para ${nomeUtente}?`)) {
+      this.pedidosService.agendar(this.pedido.id).subscribe({
+        next: () => {
+          console.log('Pedido agendado com sucesso');
+          this.carregarPedido(this.pedido.id);
+        },
+        error: (error) => {
+          console.error('Erro ao agendar pedido:', error);
+        }
+      });
     }
   }
 
   realizarPedido() {
-    if (confirm('Confirmar realização desta consulta?')) {
-      console.log('Realizar pedido:', this.pedido?.id);
-      // Implementar realização
-      alert('Consulta realizada com sucesso!');
+    if (!this.pedido?.id) return;
+    
+    const nomeUtente = this.pedido.user?.nomeCompleto || 'Utente';
+    if (confirm(`Confirmar realização da consulta para ${nomeUtente}?`)) {
+      this.pedidosService.realizar(this.pedido.id).subscribe({
+        next: () => {
+          console.log('Pedido marcado como realizado');
+          this.carregarPedido(this.pedido.id);
+        },
+        error: (error) => {
+          console.error('Erro ao marcar pedido como realizado:', error);
+        }
+      });
     }
   }
 

@@ -8,55 +8,23 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AnonymousAppointmentService {
-  private apiUrl = `${environment.apiUrl}/anonymous-appointments`;
+  private apiUrl = `${environment.apiUrl}/PedidoMarcacao`;
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Cria uma nova marcação anónima
-   */
-  createAppointment(appointment: Omit<AnonymousAppointment, 'id' | 'createdAt' | 'status' | 'referenceCode'>): Observable<AnonymousAppointment> {
-    // Por enquanto, simular uma resposta
-    const newAppointment: AnonymousAppointment = {
-      ...appointment,
-      createdAt: new Date(),
-      status: 'pending',
-      referenceCode: this.generateReferenceCode()
-    };
-
-    // Em produção, seria uma chamada HTTP real
-    // return this.http.post<AnonymousAppointment>(this.apiUrl, appointment);
-    
-    return of(newAppointment);
+  // Criar marcação anónima
+  createAppointment(dto: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/anonimo`, dto);
   }
 
-  /**
-   * Busca uma marcação pelo código de referência
-   */
-  getAppointmentByReference(referenceCode: string): Observable<AnonymousAppointment | null> {
-    // Simular busca
-    const mockAppointment: AnonymousAppointment = {
-      patient: {
-        name: 'João Silva',
-        email: 'joao@email.com',
-        phone: '912345678',
-        birthDate: new Date('1990-01-01'),
-        address: 'Rua das Flores, 123',
-        medicalHistory: 'Nenhuma condição conhecida'
-      },
-      appointment: {
-        doctorId: '1',
-        serviceId: '1',
-        date: new Date('2024-01-15'),
-        time: '10:00',
-        notes: 'Primeira consulta'
-      },
-      createdAt: new Date(),
-      status: 'pending',
-      referenceCode: referenceCode
-    };
+  // Consultar marcação por código
+  getAppointmentByReference(referenceCode: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/consulta-marcacao/${referenceCode}`);
+  }
 
-    return of(mockAppointment);
+  // Cancelar marcação por código
+  cancelAppointment(referenceCode: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/consulta-marcacao/${referenceCode}/cancelar`, {});
   }
 
   /**
@@ -86,13 +54,6 @@ export class AnonymousAppointmentService {
     };
 
     return of(updatedAppointment);
-  }
-
-  /**
-   * Cancela uma marcação
-   */
-  cancelAppointment(referenceCode: string): Observable<AnonymousAppointment> {
-    return this.updateAppointmentStatus(referenceCode, 'cancelled');
   }
 
   /**

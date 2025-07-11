@@ -107,6 +107,14 @@
         <form [formGroup]="patientForm" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Número de Utente *</label>
+              <input 
+                type="text" 
+                formControlName="numeroUtente"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                [readonly]="true" [disabled]="true">
+            </div>
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
               <input 
                 type="text" 
@@ -117,7 +125,6 @@
                 Nome é obrigatório e deve ter pelo menos 2 caracteres
               </div>
             </div>
-            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
               <input 
@@ -129,7 +136,6 @@
                 Email válido é obrigatório
               </div>
             </div>
-            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Telefone *</label>
               <input 
@@ -141,7 +147,6 @@
                 Telefone deve ter 9 dígitos
               </div>
             </div>
-            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento *</label>
               <input 
@@ -152,8 +157,19 @@
                 Data de nascimento é obrigatória
               </div>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Género *</label>
+              <select formControlName="genero" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+                <option value="">Selecione o género</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <div *ngIf="patientForm.get('genero')?.invalid && patientForm.get('genero')?.touched" class="text-red-500 text-sm mt-1">
+                Género é obrigatório
+              </div>
+            </div>
           </div>
-          
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
             <input 
@@ -162,7 +178,6 @@
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
               placeholder="Rua, número, cidade">
           </div>
-          
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Histórico Médico</label>
             <textarea 
@@ -177,37 +192,45 @@
       <!-- Step 2: Serviço e Profissional -->
       <div *ngIf="currentStep === 2">
         <h2 class="text-2xl font-bold text-[#00548d] mb-6">Escolha o Serviço e Profissional</h2>
-        <form [formGroup]="serviceForm" class="space-y-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Serviço *</label>
-            <select 
-              formControlName="serviceId"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
-              <option value="">Selecione um serviço</option>
-              <option *ngFor="let service of services" [value]="service.id">
-                {{ service.name }} - €{{ service.price }}
-              </option>
-            </select>
-            <div *ngIf="serviceForm.get('serviceId')?.invalid && serviceForm.get('serviceId')?.touched" class="text-red-500 text-sm mt-1">
-              Selecione um serviço
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold mb-2">Actos Clínicos</h3>
+          <form [formGroup]="fb.group({ actosClinicosForm: actosClinicosForm })">
+            <div formArrayName="actosClinicosForm">
+              <div *ngFor="let acto of actosClinicosForm.controls; let i = index" [formGroupName]="i" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 border-b pb-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                  <select formControlName="tipo" class="w-full px-3 py-2 border rounded">
+                    <option value="">Selecione o tipo</option>
+                    <option *ngFor="let service of services" [value]="service.name">{{ service.name }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Subsistema de Saúde *</label>
+                  <select formControlName="subsistemaSaude" class="w-full px-3 py-2 border rounded">
+                    <option value="">Selecione o subsistema</option>
+                    <option value="SNS">SNS</option>
+                    <option value="ADSE">ADSE</option>
+                    <option value="SAMS">SAMS</option>
+                    <option value="Multicare">Multicare</option>
+                    <option value="Médis">Médis</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Profissional *</label>
+                  <select formControlName="profissional" class="w-full px-3 py-2 border rounded">
+                    <option value="">Selecione o profissional</option>
+                    <option *ngFor="let doctor of doctors" [value]="doctor.name">{{ doctor.name }} - {{ doctor.specialty }}</option>
+                  </select>
+                </div>
+                <div class="col-span-3 text-right">
+                  <button type="button" (click)="removeActoClinico(i)" class="text-red-600 hover:underline" [disabled]="actosClinicosForm.length === 1">Remover</button>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Profissional *</label>
-            <select 
-              formControlName="doctorId"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
-              <option value="">Selecione um profissional</option>
-              <option *ngFor="let doctor of doctors" [value]="doctor.id">
-                {{ doctor.name }} - {{ doctor.specialty }}
-              </option>
-            </select>
-            <div *ngIf="serviceForm.get('doctorId')?.invalid && serviceForm.get('doctorId')?.touched" class="text-red-500 text-sm mt-1">
-              Selecione um profissional
-            </div>
-          </div>
-        </form>
+            <button type="button" (click)="addActoClinico()" class="mt-2 px-4 py-2 bg-[#00548d] text-white rounded">Adicionar Ato Clínico</button>
+          </form>
+        </div>
       </div>
 
       <!-- Step 3: Data e Hora -->
@@ -216,31 +239,54 @@
         <form [formGroup]="scheduleForm" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Data *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Data Início *</label>
               <input 
                 type="date" 
-                formControlName="date"
+                formControlName="dataInicioPreferida"
                 [min]="minDate"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
-              <div *ngIf="scheduleForm.get('date')?.invalid && scheduleForm.get('date')?.touched" class="text-red-500 text-sm mt-1">
-                Selecione uma data
+              <div *ngIf="scheduleForm.get('dataInicioPreferida')?.invalid && scheduleForm.get('dataInicioPreferida')?.touched" class="text-red-500 text-sm mt-1">
+                Selecione a data de início
               </div>
             </div>
-            
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Hora *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Hora Início *</label>
               <select 
-                formControlName="time"
+                formControlName="horaInicioPreferida"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
                 <option value="">Selecione um horário</option>
                 <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
               </select>
-              <div *ngIf="scheduleForm.get('time')?.invalid && scheduleForm.get('time')?.touched" class="text-red-500 text-sm mt-1">
-                Selecione um horário
+              <div *ngIf="scheduleForm.get('horaInicioPreferida')?.invalid && scheduleForm.get('horaInicioPreferida')?.touched" class="text-red-500 text-sm mt-1">
+                Selecione o horário de início
               </div>
             </div>
           </div>
-          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Data Fim *</label>
+              <input 
+                type="date" 
+                formControlName="dataFimPreferida"
+                [min]="minDate"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+              <div *ngIf="scheduleForm.get('dataFimPreferida')?.invalid && scheduleForm.get('dataFimPreferida')?.touched" class="text-red-500 text-sm mt-1">
+                Selecione a data de fim
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Hora Fim *</label>
+              <select 
+                formControlName="horaFimPreferida"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+                <option value="">Selecione um horário</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+              </select>
+              <div *ngIf="scheduleForm.get('horaFimPreferida')?.invalid && scheduleForm.get('horaFimPreferida')?.touched" class="text-red-500 text-sm mt-1">
+                Selecione o horário de fim
+              </div>
+            </div>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
             <textarea 
@@ -264,16 +310,16 @@
                 <p><strong>Email:</strong> {{ appointmentData.patient?.email }}</p>
                 <p><strong>Telefone:</strong> {{ appointmentData.patient?.phone }}</p>
                 <p><strong>Data Nasc.:</strong> {{ appointmentData.patient?.birthDate | date:'dd/MM/yyyy' }}</p>
+                <p *ngIf="appointmentData.patient?.address">Endereço: {{ appointmentData.patient?.address }}</p>
               </div>
             </div>
-            
             <div>
               <h3 class="font-semibold text-[#00548d] mb-2">Consulta</h3>
-              <div class="space-y-1 text-sm">
-                <p><strong>Serviço:</strong> {{ getSelectedService()?.name }}</p>
-                <p><strong>Profissional:</strong> {{ getSelectedDoctor()?.name }}</p>
-                <p><strong>Data:</strong> {{ getSelectedDate() }}</p>
-                <p><strong>Hora:</strong> {{ appointmentData.appointment?.time }}</p>
+              <div *ngFor="let acto of actosClinicosForm.controls; let i = index" class="space-y-1 text-sm mb-2">
+                <p><strong>Serviço:</strong> {{ acto.get('tipo')?.value }}</p>
+                <p><strong>Profissional:</strong> {{ acto.get('profissional')?.value }}</p>
+                <p><strong>Subsistema:</strong> {{ acto.get('subsistemaSaude')?.value }}</p>
+                <hr *ngIf="i < actosClinicosForm.controls.length - 1">
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ export interface ActoClinico {
 
 export interface PedidoMarcacao {
   id?: number;
-  estado: 'Pedido' | 'Agendado' | 'Realizado';
+  estado: number; // 0 = Pendente, 1 = Agendado, 2 = Realizado, 3 = Cancelado
   dataAgendada?: string;
   dataInicioPreferida?: string;
   dataFimPreferida?: string;
@@ -106,5 +106,25 @@ export class PedidosService {
   // Promover utente anónimo para registado
   promoverUtente(userId: number, dados: any): Observable<any> {
     return this.http.patch(`${environment.apiUrl}/User/promover/${userId}`, dados);
+  }
+
+  // Obter pedidos recentes para o dashboard
+  getPedidosRecentes(): Observable<PedidoMarcacao[]> {
+    return this.http.get<PedidoMarcacao[]>(`${environment.apiUrl}/PedidoMarcacao/recentes`);
+  }
+
+  // Obter estatísticas do dashboard
+  getEstatisticasDashboard(): Observable<{
+    totalPedidos: number;
+    pedidosPendentes: number;
+    pedidosAgendados: number;
+    pedidosRealizados: number;
+  }> {
+    return this.http.get<{
+      totalPedidos: number;
+      pedidosPendentes: number;
+      pedidosAgendados: number;
+      pedidosRealizados: number;
+    }>(`${environment.apiUrl}/PedidoMarcacao/estatisticas`);
   }
 } 

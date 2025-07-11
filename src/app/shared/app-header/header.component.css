@@ -9,28 +9,69 @@
   z-index: 100;
   transition: background 0.3s, box-shadow 0.3s;
 }
+/* Layout flexível para header com logo à esquerda, menu central e ações à direita */
+/* Container ocupa toda a largura, sem padding lateral */
 .navbar-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100vw;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 80px;
-  padding: 0 2vw;
+  padding: 0;
+  position: relative;
 }
+
+/* Logo mesmo colado à esquerda */
+.navbar-logo-wrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin-right: 1.2rem;
+  margin-left: 5rem;
+  padding-left: 0.5vw;
+}
+
+.navbar-logo {
+  margin-left: 0;
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+}
+
 .navbar-logo img {
   height: 48px;
   width: auto;
   display: block;
 }
+
+/* Botões mesmo colados à direita */
+.navbar-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-left: 0;
+  margin-right: 3rem;
+  padding-right: 0.5vw;
+}
+
+/* Menu centralizado com menos espaçamento */
+.navbar-menu-center {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+}
+
 .navbar-menu {
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 2.5rem;
+  gap: 1.2rem;
   margin: 0;
   padding: 0;
-  flex: 1 1 auto;
   justify-content: center;
 }
 .navbar-menu li a {
@@ -47,68 +88,150 @@
   background: #e6f1fa;
   color: #00548d;
 }
-.navbar-actions {
+
+/* Divisor visual entre botões */
+.navbar-divider {
+  display: inline-block;
+  width: 1px;
+  height: 28px;
+  background: #e5e7eb;
+  margin: 0 0.5rem;
+  border-radius: 2px;
+}
+
+/* Botão principal destacado */
+.navbar-btn-main {
+  background: linear-gradient(90deg, #00548d 60%, #0077cc 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 8px rgba(0,84,141,0.08);
+  border: none;
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 0.4rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  transition: background 0.2s, box-shadow 0.2s;
+  min-width: 0;
+  min-height: 40px;
+  line-height: 1.1;
 }
+.navbar-btn-main:hover {
+  background: linear-gradient(90deg, #0077cc 60%, #00548d 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,84,141,0.13);
+}
+
+.navbar-btn-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #fff;
+  stroke-width: 2.1;
+  margin-right: 2px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.navbar-btn,
+.navbar-btn-secondary {
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.45rem 1.1rem;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1.1;
+}
+
 .navbar-btn {
   color: #fff;
   background: #00548d;
-  font-weight: 600;
-  font-size: 1.05rem;
   text-decoration: none;
-  padding: 0.5rem 1.1rem;
-  border-radius: 6px;
+  border: none;
   transition: background 0.2s, color 0.2s;
 }
 .navbar-btn:hover {
   background: #0077cc;
   color: #fff;
 }
+
 .navbar-btn-secondary {
   color: #00548d;
-  background: transparent;
-  font-weight: 600;
-  font-size: 1.05rem;
+  background: #fff;
+  border: 1.5px solid #00548d;
   text-decoration: none;
-  padding: 0.5rem 1.1rem;
-  border: 2px solid #00548d;
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, border 0.2s;
 }
 .navbar-btn-secondary:hover {
   background: #00548d;
   color: #fff;
+  border-color: #00548d;
 }
+
 .navbar-login {
-  color: #fff;
-  background: #00548d;
+  color: #00548d;
+  background: #fff;
+  border: 1.5px solid #00548d;
   font-weight: 600;
   font-size: 1.05rem;
   text-decoration: none;
-  padding: 0.5rem 1.1rem;
+  padding: 0.45rem 1.1rem 0.45rem 0.9rem;
   border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  line-height: 1.1;
 }
 .navbar-login:hover {
-  background: #0077cc;
+  background: #00548d;
   color: #fff;
+  border-color: #00548d;
 }
+
+.navbar-user-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  margin-right: 2px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 @media (max-width: 900px) {
   .navbar-container {
     flex-direction: column;
     height: auto;
     padding: 0.5rem 1vw;
     gap: 0.5rem;
+    max-width: 100vw;
   }
-  .navbar-menu {
-    gap: 1.2rem;
-    font-size: 0.98rem;
+  .navbar-logo-wrapper {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5vw;
+  }
+  .navbar-menu-center {
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
   .navbar-actions {
-    flex-direction: row;
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0.5vw;
+  }
+  .navbar-menu {
     gap: 0.7rem;
+    font-size: 0.98rem;
+  }
+  .navbar-divider {
+    height: 20px;
+    margin: 0 0.3rem;
   }
 }
 @media (max-width: 600px) {
@@ -116,6 +239,16 @@
     flex-direction: column;
     align-items: stretch;
     padding: 0.5rem 0.5vw;
+    max-width: 100vw;
+  }
+  .navbar-logo-wrapper {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5vw;
+  }
+  .navbar-menu-center {
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
   .navbar-menu {
     flex-direction: column;
@@ -124,15 +257,24 @@
   }
   .navbar-actions {
     flex-direction: column;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 0.5rem;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0.5vw;
   }
   .navbar-btn,
+  .navbar-btn-main,
   .navbar-btn-secondary,
   .navbar-login {
     width: 100%;
     margin: 0.5rem 0 0 0;
     text-align: center;
+    justify-content: center;
+  }
+  .navbar-divider {
+    display: none;
   }
 }
 body {

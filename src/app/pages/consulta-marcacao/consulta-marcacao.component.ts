@@ -40,7 +40,32 @@ export class ConsultaMarcacaoComponent {
         const result = await this.appointmentService.getAppointmentByReference(referenceCode).toPromise();
         
         if (result) {
-          this.appointment = result;
+          // Mapeia o estado numérico para string
+          const statusMap: any = {
+            0: 'pending',
+            1: 'confirmed',
+            2: 'cancelled'
+          };
+          // Mapeia os dados do backend para o formato esperado pelo template
+          this.appointment = {
+            ...result,
+            patient: {
+              name: result.utente?.nomeCompleto,
+              email: result.utente?.email,
+              phone: result.utente?.telemovel,
+              birthDate: result.utente?.dataNascimento,
+              address: result.utente?.morada,
+              genero: result.utente?.genero
+            },
+            status: statusMap[result.estado] || 'pending',
+            referenceCode: result.codigoReferencia || result.id,
+            appointment: {
+              date: result.dataInicioPreferida,
+              time: result.horarioPreferido,
+              notes: result.observacoes
+            },
+            createdAt: result.dataCriacao || null
+          };
           this.showResults = true;
         } else {
           this.errorMessage = 'Marcação não encontrada. Verifique o código de referência.';

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -26,58 +26,24 @@ export interface PromoverUserDto {
   morada: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UsersService {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/User`;
 
-  constructor(private http: HttpClient) { }
-
-  // Obter todos os utilizadores
-  getAll(): Observable<User[]> {
-    return this.http.get<User[]>(`${environment.apiUrl}/User`);
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
   }
 
-  // Obter utilizador por ID
-  getById(id: number): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/User/${id}`);
+  updateUser(id: number, dados: any) {
+    return this.http.put(`${this.apiUrl}/${id}`, dados);
   }
 
-  // Obter dados do utilizador autenticado
-  getMe(): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/User/me`);
+  promoverUser(id: number, dados: any) {
+    return this.http.patch(`${this.apiUrl}/promover/${id}`, dados);
   }
 
-  // Criar utilizador
-  create(user: User): Observable<User> {
-    return this.http.post<User>(`${environment.apiUrl}/User`, user);
-  }
-
-  // Atualizar utilizador
-  update(id: number, user: User): Observable<any> {
-    return this.http.put(`${environment.apiUrl}/User/${id}`, user);
-  }
-
-  // Eliminar utilizador
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/User/${id}`);
-  }
-
-  // Promover utilizador anónimo para registado
-  promover(userId: number, dados: PromoverUserDto): Observable<any> {
-    return this.http.patch(`${environment.apiUrl}/User/promover/${userId}`, dados);
-  }
-
-  // Upload de foto
-  uploadFoto(id: number, file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    return this.http.post(`${environment.apiUrl}/User/${id}/foto`, formData);
-  }
-
-  // Obter todos os utilizadores (admin)
-  getAllAdmin(): Observable<User[]> {
-    return this.http.get<User[]>(`${environment.apiUrl}/User/admin/todos`);
+  eliminarUser(id: number) {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 } 

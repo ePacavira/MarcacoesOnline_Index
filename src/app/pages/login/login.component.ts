@@ -9,60 +9,7 @@ import { UserRole } from '../../core/models/user.model';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="login-container">
-      <div class="login-card">
-        <div class="login-header">
-          <button type="button" (click)="voltar()" class="login-back-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-          </button>
-          <h1>Iniciar Sessão</h1>
-          <p>Entre com as suas credenciais para aceder ao sistema</p>
-        </div>
-
-        <form (ngSubmit)="onSubmit()" class="login-form">
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email"
-              [(ngModel)]="credentials.email"
-              placeholder="Digite o seu email"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="password">Palavra-passe</label>
-            <input 
-              type="password" 
-              id="password" 
-              name="password"
-              [(ngModel)]="credentials.password"
-              placeholder="Digite a sua palavra-passe"
-              required
-            />
-          </div>
-
-          <div class="error-message" *ngIf="errorMessage">
-            {{ errorMessage }}
-          </div>
-
-          <button type="submit" class="login-btn" [disabled]="isLoading">
-            <span *ngIf="!isLoading">Entrar</span>
-            <span *ngIf="isLoading">A entrar...</span>
-          </button>
-        </form>
-
-        <div class="login-footer">
-          <p>Não tem conta? <a routerLink="/marcacao-anonima">Faça uma marcação anónima</a></p>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
@@ -79,7 +26,7 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  voltar(): void {
+  onCancel(): void {
     this.router.navigate(['/']);
   }
 

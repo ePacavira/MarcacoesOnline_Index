@@ -1,42 +1,83 @@
-<div class="login-bg">
-  <div class="login-wrapper">
-    <!-- Lado esquerdo: logo, progresso -->
-    <div class="login-left">
-      <div class="login-logo">M e d i</div>
-      <ul class="login-steps">
-        <li class="active">Login</li>
-      </ul>
-      <div class="login-img">
-        <a routerLink="/" class="logo-link">
-          <img src="/logo.jpg" alt="medi" />
-        </a>
+<div class="login-container">
+  <!-- Texto de fundo com profundidade -->
+  <div class="background-text">MEDI</div>
+  
+  <div class="login-card">
+    <!-- Header com botão de voltar e logo alinhados -->
+    <div class="login-header">
+      <button type="button" (click)="onCancel()" class="back-button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Voltar
+      </button>
+      <div class="logo-container">
+        <img src="/logo.jpg" alt="Medi Logo" class="logo" />
       </div>
     </div>
-    <!-- Lado direito: formulário -->
-    <div class="login-right">
-      <div class="login-header">
-        <button type="button" (click)="onCancel()" class="login-back-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <div class="login-header-content">
-          <h2 class="login-title">Bem-vindo de volta!</h2>
-          <p class="login-subtitle">Acesse sua conta para continuar</p>
-        </div>
+
+    <!-- Título e subtítulo -->
+    <div class="login-brand">
+      <h1 class="login-title">Bem-vindo de volta!</h1>
+      <p class="login-subtitle">Entre com as suas credenciais para aceder ao sistema</p>
+    </div>
+
+    <!-- Formulário de login -->
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email"
+          [(ngModel)]="credentials.email"
+          placeholder="Digite o seu email"
+          class="form-input"
+          required
+        />
       </div>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <label for="email">E-mail</label>
-        <input type="text" id="email" formControlName="email" placeholder="seu@email.com" />
-        <label for="password">Código</label>
-        <input type="password" id="password" formControlName="password" placeholder="Ex-3982-192" />
-        <button type="submit" class="login-btn">Acessar</button>
-        
-        <!-- Link para criação de conta -->
-        <div class="login-footer">
-          <p>Não tem uma conta? <a routerLink="/conta-criada" class="create-account-link">Criar conta</a></p>
-        </div>
-      </form>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Palavra-passe</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password"
+          [(ngModel)]="credentials.password"
+          placeholder="Digite a sua palavra-passe"
+          class="form-input"
+          required
+        />
+      </div>
+
+      <!-- Mensagem de erro -->
+      <div class="error-message" *ngIf="errorMessage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botão de login -->
+      <button type="submit" class="login-button" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Entrar</span>
+        <span *ngIf="isLoading" class="loading">
+          <svg class="spinner" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+              <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+              <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+          A entrar...
+        </span>
+      </button>
+    </form>
+
+    <!-- Footer com link para marcação anónima -->
+    <div class="login-footer">
+      <p>Não tem conta? <a routerLink="/marcacao-anonima" class="footer-link">Faça uma marcação anónima</a></p>
     </div>
   </div>
 </div>

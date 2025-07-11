@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   get isLoggedIn(): boolean {
     return this.authService.isAuthenticated();
@@ -23,5 +23,6 @@ export class HeaderComponent {
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

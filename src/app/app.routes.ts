@@ -10,6 +10,9 @@ import { ServicosComponent } from './pages/servicos/servicos.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { UtenteService } from './core/services/utentes.service';
+import { MarcacaoService } from './core/services/marcacao';
+import { UsersService } from './core/services/users.service';
 
 export const routes: Routes = [
   // Público

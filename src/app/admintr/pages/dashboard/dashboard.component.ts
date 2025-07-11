@@ -1,7 +1,7 @@
 import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule } from "@angular/router"
-import { MarcacaoService } from "../../../core/services/marcacao.service"
+import { PedidosService, PedidoMarcacao } from "../../../core/services/pedidos.service"
 
 @Component({
   selector: "app-admintr-dashboard",
@@ -98,9 +98,9 @@ import { MarcacaoService } from "../../../core/services/marcacao.service"
           <div *ngFor="let pedido of pedidosRecentes" class="pedido-item">
             <div class="pedido-header">
               <div class="pedido-info">
-                <h4>{{ pedido.tipoConsulta }}</h4>
-                <p>{{ pedido.nomeUtente }} - {{ pedido.dataInicioPreferida | date:'dd/MM/yyyy HH:mm' }}</p>
-                <span class="status-badge" [class]="'status-' + pedido.estado.toLowerCase()">
+                <h4>{{ getTipoConsulta(pedido) }}</h4>
+                <p>{{ getNomeUtente(pedido) }} - {{ pedido.dataInicioPreferida | date:'dd/MM/yyyy HH:mm' }}</p>
+                <span class="status-badge" [class]="'status-' + getStatusClass(pedido.estado)">
                   {{ getStatusLabel(pedido.estado) }}
                 </span>
               </div>
@@ -109,14 +109,14 @@ import { MarcacaoService } from "../../../core/services/marcacao.service"
                   Ver Detalhes
                 </button>
                 <button 
-                  *ngIf="pedido.estado === 'Pedido'" 
+                  *ngIf="pedido.estado === 0" 
                   class="action-btn success" 
-                  (click)="agendarPedido(pedido)"
+                  (click)="confirmarPedido(pedido)"
                 >
-                  Agendar
+                  Confirmar
                 </button>
                 <button 
-                  *ngIf="pedido.estado === 'Agendado'" 
+                  *ngIf="pedido.estado === 1" 
                   class="action-btn completed" 
                   (click)="realizarPedido(pedido)"
                 >
@@ -124,24 +124,6 @@ import { MarcacaoService } from "../../../core/services/marcacao.service"
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Estatísticas Rápidas -->
-      <div class="quick-stats">
-        <div class="stats-row">
-          <div class="stat-item">
-            <span class="stat-number">{{ getAnonimosCount() }}</span>
-            <span class="stat-label">Pedidos Anónimos</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">{{ getRegistadosCount() }}</span>
-            <span class="stat-label">Utentes Registados</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">{{ getPromocoesCount() }}</span>
-            <span class="stat-label">Promoções Realizadas</span>
           </div>
         </div>
       </div>
@@ -199,7 +181,7 @@ import { MarcacaoService } from "../../../core/services/marcacao.service"
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
@@ -285,6 +267,7 @@ import { MarcacaoService } from "../../../core/services/marcacao.service"
 
     .pedidos-list {
       display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
     }
 
@@ -440,88 +423,131 @@ import { MarcacaoService } from "../../../core/services/marcacao.service"
   `]
 })
 export class AdmintrDashboardComponent implements OnInit {
-  pedidosRecentes: any[] = [];
+  pedidosRecentes: PedidoMarcacao[] = [];
+  estatisticas: {
+    totalPedidos: number;
+    pedidosPendentes: number;
+    pedidosAgendados: number;
+    pedidosRealizados: number;
+  } = {
+    totalPedidos: 0,
+    pedidosPendentes: 0,
+    pedidosAgendados: 0,
+    pedidosRealizados: 0
+  };
 
-  constructor(private marcacaoService: MarcacaoService) {}
+  constructor(private pedidosService: PedidosService) {}
 
   ngOnInit() {
+    this.carregarDados();
+  }
+
+  carregarDados() {
+    // Carregar pedidos recentes e calcular estatísticas
     this.carregarPedidosRecentes();
   }
 
   carregarPedidosRecentes() {
-    // Mock data - em produção viria do serviço
-    this.pedidosRecentes = [
-      {
-        id: 1,
-        tipoConsulta: 'Consulta Geral',
-        nomeUtente: 'João Silva',
-        dataInicioPreferida: new Date('2024-01-15 10:00'),
-        estado: 'Pedido',
-        tipo: 'Registado'
+    // Carregar todas as pedidos
+    this.pedidosService.getAll().subscribe({
+      next: (todasPedidos) => {
+        // Mostrar apenas as 6 primeiras pedidos
+        this.pedidosRecentes = todasPedidos.slice(0, 6);
+        // Calcular estatísticas baseadas em todas as pedidos
+        this.calcularEstatisticasLocais(todasPedidos);
       },
-      {
-        id: 2,
-        tipoConsulta: 'Exame Clínico',
-        nomeUtente: 'Maria Santos',
-        dataInicioPreferida: new Date('2024-01-16 14:30'),
-        estado: 'Agendado',
-        tipo: 'Anónimo'
-      },
-      {
-        id: 3,
-        tipoConsulta: 'Consulta de Especialidade',
-        nomeUtente: 'Carlos Oliveira',
-        dataInicioPreferida: new Date('2024-01-14 09:00'),
-        estado: 'Realizado',
-        tipo: 'Registado'
+      error: (error) => {
+        console.error('Erro ao carregar pedidos:', error);
       }
-    ];
+    });
   }
 
-  getStatusLabel(estado: string): string {
-    const labels: { [key: string]: string } = {
-      'Pedido': 'Pedido',
-      'Agendado': 'Agendado',
-      'Realizado': 'Realizado'
+  calcularEstatisticasLocais(todasPedidos: PedidoMarcacao[]) {
+    this.estatisticas = {
+      totalPedidos: todasPedidos.length,
+      pedidosPendentes: todasPedidos.filter(p => p.estado === 0).length,
+      pedidosAgendados: todasPedidos.filter(p => p.estado === 1).length,
+      pedidosRealizados: todasPedidos.filter(p => p.estado === 2).length,
     };
-    return labels[estado] || estado;
+  }
+
+  getStatusLabel(estado: number): string {
+    const labels: { [key: number]: string } = {
+      0: 'Pendente',
+      1: 'Agendado',
+      2: 'Realizado',
+      3: 'Cancelado'
+    };
+    return labels[estado] || 'Desconhecido';
+  }
+
+  getStatusClass(estado: number): string {
+    const classes: { [key: number]: string } = {
+      0: 'pedido',
+      1: 'agendado', 
+      2: 'realizado',
+      3: 'cancelado'
+    };
+    return classes[estado] || 'unknown';
+  }
+
+  getTipoConsulta(pedido: PedidoMarcacao): string {
+    if (pedido.actosClinicos && pedido.actosClinicos.length > 0) {
+      return pedido.actosClinicos[0].tipo || 'Consulta';
+    }
+    return 'Consulta';
+  }
+
+  getNomeUtente(pedido: PedidoMarcacao): string {
+    if (pedido.user) {
+      return pedido.user.nomeCompleto || 'Utente';
+    }
+    return 'Utente Anónimo';
   }
 
   getPedidosCount(): number {
-    return 15; // Mock data
+    return this.estatisticas.pedidosPendentes;
   }
 
   getAgendadosCount(): number {
-    return 8; // Mock data
+    return this.estatisticas.pedidosAgendados;
   }
 
   getRealizadosCount(): number {
-    return 25; // Mock data
+    return this.estatisticas.pedidosRealizados;
   }
 
   getTotalCount(): number {
-    return this.getPedidosCount() + this.getAgendadosCount() + this.getRealizadosCount();
+    return this.estatisticas.totalPedidos;
   }
 
-  getAnonimosCount(): number {
-    return 12; // Mock data
+  confirmarPedido(pedido: PedidoMarcacao) {
+    if (pedido.id) {
+      this.pedidosService.agendar(pedido.id).subscribe({
+        next: () => {
+          console.log('Pedido agendado com sucesso');
+          // Recarregar dados
+          this.carregarDados();
+        },
+        error: (error) => {
+          console.error('Erro ao agendar pedido:', error);
+        }
+      });
+    }
   }
 
-  getRegistadosCount(): number {
-    return 36; // Mock data
-  }
-
-  getPromocoesCount(): number {
-    return 5; // Mock data
-  }
-
-  agendarPedido(pedido: any) {
-    console.log('Agendar pedido:', pedido);
-    // Implementar lógica de agendamento
-  }
-
-  realizarPedido(pedido: any) {
-    console.log('Realizar pedido:', pedido);
-    // Implementar lógica de realização
+  realizarPedido(pedido: PedidoMarcacao) {
+    if (pedido.id) {
+      this.pedidosService.realizar(pedido.id).subscribe({
+        next: () => {
+          console.log('Pedido marcado como realizado');
+          // Recarregar dados
+          this.carregarDados();
+        },
+        error: (error) => {
+          console.error('Erro ao marcar pedido como realizado:', error);
+        }
+      });
+    }
   }
 } 
