@@ -77,9 +77,14 @@ export class UserProfileService {
     return this.http.get<UserPedidosResponse>(`${this.baseUrl}/pedidos/${id}`);
   }
 
-  // Cancelar pedido
+  // Cancelar pedido (PATCH)
   cancelPedido(id: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/pedidos/${id}/cancel`, {});
+    return this.http.patch<void>(`${this.baseUrl}/pedidos/${id}/cancelar`, {});
+  }
+
+  // Apagar pedido (marcação)
+  deletePedido(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/pedidos/${id}`);
   }
 
   // Obter estatísticas do utilizador

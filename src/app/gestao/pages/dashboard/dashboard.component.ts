@@ -49,7 +49,7 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">{{ totalConfirmadas }}</h3>
+            <h3 class="stat-number">{{ totalAgendadas }}</h3>
             <p class="stat-label">Marcações Confirmadas</p>
             <span class="stat-change positive">Próximas consultas</span>
           </div>
@@ -84,12 +84,12 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
         </div>
       </div>
 
-      <!-- Dados Pessoais -->
-      <div class="dashboard-content">
+      <!-- Secções lado a lado -->
+      <div class="dashboard-sections-row">
+        <!-- Dados Pessoais -->
         <div class="profile-section">
           <div class="section-header">
             <h2>Dados Pessoais</h2>
-            <button class="edit-btn" routerLink="/utente/profile">Editar Perfil</button>
           </div>
           <div class="profile-grid">
             <div class="profile-photo">
@@ -133,7 +133,7 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
           </div>
           <div class="appointments-list">
             @if (proximasMarcacoes().length > 0) {
-              @for (marcacao of proximasMarcacoes(); track marcacao.id) {
+              @for (marcacao of proximasMarcacoes().slice(0, 3); track marcacao.id) {
                 <div class="appointment-item">
                   <div class="appointment-date">
                     <span class="day">{{ marcacao.dataInicioPreferida | date:'dd' }}</span>
@@ -483,23 +483,22 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
       background: #003a5c;
     }
 
-    @media (max-width: 768px) {
-      .dashboard-container {
-        padding: 1rem;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .profile-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .appointment-item {
+    .dashboard-sections-row {
+      display: flex;
+      gap: 2rem;
+      align-items: stretch;
+    }
+    .profile-section, .upcoming-section {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 900px) {
+      .dashboard-sections-row {
         flex-direction: column;
-        text-align: center;
+        gap: 2rem;
       }
     }
   `]
@@ -517,7 +516,7 @@ export class DashboardComponent implements OnInit {
   });
   marcacoes: any[] = [];
   totalPendentes = 0;
-  totalConfirmadas = 0;
+  totalAgendadas = 0;
   totalRealizadas = 0;
 
   constructor(
@@ -587,17 +586,15 @@ export class DashboardComponent implements OnInit {
   carregarProximasMarcacoes() {
     this.userProfileService.getUserPedidos().subscribe({
       next: (pedidos) => {
-        // Garante que pedidos é sempre array
         const pedidosArray = Array.isArray(pedidos) ? pedidos : [];
-        // Filtrar apenas pedidos confirmados e pendentes, ordenados por data
+        // Filtrar apenas estados 0, 1 e 2, ordenar por data desc (mais recente primeiro)
         const proximos = pedidosArray
-          .filter(pedido => pedido.estado === 0 || pedido.estado === 1) // Pendente ou Confirmado
-          .sort((a, b) => new Date(a.dataInicioPreferida).getTime() - new Date(b.dataInicioPreferida).getTime())
-          .slice(0, 5); // Apenas os próximos 5
+          .filter(pedido => [0, 1, 2].includes(pedido.estado))
+          .sort((a, b) => new Date(b.dataInicioPreferida).getTime() - new Date(a.dataInicioPreferida).getTime())
+          .slice(0, 3); // Apenas as 3 mais recentes
         this.proximasMarcacoes.set(proximos);
       },
       error: (error) => {
-        // Em caso de erro, lista vazia
         this.proximasMarcacoes.set([]);
         console.error('Erro ao carregar marcações:', error);
       }
@@ -609,13 +606,13 @@ export class DashboardComponent implements OnInit {
       next: (pedidos: any[]) => {
         this.marcacoes = pedidos || [];
         this.totalPendentes = this.marcacoes.filter(m => m.estado === 0).length;
-        this.totalConfirmadas = this.marcacoes.filter(m => m.estado === 1).length;
+        this.totalAgendadas = this.marcacoes.filter(m => m.estado === 1).length;
         this.totalRealizadas = this.marcacoes.filter(m => m.estado === 2).length;
       },
       error: () => {
         this.marcacoes = [];
         this.totalPendentes = 0;
-        this.totalConfirmadas = 0;
+        this.totalAgendadas = 0;
         this.totalRealizadas = 0;
       }
     });
@@ -624,8 +621,8 @@ export class DashboardComponent implements OnInit {
   getStatusText(estado: number): string {
     switch (estado) {
       case 0: return 'Pendente';
-      case 1: return 'Confirmado';
-      case 2: return 'Concluído';
+      case 1: return 'Agendado';
+      case 2: return 'Realizado';
       case 3: return 'Cancelado';
       default: return 'Desconhecido';
     }
@@ -634,8 +631,8 @@ export class DashboardComponent implements OnInit {
   getStatusClass(estado: number): string {
     switch (estado) {
       case 0: return 'pendente';
-      case 1: return 'confirmado';
-      case 2: return 'concluido';
+      case 1: return 'agendado';
+      case 2: return 'realizado';
       case 3: return 'cancelado';
       default: return 'pendente';
     }

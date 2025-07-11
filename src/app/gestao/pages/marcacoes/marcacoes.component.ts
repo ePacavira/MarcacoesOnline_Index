@@ -35,8 +35,8 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
             <select id="statusFilter" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
               <option value="">Todos</option>
               <option value="0">Pendentes</option>
-              <option value="1">Confirmados</option>
-              <option value="2">Concluídos</option>
+              <option value="1">Agendadas</option>
+              <option value="2">Realizadas</option>
               <option value="3">Cancelados</option>
             </select>
           </div>
@@ -80,12 +80,12 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
           <span class="stat-label">Pendentes</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">{{ estatisticas().confirmados }}</span>
-          <span class="stat-label">Confirmados</span>
+          <span class="stat-number">{{ estatisticas().agendadas }}</span>
+          <span class="stat-label">Agendadas</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">{{ estatisticas().concluidos }}</span>
-          <span class="stat-label">Concluídos</span>
+          <span class="stat-number">{{ estatisticas().realizadas }}</span>
+          <span class="stat-label">Realizadas</span>
         </div>
         <div class="stat-item">
           <span class="stat-number">{{ estatisticas().cancelados }}</span>
@@ -189,6 +189,17 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
             </div>
           }
         }
+      </div>
+
+      <!-- Modal de confirmação de cancelamento -->
+      <div *ngIf="showCancelModal" class="modal-overlay">
+        <div class="modal-box">
+          <h3>Tem certeza que deseja cancelar esta marcação?</h3>
+          <div class="modal-actions">
+            <button class="modal-btn danger" (click)="confirmarCancelamento()">Cancelar Marcação</button>
+            <button class="modal-btn" (click)="fecharModal()">Fechar</button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -365,12 +376,12 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
       color: #92400e;
     }
 
-    .status-badge.confirmado {
+    .status-badge.agendada {
       background: #d1fae5;
       color: #065f46;
     }
 
-    .status-badge.concluido {
+    .status-badge.realizada {
       background: #dbeafe;
       color: #1e40af;
     }
@@ -489,6 +500,51 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
       margin: 0 0 1.5rem 0;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+      min-width: 320px;
+      text-align: center;
+    }
+    .modal-actions {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .modal-btn {
+      padding: 0.5rem 1.5rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #f3f4f6;
+      color: #374151;
+      transition: background 0.2s;
+    }
+    .modal-btn.danger {
+      background: #dc2626;
+      color: #fff;
+    }
+    .modal-btn:hover {
+      background: #e5e7eb;
+    }
+    .modal-btn.danger:hover {
+      background: #b91c1c;
+    }
+
     @media (max-width: 768px) {
       .marcacoes-container {
         padding: 1rem;
@@ -539,10 +595,12 @@ export class MarcacoesComponent implements OnInit {
   estatisticas = signal({
     total: 0,
     pendentes: 0,
-    confirmados: 0,
-    concluidos: 0,
+    agendadas: 0,
+    realizadas: 0,
     cancelados: 0
   });
+  showCancelModal = false;
+  pedidoParaCancelar: number | null = null;
 
   constructor(
     private authService: AuthService,
@@ -575,8 +633,8 @@ export class MarcacoesComponent implements OnInit {
     const stats = {
       total: pedidos.length,
       pendentes: pedidos.filter(p => p.estado === 0).length,
-      confirmados: pedidos.filter(p => p.estado === 1).length,
-      concluidos: pedidos.filter(p => p.estado === 2).length,
+      agendadas: pedidos.filter(p => p.estado === 1).length,
+      realizadas: pedidos.filter(p => p.estado === 2).length,
       cancelados: pedidos.filter(p => p.estado === 3).length
     };
     this.estatisticas.set(stats);
@@ -588,6 +646,9 @@ export class MarcacoesComponent implements OnInit {
     // Filtro por estado
     if (this.filtroEstado()) {
       filtrados = filtrados.filter(m => m.estado === parseInt(this.filtroEstado()));
+    } else {
+      // Por padrão, não mostrar canceladas
+      filtrados = filtrados.filter(m => m.estado !== 3);
     }
 
     // Filtro por data
@@ -595,7 +656,6 @@ export class MarcacoesComponent implements OnInit {
       const dias = parseInt(this.filtroData());
       const dataLimite = new Date();
       dataLimite.setDate(dataLimite.getDate() - dias);
-      
       filtrados = filtrados.filter(m => {
         const dataMarcacao = new Date(m.dataInicioPreferida);
         return dataMarcacao >= dataLimite;
@@ -621,8 +681,8 @@ export class MarcacoesComponent implements OnInit {
   getStatusText(estado: number): string {
     switch (estado) {
       case 0: return 'Pendente';
-      case 1: return 'Confirmado';
-      case 2: return 'Concluído';
+      case 1: return 'Agendada';
+      case 2: return 'Realizada';
       case 3: return 'Cancelado';
       default: return 'Desconhecido';
     }
@@ -631,8 +691,8 @@ export class MarcacoesComponent implements OnInit {
   getStatusClass(estado: number): string {
     switch (estado) {
       case 0: return 'pendente';
-      case 1: return 'confirmado';
-      case 2: return 'concluido';
+      case 1: return 'agendada';
+      case 2: return 'realizada';
       case 3: return 'cancelado';
       default: return 'pendente';
     }
@@ -644,13 +704,25 @@ export class MarcacoesComponent implements OnInit {
   }
 
   cancelarMarcacao(id: number) {
-    if (confirm('Tem certeza que deseja cancelar esta marcação?')) {
-      this.userProfileService.cancelPedido(id).subscribe({
+    this.pedidoParaCancelar = id;
+    this.showCancelModal = true;
+  }
+
+  fecharModal() {
+    this.showCancelModal = false;
+    this.pedidoParaCancelar = null;
+  }
+
+  confirmarCancelamento() {
+    if (this.pedidoParaCancelar !== null) {
+      this.userProfileService.cancelPedido(this.pedidoParaCancelar).subscribe({
         next: () => {
-          this.carregarMarcacoes(); // Recarregar lista
+          this.carregarMarcacoes();
+          this.fecharModal();
         },
         error: (error) => {
           console.error('Erro ao cancelar marcação:', error);
+          this.fecharModal();
         }
       });
     }
