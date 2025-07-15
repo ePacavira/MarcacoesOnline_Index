@@ -555,9 +555,9 @@ export class PedidoDetalheComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       const id = +params['id'];
-      if (id) {
+    if (id) {
         this.carregarPedido(id);
-      }
+    }
     });
   }
 

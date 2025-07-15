@@ -65,6 +65,10 @@ export const routes: Routes = [
         loadComponent: () => import('./gestao/pages/marcacoes/marcacoes.component').then((m) => m.MarcacoesComponent),
       },
       {
+        path: 'minhas-marcacoes/:id',
+        loadComponent: () => import('./gestao/pages/marcacoes/marcacao-detalhe-utente.component').then((m) => m.MarcacaoDetalheUtenteComponent),
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./gestao/pages/profile/profile.component').then((m) => m.ProfileComponent),
       },

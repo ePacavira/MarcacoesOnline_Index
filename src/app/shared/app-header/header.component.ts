@@ -25,4 +25,13 @@ export class HeaderComponent {
     this.authService.logout();
     this.router.navigate(['/']);
   }
+
+  pedirMarcacao() {
+    const user = this.authService.getCurrentUser();
+    if (user && user.perfil === 1) {
+      this.router.navigate(['/marcacoes']);
+    } else {
+      this.router.navigate(['/marcacao-anonima']);
+    }
+  }
 }

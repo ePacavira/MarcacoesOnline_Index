@@ -681,8 +681,8 @@ export class ProfileComponent implements OnInit {
           this.isLoading.set(false);
           
           // Atualizar dados do utilizador
-          currentUser.fotoPath = response.fotoPath;
-          this.authService.updateCurrentUser(currentUser);
+            currentUser.fotoPath = response.fotoPath;
+            this.authService.updateCurrentUser(currentUser);
         },
         error: (error) => {
           console.error('Erro ao fazer upload da foto:', error);

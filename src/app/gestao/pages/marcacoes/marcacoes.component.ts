@@ -3,6 +3,9 @@ import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { AuthService } from "../../../core/services/auth.service"
 import { UserProfileService } from "../../../core/services/user-profile.service"
+import { Router } from '@angular/router';
+import { PedidosService } from '../../../core/services/pedidos.service';
+import { MarcacaoService } from '../../../core/services/marcacao';
 
 @Component({
   selector: "app-marcacoes",
@@ -17,7 +20,7 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
           <p class="page-subtitle">Gerencie todas as suas consultas e marcações</p>
         </div>
         <div class="header-right">
-          <button class="new-appointment-btn" routerLink="/marcacoes">
+          <button class="new-appointment-btn" (click)="irParaNovaMarcacao()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -198,6 +201,66 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
           <div class="modal-actions">
             <button class="modal-btn danger" (click)="confirmarCancelamento()">Cancelar Marcação</button>
             <button class="modal-btn" (click)="fecharModal()">Fechar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de detalhes da marcação -->
+      <div *ngIf="detalheModalAberto" class="modal-overlay">
+        <div class="modal-box">
+          <h3>Detalhes da Marcação</h3>
+          @if (!detalheMarcacao) {
+            <p class="loading-message">A carregar detalhes...</p>
+          } @else if (detalheMarcacao?.erro) {
+            <p class="error-message">Erro ao carregar detalhes da marcação.<br>O pedido pode não existir ou não pertence ao seu usuário.</p>
+          } @else if (isEmpty(detalheMarcacao)) {
+            <p class="error-message">Dados não disponíveis para esta marcação.</p>
+          } @else {
+            <div class="detail-item">
+              <span class="detail-label">ID:</span>
+              <span class="detail-value">{{ detalheMarcacao.id || 'Sem dados' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Estado:</span>
+              <span class="detail-value">
+                {{ detalheMarcacao.estado !== undefined && detalheMarcacao.estado !== null ? getStatusText(detalheMarcacao.estado) : 'Sem dados' }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Data de Início:</span>
+              <span class="detail-value">{{ detalheMarcacao.dataInicioPreferida ? (detalheMarcacao.dataInicioPreferida | date:'dd/MM/yyyy HH:mm') : 'Sem dados' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Data de Fim:</span>
+              <span class="detail-value">{{ detalheMarcacao.dataFimPreferida ? (detalheMarcacao.dataFimPreferida | date:'dd/MM/yyyy HH:mm') : 'Sem dados' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Horário Preferido:</span>
+              <span class="detail-value">{{ detalheMarcacao.horarioPreferido || 'Sem dados' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Observações:</span>
+              <span class="detail-value">{{ detalheMarcacao.observacoes ? detalheMarcacao.observacoes : 'Sem observações' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Actos Clínicos:</span>
+              <div class="actos-list">
+                @if (detalheMarcacao.actosClinicos && detalheMarcacao.actosClinicos.length > 0) {
+                  @for (acto of detalheMarcacao.actosClinicos; track acto.id) {
+                    <div class="acto-item">
+                      <span class="acto-type">{{ acto.tipo || 'Sem tipo' }}</span>
+                      <span class="acto-professional">{{ acto.profissional || 'Sem profissional' }}</span>
+                      <span class="acto-subsistema">{{ acto.subsistemaSaude || 'Sem subsistema' }}</span>
+                    </div>
+                  }
+                } @else {
+                  <span class="detail-value">Sem actos clínicos</span>
+                }
+              </div>
+            </div>
+          }
+          <div class="modal-actions">
+            <button class="modal-btn" (click)="fecharModalDetalhe()">Fechar</button>
           </div>
         </div>
       </div>
@@ -545,6 +608,78 @@ import { UserProfileService } from "../../../core/services/user-profile.service"
       background: #b91c1c;
     }
 
+    .error-message {
+      color: #dc2626;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .loading-message {
+      color: #00548d;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+
+    .detail-value {
+      color: #6b7280;
+      font-size: 0.9rem;
+      text-align: right;
+    }
+
+    .actos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      padding-left: 1rem;
+    }
+
+    .acto-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed #e5e7eb;
+    }
+
+    .acto-item:last-child {
+      border-bottom: none;
+    }
+
+    .acto-type {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 0.9rem;
+    }
+
+    .acto-professional {
+      color: #4b5563;
+      font-size: 0.8rem;
+    }
+
+    .acto-subsistema {
+      color: #6b7280;
+      font-size: 0.7rem;
+    }
+
     @media (max-width: 768px) {
       .marcacoes-container {
         padding: 1rem;
@@ -601,10 +736,15 @@ export class MarcacoesComponent implements OnInit {
   });
   showCancelModal = false;
   pedidoParaCancelar: number | null = null;
+  detalheModalAberto = false;
+  detalheMarcacao: any = null;
 
   constructor(
     private authService: AuthService,
-    private userProfileService: UserProfileService
+    private userProfileService: UserProfileService,
+    private router: Router,
+    private pedidosService: PedidosService,
+    private marcacaoService: MarcacaoService
   ) {}
 
   ngOnInit() {
@@ -613,16 +753,27 @@ export class MarcacoesComponent implements OnInit {
 
   carregarMarcacoes() {
     this.isLoading.set(true);
-    
-    this.userProfileService.getUserPedidos().subscribe({
-      next: (pedidos) => {
-        this.todasMarcacoes.set(pedidos);
-        this.calcularEstatisticas();
+    const user = this.authService.getCurrentUser();
+    this.marcacaoService.getMarcacoes().subscribe({
+      next: (marcacoes) => {
+        console.log('Usuário logado:', user);
+        console.log('Marcações recebidas:', marcacoes);
+        // Garantir igualdade de tipos ao filtrar
+        const minhasMarcacoes = marcacoes.filter(m => String(m.userId) === String(user?.id));
+        console.log('Marcações filtradas:', minhasMarcacoes);
+        this.todasMarcacoes.set(minhasMarcacoes);
+        this.estatisticas.set({
+          total: minhasMarcacoes.length,
+          pendentes: minhasMarcacoes.filter(m => Number(m.estado) === 0).length,
+          agendadas: minhasMarcacoes.filter(m => Number(m.estado) === 1).length,
+          realizadas: minhasMarcacoes.filter(m => Number(m.estado) === 2).length,
+          cancelados: minhasMarcacoes.filter(m => Number(m.estado) === 3).length,
+        });
         this.aplicarFiltros();
         this.isLoading.set(false);
       },
-      error: (error) => {
-        console.error('Erro ao carregar marcações:', error);
+      error: (err) => {
+        console.error('Erro ao carregar marcações:', err);
         this.isLoading.set(false);
       }
     });
@@ -699,8 +850,29 @@ export class MarcacoesComponent implements OnInit {
   }
 
   verDetalhes(id: number) {
-    // Implementar navegação para detalhes
-    console.log('Ver detalhes do pedido:', id);
+    this.detalheModalAberto = true;
+    this.detalheMarcacao = null;
+    console.log('[DEBUG] Buscando detalhes do pedido com id:', id);
+    this.userProfileService.getUserPedido(id).subscribe({
+      next: (marc: any) => {
+        console.log('[DEBUG] Resposta da API para detalhes:', marc);
+        if (Array.isArray(marc)) {
+          const encontrado = marc.find((p: any) => p.id === id);
+          this.detalheMarcacao = encontrado || {};
+        } else {
+          this.detalheMarcacao = marc;
+        }
+      },
+      error: (err) => {
+        console.error('[DEBUG] Erro ao buscar detalhes:', err);
+        this.detalheMarcacao = { erro: true };
+      }
+    });
+  }
+
+  fecharModalDetalhe() {
+    this.detalheModalAberto = false;
+    this.detalheMarcacao = null;
   }
 
   cancelarMarcacao(id: number) {
@@ -716,12 +888,13 @@ export class MarcacoesComponent implements OnInit {
   confirmarCancelamento() {
     if (this.pedidoParaCancelar !== null) {
       this.userProfileService.cancelPedido(this.pedidoParaCancelar).subscribe({
-        next: () => {
+        next: (res) => {
+          console.log('[DEBUG] Cancelamento realizado com sucesso:', res);
           this.carregarMarcacoes();
           this.fecharModal();
         },
         error: (error) => {
-          console.error('Erro ao cancelar marcação:', error);
+          console.error('[DEBUG] Erro ao cancelar marcação:', error);
           this.fecharModal();
         }
       });
@@ -729,7 +902,22 @@ export class MarcacoesComponent implements OnInit {
   }
 
   exportarPDF(id: number) {
-    // Implementar exportação PDF
-    console.log('Exportar PDF do pedido:', id);
+    this.pedidosService.exportarPdf(id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: (error: any) => {
+        console.error('Erro ao exportar PDF:', error);
+      }
+    });
+  }
+
+  isEmpty(obj: any): boolean {
+    return obj && Object.keys(obj).length === 0;
+  }
+
+  irParaNovaMarcacao() {
+    this.router.navigate(['/marcacoes']);
   }
 }

@@ -56,7 +56,7 @@
     <a routerLink="/utente/minhas-marcacoes" routerLinkActive="active">
       <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/calendar.svg" alt="Minhas Marcações" class="sidebar-svg-icon" /></span> Minhas Marcações
     </a>
-    <a routerLink="/marcacao-anonima" routerLinkActive="active">
+    <a *ngIf="isUtente()" (click)="irParaNovaMarcacao()" style="cursor:pointer;">
       <span class="icon"><img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/plus-circle.svg" alt="Nova Marcação" class="sidebar-svg-icon" /></span> Nova Marcação
     </a>
     <a routerLink="/consulta-marcacao" routerLinkActive="active">
@@ -70,7 +70,7 @@
   <div class="sidebar-bottom">
     <div class="user-info" *ngIf="currentUser">
       <div class="user-avatar">
-        <img [src]="getFotoPerfilSrc()" alt="Avatar" />
+        <img [src]="avatarSrc" alt="Avatar" (error)="onAvatarError()" />
       </div>
       <div class="user-details">
         <span class="user-name">{{ currentUser.nomeCompleto }}</span>

@@ -2,28 +2,28 @@
   <div class="navbar-container">
     <!-- Logo à esquerda -->
     <div class="navbar-logo-wrapper">
-      <a routerLink="/" class="navbar-logo">
-        <img src="/logo.jpg" alt="Logo" />
-      </a>
+    <a routerLink="/" class="navbar-logo">
+      <img src="/logo.jpg" alt="Logo" />
+    </a>
     </div>
     <!-- Menu centralizado -->
     <div class="navbar-menu-center">
-      <ul class="navbar-menu">
-        <li><a routerLink="/" routerLinkActive="active">Home</a></li>
-        <li><a routerLink="/servicos" routerLinkActive="active">Serviços</a></li>
-        <li><a routerLink="/sobre" routerLinkActive="active">Sobre</a></li>
-        <li><a routerLink="/medico" routerLinkActive="active">Médico</a></li>
-        <li><a routerLink="/marcacoes" routerLinkActive="active">Marcação</a></li>
-        <li><a routerLink="/contacto" routerLinkActive="active">Contacto</a></li>
-      </ul>
+    <ul class="navbar-menu">
+      <li><a routerLink="/" routerLinkActive="active">Home</a></li>
+      <li><a routerLink="/servicos" routerLinkActive="active">Serviços</a></li>
+      <li><a routerLink="/sobre" routerLinkActive="active">Sobre</a></li>
+      <li><a routerLink="/medico" routerLinkActive="active">Médico</a></li>
+      <li><a routerLink="/marcacoes" routerLinkActive="active">Marcação</a></li>
+      <li><a routerLink="/contacto" routerLinkActive="active">Contacto</a></li>
+    </ul>
     </div>
     <!-- Botões de ação à direita -->
     <div class="navbar-actions">
       <a routerLink="/consulta-marcacao" class="navbar-btn-secondary">Consultar</a>
       <span class="navbar-divider"></span>
-      <a routerLink="/marcacao-anonima" class="navbar-btn navbar-btn-main" title="Marcar Consulta">
+      <button class="navbar-btn navbar-btn-main" title="Marcar Consulta" (click)="pedirMarcacao()">
         <svg class="navbar-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-      </a>
+      </button>
       <a *ngIf="!isLoggedIn" routerLink="/login" class="navbar-login">
         <svg class="navbar-user-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 8-4 8-4s8 0 8 4"/></svg>
         Login

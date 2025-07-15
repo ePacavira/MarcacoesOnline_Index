@@ -735,8 +735,8 @@ export class PedidosComponent implements OnInit {
   }
 
   mudarPagina(pagina: number) {
-    this.paginaAtual = pagina;
-  }
+      this.paginaAtual = pagina;
+    }
 
   agendarPedido(pedido: PedidoMarcacao) {
     const nomeUtente = pedido.user?.nomeCompleto || 'Utente';

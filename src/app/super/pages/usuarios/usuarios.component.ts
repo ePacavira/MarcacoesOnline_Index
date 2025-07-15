@@ -911,7 +911,7 @@ export class UsuariosComponent implements OnInit {
         ...u,
         fotoUrl: this.gerarFotoUrl(u)
       }));
-      this.aplicarFiltros();
+    this.aplicarFiltros();
     });
   }
 
@@ -1109,7 +1109,7 @@ export class UsuariosComponent implements OnInit {
     if (confirm(`Eliminar utilizador ${usuario.nome || usuario.nomeCompleto}? Esta ação não pode ser desfeita.`)) {
       this.usersService.eliminarUser(usuario.id).subscribe({
         next: () => {
-          alert('Utilizador eliminado com sucesso!');
+      alert('Utilizador eliminado com sucesso!');
           this.carregarUsuarios();
         },
         error: (err) => {

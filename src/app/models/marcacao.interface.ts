@@ -22,7 +22,8 @@ export interface PedidoMarcacao {
   estado: 'Agendado' | 'Pendente' | 'Cancelado' | 'Concluído' | string;
   actosClinicos: ActoClinico[];
   utenteId?: string;
-  nomeUtente?: string
+  nomeUtente?: string;
+  userId?: number;
 }
 
 export interface CreatePedidoMarcacao {

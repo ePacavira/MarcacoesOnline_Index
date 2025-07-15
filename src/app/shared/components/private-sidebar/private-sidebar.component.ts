@@ -14,9 +14,11 @@ import { Router } from '@angular/router';
 export class PrivateSidebarComponent {
   isUserMenuOpen = false;
   currentUser: any = null;
+  avatarSrc: string = '';
 
   constructor(private authService: AuthService, private router: Router) {
     this.currentUser = this.authService.getCurrentUser();
+    this.avatarSrc = this.getFotoPerfilSrc();
   }
 
   toggleUserMenu() {
@@ -58,8 +60,16 @@ export class PrivateSidebarComponent {
     return '/assets/default-avatar.png';
   }
 
+  onAvatarError() {
+    this.avatarSrc = '/assets/default-avatar.png';
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  irParaNovaMarcacao() {
+    this.router.navigate(['/marcacoes']);
   }
 }

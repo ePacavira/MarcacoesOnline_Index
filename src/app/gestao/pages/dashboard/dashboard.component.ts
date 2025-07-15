@@ -4,6 +4,7 @@ import { AuthService } from "../../../core/services/auth.service"
 import { UserProfileService } from "../../../core/services/user-profile.service"
 import { MarcacaoService } from '../../../core/services/marcacao';
 import { PedidoMarcacao } from '../../../models/marcacao.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: "app-dashboard",
@@ -25,7 +26,7 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
       </div>
 
       <!-- Cards de Estatísticas do Utente -->
-      <div class="stats-grid">
+      <div class="stats-row stats-row-centered">
         <div class="stat-card">
           <div class="stat-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -35,11 +36,10 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
           </div>
           <div class="stat-content">
             <h3 class="stat-number">{{ totalPendentes }}</h3>
-            <p class="stat-label">Marcações Pendentes</p>
-            <span class="stat-change neutral">Aguardando confirmação</span>
+            <p class="stat-label">Marcações <br>Pendentes</p>
+            <span class="stat-change neutral">Aguardar confirmação</span>
           </div>
         </div>
-
         <div class="stat-card">
           <div class="stat-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,7 +54,6 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
             <span class="stat-change positive">Próximas consultas</span>
           </div>
         </div>
-
         <div class="stat-card">
           <div class="stat-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -64,11 +63,10 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
           </div>
           <div class="stat-content">
             <h3 class="stat-number">{{ totalRealizadas }}</h3>
-            <p class="stat-label">Consultas Realizadas</p>
+            <p class="stat-label">Consultas <br>Realizadas</p>
             <span class="stat-change positive">Histórico completo</span>
           </div>
         </div>
-
         <div class="stat-card">
           <div class="stat-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -92,10 +90,6 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
             <h2>Dados Pessoais</h2>
           </div>
           <div class="profile-grid">
-            <div class="profile-photo">
-              <img [src]="getFotoPerfilSrc()" alt="Foto de perfil" class="avatar" />
-              <button class="change-photo-btn" routerLink="/utente/profile">Alterar Foto</button>
-            </div>
             <div class="profile-info">
               <div class="info-row">
                 <span class="info-label">Nome:</span>
@@ -129,7 +123,7 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
         <div class="upcoming-section">
           <div class="section-header">
             <h2>Próximas Consultas</h2>
-            <button class="view-all-btn" routerLink="/utente/minhas-marcacoes">Ver Todas</button>
+            <button class="view-all-btn" (click)="logVerTodas()">Ver Todas</button>
           </div>
           <div class="appointments-list">
             @if (proximasMarcacoes().length > 0) {
@@ -501,6 +495,80 @@ import { PedidoMarcacao } from '../../../models/marcacao.interface';
         gap: 2rem;
       }
     }
+    .stats-row {
+      display: flex;
+      flex-direction: row;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+      flex-wrap: nowrap;
+      align-items: stretch;
+    }
+    .stats-row-centered {
+      max-width: 1100px;
+      margin: 1.2rem auto 2.2rem auto;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      gap: 2rem;
+      width: 100%;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 1.2rem 1.1rem 1rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 180px;
+      max-width: 220px;
+      flex: 1 1 0;
+      transition: box-shadow 0.2s;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 24px rgba(0,84,141,0.13);
+    }
+    .stat-card .stat-number {
+      font-size: 2.1rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      color: #00548d;
+    }
+    .stat-card .stat-label {
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    .stat-card .stat-change {
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+    @media (max-width: 1100px) {
+      .stats-row-centered {
+        max-width: 100%;
+        padding: 0 1rem;
+        gap: 1rem;
+      }
+      .stat-card {
+        min-width: 160px;
+        max-width: 180px;
+        flex: 1 1 0;
+      }
+    }
+    @media (max-width: 900px) {
+      .stats-row-centered {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+      .stat-card {
+        min-width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
+      }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -522,7 +590,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private userProfileService: UserProfileService,
-    private marcacaoService: MarcacaoService
+    private marcacaoService: MarcacaoService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -534,8 +603,6 @@ export class DashboardComponent implements OnInit {
     });
 
     this.carregarDadosUtente();
-    this.carregarEstatisticas();
-    this.carregarProximasMarcacoes();
     this.carregarMarcacoesUtente();
   }
 
@@ -557,63 +624,32 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  carregarEstatisticas() {
-    this.userProfileService.getUserStats().subscribe({
-      next: (stats) => {
-        // Garante que todos os campos são números válidos
-        this.userStats.set({
-          totalPedidos: stats?.totalPedidos ?? 0,
-          pedidosPendentes: stats?.pedidosPendentes ?? 0,
-          pedidosConfirmados: stats?.pedidosConfirmados ?? 0,
-          pedidosConcluidos: stats?.pedidosConcluidos ?? 0,
-          pedidosCancelados: stats?.pedidosCancelados ?? 0
-        });
-      },
-      error: (error) => {
-        // Em caso de erro, zera os contadores
-        this.userStats.set({
-          totalPedidos: 0,
-          pedidosPendentes: 0,
-          pedidosConfirmados: 0,
-          pedidosConcluidos: 0,
-          pedidosCancelados: 0
-        });
-        console.error('Erro ao carregar estatísticas:', error);
-      }
-    });
-  }
-
-  carregarProximasMarcacoes() {
-    this.userProfileService.getUserPedidos().subscribe({
-      next: (pedidos) => {
-        const pedidosArray = Array.isArray(pedidos) ? pedidos : [];
-        // Filtrar apenas estados 0, 1 e 2, ordenar por data desc (mais recente primeiro)
-        const proximos = pedidosArray
-          .filter(pedido => [0, 1, 2].includes(pedido.estado))
-          .sort((a, b) => new Date(b.dataInicioPreferida).getTime() - new Date(a.dataInicioPreferida).getTime())
-          .slice(0, 3); // Apenas as 3 mais recentes
-        this.proximasMarcacoes.set(proximos);
-      },
-      error: (error) => {
-        this.proximasMarcacoes.set([]);
-        console.error('Erro ao carregar marcações:', error);
-      }
-    });
-  }
-
   carregarMarcacoesUtente() {
-    this.userProfileService.getUserPedidos().subscribe({
-      next: (pedidos: any[]) => {
-        this.marcacoes = pedidos || [];
-        this.totalPendentes = this.marcacoes.filter(m => m.estado === 0).length;
-        this.totalAgendadas = this.marcacoes.filter(m => m.estado === 1).length;
-        this.totalRealizadas = this.marcacoes.filter(m => m.estado === 2).length;
+    const user = this.authService.getCurrentUser();
+    this.marcacaoService.getMarcacoes().subscribe({
+      next: (marcacoes: any[]) => {
+        console.log('Usuário logado:', user);
+        console.log('Marcações recebidas:', marcacoes);
+        const minhasMarcacoes = marcacoes.filter(m => String(m.userId) === String(user?.id));
+        console.log('Marcações filtradas:', minhasMarcacoes);
+        this.marcacoes = minhasMarcacoes;
+        // Estatísticas
+        this.totalPendentes = minhasMarcacoes.filter(m => m.estado === 0).length;
+        this.totalAgendadas = minhasMarcacoes.filter(m => m.estado === 1).length;
+        this.totalRealizadas = minhasMarcacoes.filter(m => m.estado === 2).length;
+        // Próximas marcações (as 3 mais recentes, estados 0, 1, 2)
+        const proximos = minhasMarcacoes
+          .filter(m => [0, 1, 2].includes(m.estado))
+          .sort((a, b) => new Date(b.dataInicioPreferida).getTime() - new Date(a.dataInicioPreferida).getTime())
+          .slice(0, 3);
+        this.proximasMarcacoes.set(proximos);
       },
       error: () => {
         this.marcacoes = [];
         this.totalPendentes = 0;
         this.totalAgendadas = 0;
         this.totalRealizadas = 0;
+        this.proximasMarcacoes.set([]);
       }
     });
   }
@@ -641,6 +677,11 @@ export class DashboardComponent implements OnInit {
   verDetalhesPedido(id: number) {
     // Implementar navegação para detalhes do pedido
     console.log('Ver detalhes do pedido:', id);
+  }
+
+  logVerTodas() {
+    console.log('Botão Ver Todas clicado!');
+    this.router.navigate(['/utente/minhas-marcacoes']);
   }
 
   getFotoPerfilSrc(): string {
