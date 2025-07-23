@@ -93,10 +93,18 @@
                   <div class="form-group">
                     <label [for]="'tipo-' + i">Tipo de Consulta/Exame</label>
                     <select [id]="'tipo-' + i" formControlName="tipo" class="form-select" 
-                            (focus)="onFormFieldInteraction()" (change)="onFormChange()">
+                            (focus)="onFormFieldInteraction()" (change)="onTipoConsultaChange(i); onFormChange()">
                       <option value="">Selecione...</option>
                       <option value="Consulta Geral">Consulta Geral</option>
                       <option value="Cardiologia">Cardiologia</option>
+                      <option value="Dermatologia">Dermatologia</option>
+                      <option value="Pediatria">Pediatria</option>
+                      <option value="Ortopedia">Ortopedia</option>
+                      <option value="Ginecologia">Ginecologia</option>
+                      <option value="Neurologia">Neurologia</option>
+                      <option value="Psiquiatria">Psiquiatria</option>
+                      <option value="Oftalmologia">Oftalmologia</option>
+                      <option value="Endocrinologia">Endocrinologia</option>
                       <option value="Raio-X">Raio-X</option>
                       <option value="Análises Sanguíneas">Análises Sanguíneas</option>
                     </select>
@@ -119,15 +127,15 @@
                     <label [for]="'profissional-' + i">Profissional (Opcional)</label>
                     <select [id]="'profissional-' + i" formControlName="profissional" 
                             class="form-select" (focus)="onFormFieldInteraction()" (change)="onFormChange()">
-                      <option value="">Selecione...</option>
-                      <option value="Dr. João Silva">Dr. João Silva</option>
-                      <option value="Dra. Maria Santos">Dra. Maria Santos</option>
-                      <option value="Dr. Pedro Costa">Dr. Pedro Costa</option>
-                      <option value="Dra. Ana Oliveira">Dra. Ana Oliveira</option>
-                      <option value="Dr. Carlos Ferreira">Dr. Carlos Ferreira</option>
-                      <option value="Dra. Sofia Martins">Dra. Sofia Martins</option>
-                      <option value="Dr. Miguel Rodrigues">Dr. Miguel Rodrigues</option>
-                      <option value="Dra. Inês Pereira">Dra. Inês Pereira</option>
+                      <option value="">Selecione um profissional...</option>
+                      @for (doctor of getProfissionaisRecomendados(actoCtrl.get('tipo')?.value || ''); track doctor.id) {
+                        <option [value]="formatarProfissional(doctor)">{{ formatarProfissional(doctor) }}</option>
+                      }
+                      @if (getProfissionaisRecomendados(actoCtrl.get('tipo')?.value || '').length === 0) {
+                        @for (doctor of doctors; track doctor.id) {
+                          <option [value]="formatarProfissional(doctor)">{{ formatarProfissional(doctor) }}</option>
+                        }
+                      }
                     </select>
                   </div>
                 </div>
@@ -172,16 +180,45 @@
             </div>
             
             <div class="form-group">
+              <label for="horaInicioPreferida">Hora Início</label>
+              <select id="horaInicioPreferida" formControlName="horaInicioPreferida" class="form-input" (focus)="onFormFieldInteraction()" (change)="onFormChange()">
+                <option value="">Selecione um horário</option>
+                <option value="09:00">09:00</option>
+                <option value="09:30">09:30</option>
+                <option value="10:00">10:00</option>
+                <option value="10:30">10:30</option>
+                <option value="11:00">11:00</option>
+                <option value="11:30">11:30</option>
+                <option value="14:00">14:00</option>
+                <option value="14:30">14:30</option>
+                <option value="15:00">15:00</option>
+                <option value="15:30">15:30</option>
+                <option value="16:00">16:00</option>
+                <option value="16:30">16:30</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label for="dataFimPreferida">Data de Fim</label>
               <input type="date" id="dataFimPreferida" formControlName="dataFimPreferida" 
                      class="form-input" (focus)="onFormFieldInteraction()" (change)="onFormChange()">
             </div>
-            
-            <div class="form-group full-width">
-              <label for="horarioPreferido">Horário Preferido</label>
-              <input type="text" id="horarioPreferido" formControlName="horarioPreferido" 
-                     class="form-input" placeholder="Ex: 14h30, Manhã, Tarde, Indiferente..."
-                     (focus)="onFormFieldInteraction()" (input)="onFormChange()">
+            <div class="form-group">
+              <label for="horaFimPreferida">Hora Fim</label>
+              <select id="horaFimPreferida" formControlName="horaFimPreferida" class="form-input" (focus)="onFormFieldInteraction()" (change)="onFormChange()">
+                <option value="">Selecione um horário</option>
+                <option value="09:00">09:00</option>
+                <option value="09:30">09:30</option>
+                <option value="10:00">10:00</option>
+                <option value="10:30">10:30</option>
+                <option value="11:00">11:00</option>
+                <option value="11:30">11:30</option>
+                <option value="14:00">14:00</option>
+                <option value="14:30">14:30</option>
+                <option value="15:00">15:00</option>
+                <option value="15:30">15:30</option>
+                <option value="16:00">16:00</option>
+                <option value="16:30">16:30</option>
+              </select>
             </div>
           </div>
         </div>

@@ -1,4 +1,69 @@
 <div class="marcacoes-container">
+  <!-- Formulário de Nova Marcação -->
+  <form *ngIf="showForm" [formGroup]="marcacaoForm" class="marcacao-form space-y-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Data Início *</label>
+        <input 
+          type="date" 
+          formControlName="dataInicioPreferida"
+          [min]="minDate"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+        <div *ngIf="marcacaoForm.get('dataInicioPreferida')?.invalid && marcacaoForm.get('dataInicioPreferida')?.touched" class="text-red-500 text-sm mt-1">
+          Selecione a data de início
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Hora Início *</label>
+        <select 
+          formControlName="horaInicioPreferida"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+          <option value="">Selecione um horário</option>
+          <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+        </select>
+        <div *ngIf="marcacaoForm.get('horaInicioPreferida')?.invalid && marcacaoForm.get('horaInicioPreferida')?.touched" class="text-red-500 text-sm mt-1">
+          Selecione o horário de início
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Data Fim *</label>
+        <input 
+          type="date" 
+          formControlName="dataFimPreferida"
+          [min]="minDate"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+        <div *ngIf="marcacaoForm.get('dataFimPreferida')?.invalid && marcacaoForm.get('dataFimPreferida')?.touched" class="text-red-500 text-sm mt-1">
+          Selecione a data de fim
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Hora Fim *</label>
+        <select 
+          formControlName="horaFimPreferida"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent">
+          <option value="">Selecione um horário</option>
+          <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+        </select>
+        <div *ngIf="marcacaoForm.get('horaFimPreferida')?.invalid && marcacaoForm.get('horaFimPreferida')?.touched" class="text-red-500 text-sm mt-1">
+          Selecione o horário de fim
+        </div>
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+      <textarea 
+        formControlName="observacoes"
+        rows="3"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00548d] focus:border-transparent"
+        placeholder="Informações adicionais sobre a consulta..."></textarea>
+    </div>
+    <div class="flex justify-end">
+      <button type="button" (click)="cancelarForm()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 mr-2">Cancelar</button>
+      <button type="submit" (click)="salvarMarcacao()" [disabled]="marcacaoForm.invalid" class="px-6 py-3 bg-[#00548d] text-white rounded-lg hover:bg-[#0077cc] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">Salvar Marcação</button>
+    </div>
+  </form>
   <!-- Header da página -->
   <div class="marcacoes-header">
     <div class="marcacoes-header-content">

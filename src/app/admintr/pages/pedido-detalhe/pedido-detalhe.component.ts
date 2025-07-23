@@ -2,11 +2,13 @@ import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule, ActivatedRoute, Router } from "@angular/router"
 import { PedidosService } from "../../../core/services/pedidos.service"
+import { FormGroup } from "@angular/forms"
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: "app-pedido-detalhe",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
     <div class="pedido-detalhe-container">
       <!-- Header -->
@@ -161,35 +163,21 @@ import { PedidosService } from "../../../core/services/pedidos.service"
       <!-- Ações -->
       <div class="actions-section">
         <div class="actions-grid">
-          <button 
-            *ngIf="pedido?.estado === 0" 
-            class="action-btn success" 
-            (click)="agendarPedido()"
-          >
+          <button *ngIf="pedido?.estado === 0" class="action-btn success" (click)="agendarPedido()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12,6 12,12 16,14"/>
             </svg>
             Agendar Consulta
           </button>
-          
-          <button 
-            *ngIf="pedido?.estado === 1" 
-            class="action-btn completed" 
-            (click)="realizarPedido()"
-          >
+          <button *ngIf="pedido?.estado === 1" class="action-btn completed" (click)="realizarPedido()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22,4 12,14.01 9,11.01"/>
             </svg>
             Realizar Consulta
           </button>
-          
-          <button 
-            *ngIf="pedido?.tipo === 'Anónimo' && pedido?.estado === 'Agendado'" 
-            class="action-btn promote" 
-            (click)="promoverUtente()"
-          >
+          <button *ngIf="pedido?.tipo === 'Anónimo' && pedido?.estado === 'Agendado'" class="action-btn promote" (click)="promoverUtente()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="8.5" cy="7" r="4"/>
@@ -198,14 +186,82 @@ import { PedidosService } from "../../../core/services/pedidos.service"
             </svg>
             Promover para Utente Registado
           </button>
-          
-          <button class="action-btn secondary" (click)="editarPedido()">
+          <button class="action-btn secondary" (click)="abrirEditarPedido()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/>
             </svg>
             Editar Pedido
           </button>
+        </div>
+      </div>
+
+      <!-- Modal de Edição do Pedido -->
+      <div class="modal-overlay" *ngIf="editarAberto">
+        <div class="modal-content">
+          <h2>Editar Pedido</h2>
+          <form *ngIf="editForm" [formGroup]="editForm" (ngSubmit)="salvarEdicao()">
+            <div class="form-group">
+              <label>Data Início Preferida:</label>
+              <input type="date" formControlName="dataInicioPreferida" />
+            </div>
+            <div class="form-group">
+              <label>Data Fim Preferida:</label>
+              <input type="date" formControlName="dataFimPreferida" />
+            </div>
+            <div class="form-group">
+              <label>Hora Início Preferida:</label>
+              <select formControlName="horaInicioPreferida">
+                <option value="">Selecione um horário</option>
+                <option value="09:00">09:00</option>
+                <option value="09:30">09:30</option>
+                <option value="10:00">10:00</option>
+                <option value="10:30">10:30</option>
+                <option value="11:00">11:00</option>
+                <option value="11:30">11:30</option>
+                <option value="14:00">14:00</option>
+                <option value="14:30">14:30</option>
+                <option value="15:00">15:00</option>
+                <option value="15:30">15:30</option>
+                <option value="16:00">16:00</option>
+                <option value="16:30">16:30</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Hora Fim Preferida:</label>
+              <select formControlName="horaFimPreferida">
+                <option value="">Selecione um horário</option>
+                <option value="09:00">09:00</option>
+                <option value="09:30">09:30</option>
+                <option value="10:00">10:00</option>
+                <option value="10:30">10:30</option>
+                <option value="11:00">11:00</option>
+                <option value="11:30">11:30</option>
+                <option value="14:00">14:00</option>
+                <option value="14:30">14:30</option>
+                <option value="15:00">15:00</option>
+                <option value="15:30">15:30</option>
+                <option value="16:00">16:00</option>
+                <option value="16:30">16:30</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subsistema:</label>
+              <input type="text" formControlName="subsistema" />
+            </div>
+            <div class="form-group">
+              <label>Profissional:</label>
+              <input type="text" formControlName="profissional" />
+            </div>
+            <div class="form-group">
+              <label>Observações:</label>
+              <textarea formControlName="observacoes"></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="submit" class="action-btn success">Salvar</button>
+              <button type="button" class="action-btn danger" (click)="fecharEditarPedido()">Cancelar</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -511,6 +567,84 @@ import { PedidosService } from "../../../core/services/pedidos.service"
       height: 20px;
     }
 
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .modal-content h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #00548d;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input[type="date"],
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #333;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input[type="date"]:focus,
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+      border-color: #00548d;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .action-btn.danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .action-btn.danger:hover {
+      background: #dc2626;
+    }
+
     @media (max-width: 768px) {
       .pedido-detalhe-container {
         padding: 1rem;
@@ -545,6 +679,8 @@ export class PedidoDetalheComponent implements OnInit {
   pedido: any = null;
   atosClinicos: any[] = [];
   historico: any[] = [];
+  editarAberto: boolean = false;
+  editForm: FormGroup | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -644,10 +780,20 @@ export class PedidoDetalheComponent implements OnInit {
 
   agendarPedido() {
     if (!this.pedido?.id) return;
-    
+
     const nomeUtente = this.pedido.user?.nomeCompleto || 'Utente';
     if (confirm(`Confirmar agendamento para ${nomeUtente}?`)) {
-      this.pedidosService.agendar(this.pedido.id).subscribe({
+      // Usa a dataInicioPreferida como data agendada, garantindo o formato correto
+      let dataAgendada = this.pedido.dataInicioPreferida;
+      // Se vier só a data, adiciona hora padrão
+      if (dataAgendada && dataAgendada.length === 10) {
+        dataAgendada = dataAgendada + 'T09:00:00';
+      }
+      // Se não houver data, usa o momento atual
+      if (!dataAgendada) {
+        dataAgendada = new Date().toISOString().slice(0, 19);
+      }
+      this.pedidosService.agendar(this.pedido.id, dataAgendada).subscribe({
         next: () => {
           console.log('Pedido agendado com sucesso');
           this.carregarPedido(this.pedido.id);
@@ -681,6 +827,39 @@ export class PedidoDetalheComponent implements OnInit {
       console.log('Promover utente:', this.pedido?.id);
       // Implementar promoção
       alert('Utente promovido com sucesso! Email com credenciais enviado.');
+    }
+  }
+
+  abrirEditarPedido() {
+    this.editarAberto = true;
+    this.editForm = this.pedidosService.getEditForm(this.pedido);
+  }
+
+  fecharEditarPedido() {
+    this.editarAberto = false;
+    this.editForm?.reset();
+  }
+
+  salvarEdicao() {
+    if (this.editForm && this.editForm.valid) {
+      const formValue = this.editForm.value;
+      const payload = {
+        ...formValue,
+        horarioPreferido: formValue.horaInicioPreferida && formValue.horaFimPreferida ? `${formValue.horaInicioPreferida} - ${formValue.horaFimPreferida}` : '',
+      };
+      this.pedidosService.update(this.pedido.id, payload).subscribe({
+        next: () => {
+          console.log('Pedido editado com sucesso');
+          this.carregarPedido(this.pedido.id);
+          this.fecharEditarPedido();
+        },
+        error: (error) => {
+          console.error('Erro ao editar pedido:', error);
+          alert('Erro ao salvar edição do pedido.');
+        }
+      });
+    } else {
+      alert('Por favor, preencha todos os campos obrigatórios.');
     }
   }
 

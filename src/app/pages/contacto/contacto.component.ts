@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { UsersService } from '../../core/services/users.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface ContactFormData {
   nome: string;
@@ -31,33 +33,50 @@ export class ContactoComponent {
   isSubmitting = false;
   activeFaq: number | null = null;
 
+  constructor(private usersService: UsersService, private authService: AuthService) {
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.formData.nome = user.nomeCompleto || '';
+      this.formData.email = user.email || '';
+      this.formData.telefone = user.telemovel || user.telefone || '';
+    }
+  }
+
   onSubmit() {
     if (this.isSubmitting) return;
-    
     this.isSubmitting = true;
-    
-    // Simular envio do formulário
-    setTimeout(() => {
-      console.log('Formulário enviado:', this.formData);
-      
-      // Aqui você pode adicionar a lógica real para enviar o formulário
-      // Por exemplo, chamar um serviço que faz uma requisição HTTP
-      
-      alert('Mensagem enviada com sucesso! Entraremos em contacto consigo em breve.');
-      this.clearForm();
-      this.isSubmitting = false;
-    }, 2000);
+    this.usersService.sendContactMessage(this.formData).subscribe({
+      next: () => {
+        alert('Mensagem enviada com sucesso! Entraremos em contacto consigo em breve.');
+        this.clearForm();
+        this.isSubmitting = false;
+      },
+      error: (err) => {
+        alert('Erro ao enviar mensagem. Tente novamente mais tarde.');
+        this.isSubmitting = false;
+      }
+    });
+  }
+
+  isUserLogged(): boolean {
+    return !!this.authService.getCurrentUser();
   }
 
   clearForm() {
-    this.formData = {
-      nome: '',
-      email: '',
-      telefone: '',
-      assunto: '',
-      mensagem: '',
-      newsletter: false
-    };
+    if (this.isUserLogged()) {
+      this.formData.assunto = '';
+      this.formData.mensagem = '';
+      this.formData.newsletter = false;
+    } else {
+      this.formData = {
+        nome: '',
+        email: '',
+        telefone: '',
+        assunto: '',
+        mensagem: '',
+        newsletter: false
+      };
+    }
   }
 
   toggleFaq(index: number) {

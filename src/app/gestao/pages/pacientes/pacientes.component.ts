@@ -1,9 +1,9 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { User } from '../../../core/models/user.model';
 import { UtenteService } from '../../../core/services/utentes.service';
-import { IUtente } from '../../../models/utente.interface';
 import { FilterOption } from '../../../models/marcacao.interface';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -15,7 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./pacientes.component.css']
 })
 export class UtenteComponent {
-  utentes: IUtente[] = [];
+  utentes: User[] = [];
 
   isDropdownOpen = false;
   selectedFilterValue: string = 'Últimos dias';

@@ -97,6 +97,8 @@ import autoTable from 'jspdf-autotable'
       </div>
 
       <!-- Lista de Pedidos -->
+      <div *ngIf="mensagemSucesso" class="alert alert-success" style="margin-bottom: 16px;">{{ mensagemSucesso }}</div>
+      <div *ngIf="mensagemErro" class="alert alert-danger" style="margin-bottom: 16px;">{{ mensagemErro }}</div>
       <div class="pedidos-list">
         <div *ngFor="let pedido of pedidosFiltrados" class="pedido-item">
           <div class="pedido-header">
@@ -152,11 +154,13 @@ import autoTable from 'jspdf-autotable'
                 *ngIf="pedido.estado === 1" 
                 class="action-btn completed" 
                 (click)="realizarPedido(pedido)"
+                [disabled]="loadingRealizar === pedido.id"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                   <polyline points="22,4 12,14.01 9,11.01"/>
                 </svg>
+                <span *ngIf="loadingRealizar === pedido.id" class="spinner" style="margin-right: 6px; width: 16px; height: 16px; display: inline-block; border: 2px solid #00548d; border-top: 2px solid #fff; border-radius: 50%; animation: spin 1s linear infinite;"></span>
                 Realizar
               </button>
             </div>
@@ -201,6 +205,9 @@ import autoTable from 'jspdf-autotable'
           Próxima
         </button>
       </div>
+      <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+      </style>
     </div>
   `,
   styles: [`
@@ -596,6 +603,8 @@ import autoTable from 'jspdf-autotable'
         justify-content: center;
       }
     }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   `]
 })
 export class PedidosComponent implements OnInit {
@@ -608,6 +617,9 @@ export class PedidosComponent implements OnInit {
   
   todosPedidos: PedidoMarcacao[] = [];
   pedidosFiltrados: PedidoMarcacao[] = [];
+  mensagemErro: string = "";
+  mensagemSucesso: string = "";
+  loadingRealizar: number | null = null; // id do pedido em loading
 
   constructor(private pedidosService: PedidosService) {}
 
@@ -740,14 +752,30 @@ export class PedidosComponent implements OnInit {
 
   agendarPedido(pedido: PedidoMarcacao) {
     const nomeUtente = pedido.user?.nomeCompleto || 'Utente';
+    this.mensagemErro = ""; // Limpa mensagem anterior
     if (confirm(`Confirmar agendamento para ${nomeUtente}?`)) {
       if (pedido.id) {
-        this.pedidosService.agendar(pedido.id).subscribe({
+        // Usa a dataInicioPreferida como data agendada, garantindo o formato correto
+        let dataAgendada = pedido.dataInicioPreferida;
+        if (dataAgendada && dataAgendada.length === 10) {
+          dataAgendada = dataAgendada + 'T09:00:00';
+        }
+        if (!dataAgendada) {
+          dataAgendada = new Date().toISOString().slice(0, 19);
+        }
+        this.pedidosService.agendar(pedido.id, dataAgendada).subscribe({
           next: () => {
             console.log('Pedido agendado com sucesso');
             this.carregarPedidos();
           },
           error: (error) => {
+            let mensagem = "Erro ao agendar pedido. Tente novamente.";
+            if (error.status === 400 && error.error && error.error.errors) {
+              // Mostra a(s) mensagem(ns) de erro de validação retornada(s) pelo backend
+              const erros = error.error.errors;
+              mensagem = Object.values(erros).flat().join(' ');
+            }
+            this.mensagemErro = mensagem;
             console.error('Erro ao agendar pedido:', error);
           }
         });
@@ -759,12 +787,23 @@ export class PedidosComponent implements OnInit {
     const nomeUtente = pedido.user?.nomeCompleto || 'Utente';
     if (confirm(`Confirmar realização da consulta para ${nomeUtente}?`)) {
       if (pedido.id) {
+        this.loadingRealizar = pedido.id;
+        this.mensagemErro = "";
+        this.mensagemSucesso = "";
         this.pedidosService.realizar(pedido.id).subscribe({
           next: () => {
-            console.log('Pedido marcado como realizado');
+            this.mensagemSucesso = 'Pedido marcado como realizado com sucesso!';
+            this.loadingRealizar = null;
             this.carregarPedidos();
+            setTimeout(() => { this.mensagemSucesso = ''; }, 4000);
           },
           error: (error) => {
+            this.loadingRealizar = null;
+            this.mensagemErro = 'Erro ao marcar pedido como realizado. Tente novamente.';
+            if (error.status === 400 && error.error && error.error.errors) {
+              const erros = error.error.errors;
+              this.mensagemErro = Object.values(erros).flat().join(' ');
+            }
             console.error('Erro ao marcar pedido como realizado:', error);
           }
         });

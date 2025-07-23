@@ -2,12 +2,12 @@ import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule } from "@angular/router"
 import { UsersService } from '../../../core/services/users.service';
-import { MarcacaoService } from '../../../core/services/marcacao';
+import { NgChartsModule } from 'ng2-charts';
 
 @Component({
   selector: "app-super-dashboard",
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NgChartsModule],
   template: `
     <div class="super-dashboard-container">
       <!-- Header -->
@@ -150,6 +150,26 @@ import { MarcacaoService } from '../../../core/services/marcacao';
         </div>
       </div>
       <!-- Removida a secção de Ações Rápidas -->
+
+      <!-- Gráficos -->
+      <div class="charts-section" style="display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div style="flex:1; min-width: 320px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 1.5rem;">
+          <h3 style="color: #00548d; font-weight: 700; margin-bottom: 1rem;">Utilizadores por Perfil</h3>
+          <canvas baseChart
+            [data]="usuariosPerfilChartData"
+            [type]="'pie'"
+            [options]="usuariosPerfilChartOptions">
+          </canvas>
+            </div>
+        <div style="flex:1; min-width: 320px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 1.5rem;">
+          <h3 style="color: #00548d; font-weight: 700; margin-bottom: 1rem;">Pedidos por Estado</h3>
+          <canvas baseChart
+            [data]="pedidosEstadoChartData"
+            [type]="'bar'"
+            [options]="pedidosEstadoChartOptions">
+          </canvas>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -370,9 +390,44 @@ export class SuperDashboardComponent implements OnInit {
   pedidosPorEstado: { [key: string]: number } = { pedido: 0, agendado: 0, realizado: 0 };
   marcacoesHoje = 0;
 
+  // Gráfico de Utilizadores por Perfil
+  usuariosPerfilChartData = {
+    labels: ['Utentes', 'Administrativos', 'Administradores', 'Médicos'],
+    datasets: [
+      {
+        data: [0, 0, 0, 0],
+        label: 'Utilizadores',
+        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
+      }
+    ]
+  };
+  usuariosPerfilChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom' as const }
+    }
+  };
+
+  // Gráfico de Pedidos por Estado
+  pedidosEstadoChartData = {
+    labels: ['Pedidos', 'Agendados', 'Realizados'],
+    datasets: [
+      {
+        data: [0, 0, 0],
+        label: 'Pedidos',
+        backgroundColor: ['#6366f1', '#22d3ee', '#fbbf24']
+      }
+    ]
+  };
+  pedidosEstadoChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false }
+    }
+  };
+
   constructor(
-    private usersService: UsersService,
-    private marcacaoService: MarcacaoService
+    private usersService: UsersService
   ) {}
 
   ngOnInit() {
@@ -390,40 +445,38 @@ export class SuperDashboardComponent implements OnInit {
       });
     });
 
-    this.marcacaoService.getMarcacoes().subscribe(marcacoes => {
-      this.totalPedidos = marcacoes.length;
-      this.pedidosPorEstado = { pedido: 0, agendado: 0, realizado: 0 };
-      const estadoMap: { [key: number]: string } = {
-        0: 'pedido',
-        1: 'agendado',
-        2: 'realizado'
-      };
-      const profissionaisSet = new Set<string>();
-      let hoje = new Date();
-      hoje.setHours(0,0,0,0);
-      this.marcacoesHoje = 0;
-      marcacoes.forEach(m => {
-        const estadoStr = estadoMap[Number(m.estado)];
-        if (estadoStr) this.pedidosPorEstado[estadoStr]++;
-        // Extrair profissionais únicos dos actos clínicos
-        if (m.actosClinicos && Array.isArray(m.actosClinicos)) {
-          m.actosClinicos.forEach((a: any) => {
-            if (a.profissional && a.profissional.trim() !== '') {
-              profissionaisSet.add(a.profissional.trim());
-            }
-          });
-        }
-        // Contar marcações de hoje pela dataInicioPreferida
-        if (m.dataInicioPreferida) {
-          const dataInicio = new Date(m.dataInicioPreferida);
-          dataInicio.setHours(0,0,0,0);
-          if (dataInicio.getTime() === hoje.getTime()) {
-            this.marcacoesHoje++;
+    // Atualizar dados dos gráficos após carregar os dados reais
+    setTimeout(() => {
+      this.usuariosPerfilChartData = {
+        labels: ['Utentes', 'Administrativos', 'Administradores', 'Médicos'],
+        datasets: [
+          {
+            data: [
+              this.getUsuariosPorPerfil('utente'),
+              this.getUsuariosPorPerfil('administrativo'),
+              this.getUsuariosPorPerfil('administrador'),
+              this.getUsuariosPorPerfil('medico')
+            ],
+            label: 'Utilizadores',
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
           }
-        }
-      });
-      this.usuariosPorPerfil['medico'] = profissionaisSet.size;
-    });
+        ]
+      };
+      this.pedidosEstadoChartData = {
+        labels: ['Pedidos', 'Agendados', 'Realizados'],
+        datasets: [
+          {
+            data: [
+              this.getPedidosPorEstado('pedido'),
+              this.getPedidosPorEstado('agendado'),
+              this.getPedidosPorEstado('realizado')
+            ],
+            label: 'Pedidos',
+            backgroundColor: ['#6366f1', '#22d3ee', '#fbbf24']
+          }
+        ]
+      };
+    }, 500);
   }
 
   getTotalUsuarios() { return this.totalUsuarios; }

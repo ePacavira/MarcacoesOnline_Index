@@ -46,4 +46,16 @@ export class UsersService {
   eliminarUser(id: number) {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  sendContactMessage(data: any) {
+    return this.http.post(`${environment.apiUrl}/User/contacto`, data);
+  }
+
+  existsEmail(email: string) {
+    return this.http.get<{ exists: boolean }>(`${this.apiUrl}/exists-email`, { params: { email } });
+  }
+
+  existsTelemovel(telemovel: string) {
+    return this.http.get<{ exists: boolean }>(`${this.apiUrl}/exists-telemovel`, { params: { telemovel } });
+  }
 } 

@@ -18,7 +18,20 @@ export class AuthService {
   private loadStoredUser(): void {
     const storedUser = localStorage.getItem('current_user');
     if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
+      const user = JSON.parse(storedUser);
+      
+      // Se não há foto no servidor, tenta obter do localStorage
+      if (!user.fotoPath || user.fotoPath.trim() === '') {
+        const localPhoto = this.getPhotoFromLocalStorage(user.id);
+        if (localPhoto) {
+          user.fotoPath = localPhoto;
+          console.log('Foto carregada do localStorage na inicialização');
+          // Atualizar o localStorage com a foto
+          localStorage.setItem('current_user', JSON.stringify(user));
+        }
+      }
+      
+      this.currentUserSubject.next(user);
     }
   }
 
@@ -33,12 +46,32 @@ export class AuthService {
           console.log('Perfil (número):', response.user.perfil);
           console.log('Tipo do perfil:', typeof response.user.perfil);
           
+          // Se não há foto no servidor, tenta obter do localStorage
+          if (!response.user.fotoPath || response.user.fotoPath.trim() === '') {
+            const localPhoto = this.getPhotoFromLocalStorage(response.user.id);
+            if (localPhoto) {
+              response.user.fotoPath = localPhoto;
+              console.log('Foto carregada do localStorage após login');
+            }
+          }
+          
           // Guardar token e dados do utilizador
           localStorage.setItem('jwt_token', response.token);
           localStorage.setItem('current_user', JSON.stringify(response.user));
           this.currentUserSubject.next(response.user);
         })
       );
+  }
+
+  // Método auxiliar para obter foto do localStorage
+  private getPhotoFromLocalStorage(userId: number): string | null {
+    const key = `user_photo_${userId}`;
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.error('Erro ao obter foto do localStorage:', error);
+      return null;
+    }
   }
 
   logout(): void {

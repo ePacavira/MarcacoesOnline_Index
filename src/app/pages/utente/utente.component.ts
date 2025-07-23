@@ -2,12 +2,12 @@ import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-import { Utente } from '../../models/utente.interface';
+import { User } from '../../core/models/user.model';
 import { UtenteService } from '../../core/services/utentes.service';
-import { MarcacaoService } from '../../core/services/marcacao';
-import { Marcacao } from '../../core/services/marcacao.service';
 import { Router } from '@angular/router';
 import { PedidoMarcacao } from '../../models/marcacao.interface';
+import { MarcacaoService } from '../../core/services/marcacao.service';
+import { Marcacao } from '../../core/services/marcacao.service';
 
 @Component({
   selector: 'app-utente',
@@ -21,8 +21,8 @@ export class UtenteComponent {
   selectedFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
   private utenteService = inject(UtenteService)
-  private marcacaoService = inject(MarcacaoService)
   private router = inject(Router)
+  private marcacaoService = inject(MarcacaoService);
   isLoading = signal(false);
   errorMessage = signal('');
 
@@ -53,9 +53,17 @@ export class UtenteComponent {
     // Puxar marcações do utente autenticado (exemplo: id guardado no localStorage)
     const utenteId = localStorage.getItem('utenteId');
     if (utenteId) {
-      this.marcacaoService.getMarcacoes().subscribe({
-        next: (marcacoes: PedidoMarcacao[]) => {
-          const minhasMarcacoes = marcacoes.filter(m => m.utenteId == utenteId);
+      this.marcacaoService.getMarcacoesUtente(Number(utenteId)).subscribe({
+        next: (marcacoes: Marcacao[]) => {
+          // Adaptar para PedidoMarcacao[] se necessário
+          const minhasMarcacoes = marcacoes.map(m => ({
+            ...m,
+            actosClinicos: [], // ou adaptar conforme necessário
+            dataFimPreferida: '', // ou adaptar conforme necessário
+            horarioPreferido: m.horarioPreferido || '',
+            estado: m.estado,
+            utenteId: String(m.utenteId)
+          })) as PedidoMarcacao[];
           this.marcacoes = minhasMarcacoes;
           this.totalPendentes = minhasMarcacoes.filter(m => m.estado === 'Pendente').length;
           this.totalConfirmadas = minhasMarcacoes.filter(m => m.estado === 'Confirmada').length;
@@ -134,33 +142,23 @@ export class UtenteComponent {
       console.log("Passou aqui", utente)
 
       const dataComHora = new Date(`${utente.dataNascimento}T14:00:23.204Z`);
-      const formData = new FormData();
-      formData.append('numeroUtente', utente.numeroUtente);
-      formData.append('nomeCompleto', utente.nomeCompleto);
-      formData.append('email', utente.email);
-      formData.append('telemovel', utente.telemovel);
-      formData.append('genero', utente.genero);
-      formData.append('dataNascimento', dataComHora.toISOString());
-      formData.append('rua', utente.rua);
-      formData.append('numeroPorta', utente.numeroPorta);
-      formData.append('andarLado', utente.andarLado);
-      formData.append('localidade', utente.localidade);
-      formData.append('Fotografia', utente.fotografia);
-
-
-
-      try {
-        this.utenteService.createUtente(formData).subscribe({
-          next: (res) => {
-            console.log('Utente criado com sucesso', res);
-            this.fazerPedidoMarcacao(res.id);
-          },
-          error: (err) => console.error('Erro', err)
-        });
-      } catch (error) {
-        console.error(error);
-        alert('Erro ao enviar marcação.');
-      }
+      const utenteObj = {
+        numeroUtente: utente.numeroUtente,
+        nomeCompleto: utente.nomeCompleto,
+        email: utente.email,
+        telemovel: utente.telemovel,
+        genero: utente.genero,
+        dataNascimento: dataComHora.toISOString(),
+        rua: utente.rua,
+        fotografia: utente.fotografia
+      };
+      this.utenteService.createUtente(utenteObj).subscribe({
+        next: (res: any) => {
+          console.log('Utente criado com sucesso', res);
+          this.fazerPedidoMarcacao(String(res.id));
+        },
+        error: (err: any) => console.error('Erro', err)
+      });
     } else {
       this.registoForm.markAllAsTouched();
       this.errorMessage.set('Por favor preencha todos os campos obrigatórios.');
@@ -176,12 +174,12 @@ export class UtenteComponent {
 
       console.log(marcacao);
 
-      this.marcacaoService.createMarcacao(marcacao).subscribe({
-        next: (res) => {
+      this.marcacaoService.criarMarcacao(marcacao).subscribe({
+        next: (res: any) => {
           this.router.navigate(['/marcacao-sucesso']);
           localStorage.removeItem('consulta_pendente'); // limpa após sucesso
         },
-        error: (err) => console.error('Erro ao criar marcação', err)
+        error: (err: any) => console.error('Erro ao criar marcação', err)
       });
     } else {
       console.warn('Nenhuma marcação pendente encontrada no localStorage.');

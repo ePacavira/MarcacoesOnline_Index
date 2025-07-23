@@ -665,3 +665,11 @@
     padding: 0 20px 20px;
   }
 }
+
+.input-blocked, input[readonly], input[disabled], input:disabled, input:read-only {
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  border: 1px solid #d1d5db !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}

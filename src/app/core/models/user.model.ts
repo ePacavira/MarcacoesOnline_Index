@@ -18,6 +18,7 @@ export interface User {
   pedidos?: any[];
   createdAt?: Date;
   updatedAt?: Date;
+  createdOn?: string;
 }
 
 export enum UserRole {

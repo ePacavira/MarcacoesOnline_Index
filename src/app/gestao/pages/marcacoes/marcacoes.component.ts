@@ -5,12 +5,12 @@ import { AuthService } from "../../../core/services/auth.service"
 import { UserProfileService } from "../../../core/services/user-profile.service"
 import { Router } from '@angular/router';
 import { PedidosService } from '../../../core/services/pedidos.service';
-import { MarcacaoService } from '../../../core/services/marcacao';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: "app-marcacoes",
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
     <div class="marcacoes-container">
       <!-- Header -->
@@ -208,7 +208,7 @@ import { MarcacaoService } from '../../../core/services/marcacao';
       <!-- Modal de detalhes da marcação -->
       <div *ngIf="detalheModalAberto" class="modal-overlay">
         <div class="modal-box">
-          <h3>Detalhes da Marcação</h3>
+          <h3 class="modal-title">Detalhes da Marcação</h3>
           @if (!detalheMarcacao) {
             <p class="loading-message">A carregar detalhes...</p>
           } @else if (detalheMarcacao?.erro) {
@@ -217,8 +217,8 @@ import { MarcacaoService } from '../../../core/services/marcacao';
             <p class="error-message">Dados não disponíveis para esta marcação.</p>
           } @else {
             <div class="detail-item">
-              <span class="detail-label">ID:</span>
-              <span class="detail-value">{{ detalheMarcacao.id || 'Sem dados' }}</span>
+              <span class="detail-label">Código de Referência:</span>
+              <span class="detail-value">{{ detalheMarcacao.codigoReferencia || detalheMarcacao.referenceCode || 'Sem dados' }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Estado:</span>
@@ -680,6 +680,13 @@ import { MarcacaoService } from '../../../core/services/marcacao';
       font-size: 0.7rem;
     }
 
+    .modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #00548d;
+      margin-bottom: 0.7rem;
+    }
+
     @media (max-width: 768px) {
       .marcacoes-container {
         padding: 1rem;
@@ -738,14 +745,31 @@ export class MarcacoesComponent implements OnInit {
   pedidoParaCancelar: number | null = null;
   detalheModalAberto = false;
   detalheMarcacao: any = null;
+  showForm = false;
+  marcacaoForm: FormGroup;
+  minDate = new Date().toISOString().split('T')[0];
+  availableSlots: string[] = [
+    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+    '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+    '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
+  ];
 
   constructor(
     private authService: AuthService,
     private userProfileService: UserProfileService,
     private router: Router,
     private pedidosService: PedidosService,
-    private marcacaoService: MarcacaoService
-  ) {}
+    private fb: FormBuilder
+  ) {
+    this.marcacaoForm = this.fb.group({
+      dataInicioPreferida: ['', Validators.required],
+      horaInicioPreferida: ['', Validators.required],
+      dataFimPreferida: ['', Validators.required],
+      horaFimPreferida: ['', Validators.required],
+      observacoes: ['']
+    });
+  }
 
   ngOnInit() {
     this.carregarMarcacoes();
@@ -754,25 +778,25 @@ export class MarcacoesComponent implements OnInit {
   carregarMarcacoes() {
     this.isLoading.set(true);
     const user = this.authService.getCurrentUser();
-    this.marcacaoService.getMarcacoes().subscribe({
-      next: (marcacoes) => {
+    this.pedidosService.getAll().subscribe({
+      next: (pedidos: any[]) => {
         console.log('Usuário logado:', user);
-        console.log('Marcações recebidas:', marcacoes);
+        console.log('Pedidos recebidos:', pedidos);
         // Garantir igualdade de tipos ao filtrar
-        const minhasMarcacoes = marcacoes.filter(m => String(m.userId) === String(user?.id));
-        console.log('Marcações filtradas:', minhasMarcacoes);
+        const minhasMarcacoes = pedidos.filter(p => String(p.userId) === String(user?.id));
+        console.log('Pedidos filtrados:', minhasMarcacoes);
         this.todasMarcacoes.set(minhasMarcacoes);
         this.estatisticas.set({
           total: minhasMarcacoes.length,
-          pendentes: minhasMarcacoes.filter(m => Number(m.estado) === 0).length,
-          agendadas: minhasMarcacoes.filter(m => Number(m.estado) === 1).length,
-          realizadas: minhasMarcacoes.filter(m => Number(m.estado) === 2).length,
-          cancelados: minhasMarcacoes.filter(m => Number(m.estado) === 3).length,
+          pendentes: minhasMarcacoes.filter(p => Number(p.estado) === 0).length,
+          agendadas: minhasMarcacoes.filter(p => Number(p.estado) === 1).length,
+          realizadas: minhasMarcacoes.filter(p => Number(p.estado) === 2).length,
+          cancelados: minhasMarcacoes.filter(p => Number(p.estado) === 3).length,
         });
         this.aplicarFiltros();
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao carregar marcações:', err);
         this.isLoading.set(false);
       }
@@ -796,10 +820,10 @@ export class MarcacoesComponent implements OnInit {
 
     // Filtro por estado
     if (this.filtroEstado()) {
-      filtrados = filtrados.filter(m => m.estado === parseInt(this.filtroEstado()));
+      filtrados = filtrados.filter(p => p.estado === parseInt(this.filtroEstado()));
     } else {
       // Por padrão, não mostrar canceladas
-      filtrados = filtrados.filter(m => m.estado !== 3);
+      filtrados = filtrados.filter(p => p.estado !== 3);
     }
 
     // Filtro por data
@@ -807,8 +831,8 @@ export class MarcacoesComponent implements OnInit {
       const dias = parseInt(this.filtroData());
       const dataLimite = new Date();
       dataLimite.setDate(dataLimite.getDate() - dias);
-      filtrados = filtrados.filter(m => {
-        const dataMarcacao = new Date(m.dataInicioPreferida);
+      filtrados = filtrados.filter(p => {
+        const dataMarcacao = new Date(p.dataInicioPreferida);
         return dataMarcacao >= dataLimite;
       });
     }
@@ -816,13 +840,13 @@ export class MarcacoesComponent implements OnInit {
     // Filtro por pesquisa
     if (this.termoPesquisa()) {
       const termo = this.termoPesquisa().toLowerCase();
-      filtrados = filtrados.filter(m => 
-        m.actosClinicos.some((acto: any) => 
+      filtrados = filtrados.filter(p => 
+        p.actosClinicos.some((acto: any) => 
           acto.tipo.toLowerCase().includes(termo) ||
           acto.profissional.toLowerCase().includes(termo) ||
           acto.subsistemaSaude.toLowerCase().includes(termo)
         ) ||
-        m.observacoes?.toLowerCase().includes(termo)
+        p.observacoes?.toLowerCase().includes(termo)
       );
     }
 
@@ -850,24 +874,9 @@ export class MarcacoesComponent implements OnInit {
   }
 
   verDetalhes(id: number) {
+    const marc = this.todasMarcacoes().find((p: any) => p.id == id);
+    this.detalheMarcacao = marc || null;
     this.detalheModalAberto = true;
-    this.detalheMarcacao = null;
-    console.log('[DEBUG] Buscando detalhes do pedido com id:', id);
-    this.userProfileService.getUserPedido(id).subscribe({
-      next: (marc: any) => {
-        console.log('[DEBUG] Resposta da API para detalhes:', marc);
-        if (Array.isArray(marc)) {
-          const encontrado = marc.find((p: any) => p.id === id);
-          this.detalheMarcacao = encontrado || {};
-        } else {
-          this.detalheMarcacao = marc;
-        }
-      },
-      error: (err) => {
-        console.error('[DEBUG] Erro ao buscar detalhes:', err);
-        this.detalheMarcacao = { erro: true };
-      }
-    });
   }
 
   fecharModalDetalhe() {
@@ -919,5 +928,28 @@ export class MarcacoesComponent implements OnInit {
 
   irParaNovaMarcacao() {
     this.router.navigate(['/marcacoes']);
+  }
+
+  abrirForm() {
+    this.showForm = true;
+    this.marcacaoForm.reset();
+  }
+
+  cancelarForm() {
+    this.showForm = false;
+    this.marcacaoForm.reset();
+  }
+
+  salvarMarcacao() {
+    if (this.marcacaoForm.invalid) {
+      this.marcacaoForm.markAllAsTouched();
+      return;
+    }
+    const novaMarcacao = this.marcacaoForm.value;
+    // Aqui você pode integrar com o serviço para salvar a marcação
+    // Exemplo: this.marcacaoService.criarMarcacao(novaMarcacao).subscribe(...)
+    this.showForm = false;
+    this.marcacaoForm.reset();
+    // Recarregar lista de marcações se necessário
   }
 }

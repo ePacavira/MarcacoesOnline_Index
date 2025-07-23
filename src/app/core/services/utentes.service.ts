@@ -1,53 +1,36 @@
-import { Injectable, inject } from "@angular/core"
-import { HttpClient, HttpParams } from "@angular/common/http"
-import type { Observable } from "rxjs"
-import { environment } from "../../../environments/environment"
-import { IUtente } from "../../models/utente.interface"
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { User } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: "root",
-})
+@Injectable({ providedIn: 'root' })
 export class UtenteService {
-  private http = inject(HttpClient)
-  private apiUrl = `${environment.apiUrl}/Utente`
+  private apiUrl = '/api/utente';
+  constructor(private http: HttpClient) {}
 
   // Buscar lista de utentes com filtros opcionais
-  getUtentes(filters?: {
-    nomeCompleto?: string
-    numeroUtente?: string
-    email?: string
-    genero?: string
-  }): Observable<IUtente[]> {
-    let params = new HttpParams()
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-          params = params.set(key, value.toString())
-        }
-      })
-    }
-
-    return this.http.get<IUtente[]>(this.apiUrl, { params })
+  getUtentes(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/utentes`);
   }
 
   // Buscar um utente por ID
-  getUtenteById(id: string): Observable<IUtente> {
-    return this.http.get<IUtente>(`${this.apiUrl}/${id}`)
+  getUtenteById(id: string): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
   // Criar novo utente
-  createUtente(utente: Partial<any>): Observable<IUtente> {
-    return this.http.post<IUtente>(this.apiUrl, utente)
+  createUtente(utente: Partial<User>): Observable<User> {
+    return this.http.post<User>(this.apiUrl, utente);
   }
 
   // Atualizar utente
-  updateUtente(id: string, utente: Partial<IUtente>): Observable<IUtente> {
-    return this.http.put<IUtente>(`${this.apiUrl}/${id}`, utente)
+  updateUtente(id: string, utente: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/${id}`, utente);
   }
 
   // Eliminar utente
   deleteUtente(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

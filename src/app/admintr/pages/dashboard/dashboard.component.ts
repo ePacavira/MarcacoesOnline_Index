@@ -15,16 +15,7 @@ import { PedidosService, PedidoMarcacao } from "../../../core/services/pedidos.s
           <h1 class="page-title">Painel Administrativo</h1>
           <p class="page-subtitle">Gestão centralizada de todos os pedidos e marcações</p>
         </div>
-        <div class="header-right">
-          <button class="view-all-btn" routerLink="/admintr/pedidos">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12l2 2 4-4"/>
-              <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"/>
-              <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"/>
-            </svg>
-            Ver Todos os Pedidos
-          </button>
-        </div>
+        <!-- Removido o botão 'Ver Todos os Pedidos' do header -->
       </div>
 
       <!-- Contadores por Estado -->
@@ -39,7 +30,7 @@ import { PedidosService, PedidoMarcacao } from "../../../core/services/pedidos.s
           <div class="stat-content">
             <h3 class="stat-number">{{ getPedidosCount() }}</h3>
             <p class="stat-label">Pedidos Pendentes</p>
-            <span class="stat-change neutral">Aguardando agendamento</span>
+            <span class="stat-change neutral">Esperando agendamento</span>
           </div>
         </div>
 
@@ -92,7 +83,7 @@ import { PedidosService, PedidoMarcacao } from "../../../core/services/pedidos.s
       <div class="recent-section">
         <div class="section-header">
           <h2>Pedidos Recentes</h2>
-          <button class="view-all-btn" routerLink="/admintr/pedidos">Ver Todos</button>
+          <!-- Removido o botão 'Ver Todos' -->
         </div>
         <div class="pedidos-list">
           <div *ngFor="let pedido of pedidosRecentes" class="pedido-item">
@@ -523,7 +514,17 @@ export class AdmintrDashboardComponent implements OnInit {
 
   confirmarPedido(pedido: PedidoMarcacao) {
     if (pedido.id) {
-      this.pedidosService.agendar(pedido.id).subscribe({
+      // Usa a dataInicioPreferida como data agendada, garantindo o formato correto
+      let dataAgendada = pedido.dataInicioPreferida;
+      // Se vier só a data, adiciona hora padrão
+      if (dataAgendada && dataAgendada.length === 10) {
+        dataAgendada = dataAgendada + 'T09:00:00';
+      }
+      // Se não houver data, usa o momento atual
+      if (!dataAgendada) {
+        dataAgendada = new Date().toISOString().slice(0, 19);
+      }
+      this.pedidosService.agendar(pedido.id, dataAgendada).subscribe({
         next: () => {
           console.log('Pedido agendado com sucesso');
           // Recarregar dados

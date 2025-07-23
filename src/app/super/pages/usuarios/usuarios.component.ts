@@ -16,15 +16,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
           <h1 class="page-title">Gestão de Utilizadores</h1>
           <p class="page-subtitle">Gerencie todos os utilizadores do sistema</p>
         </div>
-        <div class="header-right">
-          <button class="add-user-btn" (click)="adicionarUtilizador()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Adicionar Utilizador
-          </button>
-        </div>
+        <!-- Removido o botão de adicionar utilizador -->
       </div>
 
       <!-- Filtros -->
@@ -34,10 +26,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
             <label for="perfilFilter">Perfil:</label>
             <select id="perfilFilter" [(ngModel)]="filtroPerfil" (change)="aplicarFiltros()">
               <option value="">Todos</option>
-              <option value="utente">Utente</option>
-              <option value="administrativo">Administrativo</option>
-              <option value="medico">Médico</option>
-              <option value="admin">Administrador</option>
+              <option value="0">Anónimo</option>
+              <option value="1">Registado</option>
+              <option value="2">Administrativo</option>
+              <option value="3">Administrador</option>
             </select>
           </div>
           <div class="filter-group">
@@ -46,24 +38,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
               <option value="">Todos</option>
               <option value="ativo">Ativo</option>
               <option value="inativo">Inativo</option>
-              <option value="bloqueado">Bloqueado</option>
             </select>
           </div>
-          <div class="filter-group">
-            <label for="dateFilter">Registado:</label>
-            <select id="dateFilter" [(ngModel)]="filtroData" (change)="aplicarFiltros()">
-              <option value="">Todos</option>
-              <option value="hoje">Hoje</option>
-              <option value="semana">Esta Semana</option>
-              <option value="mes">Este Mês</option>
-            </select>
-          </div>
+          <!-- Filtro de data de registo removido -->
         </div>
         <div class="filters-right">
           <div class="search-box">
             <input 
               type="text" 
-              placeholder="Pesquisar utilizadores..." 
+              placeholder="Pesquisar por nome, email, telemóvel, Nº utente ou género..." 
               [(ngModel)]="termoPesquisa"
               (input)="aplicarFiltros()"
             />
@@ -88,10 +71,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         <div class="stat-item inativo">
           <span class="stat-number">{{ getUsuariosInativos() }}</span>
           <span class="stat-label">Inativos</span>
-        </div>
-        <div class="stat-item bloqueado">
-          <span class="stat-number">{{ getUsuariosBloqueados() }}</span>
-          <span class="stat-label">Bloqueados</span>
         </div>
       </div>
 
@@ -160,13 +139,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
               </svg>
               Ver Detalhes
             </button>
-            <button class="action-btn secondary" (click)="editarUsuario(usuario)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-              Editar
-            </button>
             <button class="action-btn danger" (click)="eliminarUsuario(usuario)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3,6 5,6 21,6"/>
@@ -176,7 +148,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
               </svg>
               Eliminar
             </button>
-            <button *ngIf="getStatusKey(usuario.perfil) === 'inativo'" class="action-btn success" (click)="ativarUsuario(usuario)">
+            <button *ngIf="usuario.perfil === 0" class="action-btn success" (click)="ativarUsuario(usuario)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
@@ -918,49 +890,29 @@ export class UsuariosComponent implements OnInit {
   aplicarFiltros() {
     let filtradas = [...this.todosUsuarios];
 
-    // Filtro por perfil
-    if (this.filtroPerfil) {
+    // Filtro por perfil (número)
+    if (this.filtroPerfil !== '' && this.filtroPerfil !== undefined) {
       filtradas = filtradas.filter(u => 
-        u.perfil.toLowerCase() === this.filtroPerfil.toLowerCase()
+        u.perfil !== undefined && u.perfil.toString() === this.filtroPerfil.toString()
       );
     }
 
-    // Filtro por status
-    if (this.filtroStatus) {
-      filtradas = filtradas.filter(u => 
-        u.status.toLowerCase() === this.filtroStatus.toLowerCase()
-      );
+    // Filtro por estado (ativo/inativo baseado no perfil)
+    if (this.filtroStatus === 'ativo') {
+      filtradas = filtradas.filter(u => u.perfil > 0);
+    } else if (this.filtroStatus === 'inativo') {
+      filtradas = filtradas.filter(u => u.perfil === 0);
     }
 
-    // Filtro por data
-    if (this.filtroData) {
-      const hoje = new Date();
-      const inicioSemana = new Date(hoje);
-      inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-      const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-
-      filtradas = filtradas.filter(u => {
-        const dataRegisto = new Date(u.dataRegisto);
-        switch (this.filtroData) {
-          case 'hoje':
-            return dataRegisto.toDateString() === hoje.toDateString();
-          case 'semana':
-            return dataRegisto >= inicioSemana;
-          case 'mes':
-            return dataRegisto >= inicioMes;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Filtro por pesquisa
+    // Filtro por pesquisa (nomeCompleto, email, telemovel, numeroUtente, genero)
     if (this.termoPesquisa) {
       const termo = this.termoPesquisa.toLowerCase();
       filtradas = filtradas.filter(u =>
-        u.nome.toLowerCase().includes(termo) ||
-        u.email.toLowerCase().includes(termo) ||
-        u.telefone.includes(termo)
+        (u.nomeCompleto && u.nomeCompleto.toLowerCase().includes(termo)) ||
+        (u.email && u.email.toLowerCase().includes(termo)) ||
+        (u.telemovel && u.telemovel.toLowerCase().includes(termo)) ||
+        (u.numeroUtente && u.numeroUtente.toLowerCase().includes(termo)) ||
+        (u.genero && u.genero.toLowerCase().includes(termo))
       );
     }
 
@@ -1002,10 +954,6 @@ export class UsuariosComponent implements OnInit {
     return this.todosUsuarios.filter(u => u.perfil === 0).length;
   }
 
-  getUsuariosBloqueados(): number {
-    return this.todosUsuarios.filter(u => u.status === 'bloqueado').length;
-  }
-
   get totalPaginas(): number {
     return Math.ceil(this.usuariosFiltrados.length / this.itensPorPagina);
   }
@@ -1033,6 +981,7 @@ export class UsuariosComponent implements OnInit {
 
   editarUsuario(usuario: any) {
     this.utilizadorEdicao = { ...usuario };
+    this.utilizadorEdicao.fotoUrl = this.gerarFotoUrl(usuario);
     this.editForm = this.fb.group({
       nomeCompleto: [usuario.nomeCompleto || '', Validators.required],
       email: [usuario.email || '', [Validators.required, Validators.email]],
@@ -1052,27 +1001,23 @@ export class UsuariosComponent implements OnInit {
 
   guardarEdicao() {
     if (this.editForm.valid) {
-      const isRegistado = this.utilizadorEdicao.perfil === 1;
       const dados: any = {
-        id: this.utilizadorEdicao.id,
-        numeroUtente: this.utilizadorEdicao.numeroUtente || '',
         nomeCompleto: this.editForm.value.nomeCompleto,
-        dataNascimento: this.editForm.value.dataNascimento,
-        genero: this.editForm.value.genero,
-        telemovel: this.editForm.value.telemovel,
         email: this.editForm.value.email,
-        morada: this.editForm.value.morada,
-        fotoPath: this.utilizadorEdicao.fotoPath || '',
-        perfil: this.utilizadorEdicao.perfil
+        telemovel: this.editForm.value.telemovel,
+        dataNascimento: this.editForm.value.dataNascimento ? this.editForm.value.dataNascimento.toString().substring(0, 10) : null,
+        genero: this.editForm.value.genero || null,
+        morada: this.editForm.value.morada || null,
+        numeroUtente: this.utilizadorEdicao.numeroUtente || null,
+        perfil: this.utilizadorEdicao.perfil || null,
+        PasswordHash: this.utilizadorEdicao.PasswordHash || this.utilizadorEdicao.passwordHash || '',
+        Pedidos: this.utilizadorEdicao.Pedidos || this.utilizadorEdicao.pedidos || []
       };
-      if (isRegistado) {
-        dados.passwordHash = this.utilizadorEdicao.passwordHash || '';
-      }
-      this.usersService.updateUser(dados.id, dados).subscribe({
+      this.usersService.updateUser(this.utilizadorEdicao.id, dados).subscribe({
         next: (res: any) => {
           alert('Utilizador atualizado com sucesso!');
           this.fecharEditar();
-          this.carregarUsuarios(); // Recarregar dados da API
+          this.carregarUsuarios();
         },
         error: (err: any) => {
           console.error('Erro ao atualizar utilizador:', err);
@@ -1122,14 +1067,17 @@ export class UsuariosComponent implements OnInit {
 
   ativarUsuario(usuario: any) {
     if (!confirm(`Deseja ativar o utilizador ${usuario.nome || usuario.nomeCompleto}?`)) return;
-    const dadosPromocao = {
+    const dadosPromocao: any = {
       nomeCompleto: usuario.nomeCompleto,
       email: usuario.email,
       telemovel: usuario.telemovel,
-      password: usuario.password || '',
       dataNascimento: usuario.dataNascimento,
       morada: usuario.morada
     };
+    // Remove explicitamente o campo password, caso exista
+    if ('password' in dadosPromocao) {
+      delete dadosPromocao.password;
+    }
     this.usersService.promoverUser(usuario.id, dadosPromocao).subscribe({
       next: () => {
         alert('Utilizador promovido a registado com sucesso!');
@@ -1165,8 +1113,8 @@ export class UsuariosComponent implements OnInit {
   }
 
   getStatusKey(perfil: number): string {
-    // Apenas utilizadores registados (perfil 1) são ativos, todos os outros são inativos
-    if (perfil === 1) return 'ativo';
-    return 'inativo';
+    // Apenas utilizadores anónimos (perfil 0) são inativos, os demais são ativos
+    if (perfil === 0) return 'inativo';
+    return 'ativo';
   }
 } 

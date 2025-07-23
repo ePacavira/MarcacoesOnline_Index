@@ -4,6 +4,9 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } fr
 import { Router } from '@angular/router';
 import { AnonymousAppointment, AnonymousAppointmentStep, APPOINTMENT_STEPS } from '../../core/models/anonymous-appointment.model';
 import { AnonymousAppointmentService } from '../../core/services/anonymous-appointment.service';
+import { UsersService } from '../../core/services/users.service';
+import { ValidatorFn, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-marcacao-anonima',
@@ -38,14 +41,69 @@ export class MarcacaoAnonimaComponent implements OnInit {
   // Dados mock para demonstração
   services = [
     { id: '1', name: 'Consulta Geral', description: 'Consulta médica geral', duration: 30, price: 50 },
-    { id: '2', name: 'Consulta Especializada', description: 'Consulta com especialista', duration: 45, price: 80 },
-    { id: '3', name: 'Exame Clínico', description: 'Exame físico completo', duration: 60, price: 100 }
+    { id: '2', name: 'Cardiologia', description: 'Consulta de cardiologia', duration: 45, price: 80 },
+    { id: '3', name: 'Dermatologia', description: 'Consulta de dermatologia', duration: 30, price: 70 },
+    { id: '4', name: 'Pediatria', description: 'Consulta de pediatria', duration: 30, price: 60 },
+    { id: '5', name: 'Ortopedia', description: 'Consulta de ortopedia', duration: 45, price: 80 },
+    { id: '6', name: 'Ginecologia', description: 'Consulta de ginecologia', duration: 45, price: 80 },
+    { id: '7', name: 'Neurologia', description: 'Consulta de neurologia', duration: 60, price: 100 },
+    { id: '8', name: 'Psiquiatria', description: 'Consulta de psiquiatria', duration: 60, price: 100 },
+    { id: '9', name: 'Oftalmologia', description: 'Consulta de oftalmologia', duration: 30, price: 70 },
+    { id: '10', name: 'Endocrinologia', description: 'Consulta de endocrinologia', duration: 45, price: 80 },
+    { id: '11', name: 'Raio-X', description: 'Exame de raio-x', duration: 30, price: 50 },
+    { id: '12', name: 'Análises Sanguíneas', description: 'Análises de sangue', duration: 15, price: 30 }
   ];
   
   doctors = [
-    { id: '1', name: 'Dr. João Silva', specialty: 'Medicina Geral', crm: '12345' },
-    { id: '2', name: 'Dra. Maria Santos', specialty: 'Cardiologia', crm: '67890' },
-    { id: '3', name: 'Dr. Pedro Costa', specialty: 'Dermatologia', crm: '11111' }
+    // Medicina Geral (3 profissionais)
+    { id: '1', name: 'Dr. João Silva', specialty: 'Medicina Geral' },
+    { id: '2', name: 'Dra. Ana Costa', specialty: 'Medicina Geral' },
+    { id: '3', name: 'Dr. Manuel Santos', specialty: 'Medicina Geral' },
+    
+    // Cardiologia (3 profissionais)
+    { id: '4', name: 'Dra. Maria Santos', specialty: 'Cardiologia' },
+    { id: '5', name: 'Dr. António Cardoso', specialty: 'Cardiologia' },
+    { id: '6', name: 'Dra. Sofia Almeida', specialty: 'Cardiologia' },
+    
+    // Dermatologia (3 profissionais)
+    { id: '7', name: 'Dr. Pedro Costa', specialty: 'Dermatologia' },
+    { id: '8', name: 'Dra. Isabel Ferreira', specialty: 'Dermatologia' },
+    { id: '9', name: 'Dr. Ricardo Martins', specialty: 'Dermatologia' },
+    
+    // Pediatria (3 profissionais)
+    { id: '10', name: 'Dra. Ana Oliveira', specialty: 'Pediatria' },
+    { id: '11', name: 'Dr. Francisco Lima', specialty: 'Pediatria' },
+    { id: '12', name: 'Dra. Catarina Silva', specialty: 'Pediatria' },
+    
+    // Ortopedia (3 profissionais)
+    { id: '13', name: 'Dr. Carlos Ferreira', specialty: 'Ortopedia' },
+    { id: '14', name: 'Dra. Margarida Santos', specialty: 'Ortopedia' },
+    { id: '15', name: 'Dr. Luís Pereira', specialty: 'Ortopedia' },
+    
+    // Ginecologia (3 profissionais)
+    { id: '16', name: 'Dra. Sofia Martins', specialty: 'Ginecologia' },
+    { id: '17', name: 'Dr. José Oliveira', specialty: 'Ginecologia' },
+    { id: '18', name: 'Dra. Filipa Costa', specialty: 'Ginecologia' },
+    
+    // Neurologia (3 profissionais)
+    { id: '19', name: 'Dr. Miguel Rodrigues', specialty: 'Neurologia' },
+    { id: '20', name: 'Dra. Teresa Alves', specialty: 'Neurologia' },
+    { id: '21', name: 'Dr. Paulo Silva', specialty: 'Neurologia' },
+    
+    // Psiquiatria (3 profissionais)
+    { id: '22', name: 'Dra. Inês Pereira', specialty: 'Psiquiatria' },
+    { id: '23', name: 'Dr. André Santos', specialty: 'Psiquiatria' },
+    { id: '24', name: 'Dra. Mariana Costa', specialty: 'Psiquiatria' },
+    
+    // Oftalmologia (3 profissionais)
+    { id: '25', name: 'Dr. António Santos', specialty: 'Oftalmologia' },
+    { id: '26', name: 'Dra. Helena Ferreira', specialty: 'Oftalmologia' },
+    { id: '27', name: 'Dr. Diogo Martins', specialty: 'Oftalmologia' },
+    
+    // Endocrinologia (3 profissionais)
+    { id: '28', name: 'Dra. Teresa Costa', specialty: 'Endocrinologia' },
+    { id: '29', name: 'Dr. Roberto Silva', specialty: 'Endocrinologia' },
+    { id: '30', name: 'Dra. Joana Oliveira', specialty: 'Endocrinologia' }
   ];
   
   availableSlots = [
@@ -57,10 +115,28 @@ export class MarcacaoAnonimaComponent implements OnInit {
   dataFimPreferida: string = '';
   horarioPreferido: string = '';
 
+  isValidatingEmail = false;
+
+  // Validador customizado para data/hora início <= data/hora fim
+  agendamentoIntervaloValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const dataInicio = group.get('dataInicioPreferida')?.value;
+    const horaInicio = group.get('horaInicioPreferida')?.value;
+    const dataFim = group.get('dataFimPreferida')?.value;
+    const horaFim = group.get('horaFimPreferida')?.value;
+
+    if (!dataInicio || !horaInicio || !dataFim || !horaFim) return null;
+
+    const inicio = new Date(`${dataInicio}T${horaInicio}:00`);
+    const fim = new Date(`${dataFim}T${horaFim}:00`);
+
+    return inicio > fim ? { intervaloInvalido: true } : null;
+  };
+
   constructor(
     public fb: FormBuilder,
     private router: Router,
-    private appointmentService: AnonymousAppointmentService
+    private appointmentService: AnonymousAppointmentService,
+    private usersService: UsersService
   ) {
     this.minDate = new Date().toISOString().split('T')[0];
     this.initializeForms();
@@ -88,6 +164,10 @@ export class MarcacaoAnonimaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Debug: verificar se os serviços estão carregados
+    console.log('Services carregados:', this.services);
+    console.log('Doctors carregados:', this.doctors);
+    
     // Gerar número de utente aleatório (exemplo)
     const numeroUtente = Math.floor(100000000 + Math.random() * 900000000).toString();
     this.patientForm.get('numeroUtente')?.setValue(numeroUtente);
@@ -96,14 +176,49 @@ export class MarcacaoAnonimaComponent implements OnInit {
     this.updateStepStatus();
   }
 
+  // Validador assíncrono para email único
+  emailUnicoValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return Promise.resolve(null);
+      return this.usersService.existsEmail(control.value).pipe(
+        map(res => res.exists ? { emailJaExiste: (res as any).message || 'Este email já está em uso.' } : null)
+      );
+    };
+  }
+
+  // Validador assíncrono para telemóvel único
+  telemovelUnicoValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return Promise.resolve(null);
+      return this.usersService.existsTelemovel(control.value).pipe(
+        map(res => res.exists ? { telemovelJaExiste: (res as any).message || 'Este telemóvel já está em uso.' } : null)
+      );
+    };
+  }
+
+  // Validador síncrono para idade mínima (ex: 18 anos)
+  idadeMinimaValidator(idadeMinima: number) {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      const data = new Date(control.value);
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - data.getFullYear();
+      const m = hoje.getMonth() - data.getMonth();
+      if (m < 0 || (m === 0 && hoje.getDate() < data.getDate())) {
+        idade--;
+      }
+      return idade < idadeMinima ? { idadeMinima: true } : null;
+    };
+  }
+
   private initializeForms(): void {
     // Formulário dos dados do paciente
     this.patientForm = this.fb.group({
-      numeroUtente: [{ value: '', disabled: true }], // sem Validators.required
+      numeroUtente: [{ value: '', disabled: true }],
       name: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
-      birthDate: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email], [this.emailUnicoValidator()]],
+      phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)], [this.telemovelUnicoValidator()]],
+      birthDate: ['', [Validators.required, this.idadeMinimaValidator(18)]],
       genero: ['', Validators.required],
       address: [''],
       medicalHistory: ['']
@@ -122,13 +237,49 @@ export class MarcacaoAnonimaComponent implements OnInit {
       dataFimPreferida: ['', Validators.required],
       horaFimPreferida: ['', Validators.required],
       notes: ['']
-    });
+    }, { validators: this.agendamentoIntervaloValidator });
   }
 
-  nextStep(): void {
+  async nextStep(): Promise<void> {
+    if (this.currentStep === 1) {
+      this.patientForm.markAllAsTouched();
+      this.patientForm.updateValueAndValidity();
+
+      // Ativa loading
+      this.isValidatingEmail = true;
+
+      // Aguarda a validação assíncrona terminar
+      if (this.patientForm.pending) {
+        await new Promise(resolve => {
+          const sub = this.patientForm.statusChanges.subscribe(status => {
+            if (status !== 'PENDING') {
+              sub.unsubscribe();
+              resolve(null);
+            }
+          });
+        });
+      }
+
+      // Desativa loading
+      this.isValidatingEmail = false;
+
+      // Checa explicitamente o status do campo de email
+      const emailControl = this.patientForm.get('email');
+      if (emailControl && emailControl.invalid) {
+        return;
+      }
+
+      if (this.patientForm.valid) {
+        this.saveStepData();
+        if (this.currentStep < this.steps.length) {
+          this.currentStep++;
+          this.updateStepStatus();
+        }
+      }
+      return;
+    }
     if (this.validateCurrentStep()) {
       this.saveStepData();
-      
       if (this.currentStep < this.steps.length) {
         this.currentStep++;
         this.updateStepStatus();
@@ -238,7 +389,7 @@ export class MarcacaoAnonimaComponent implements OnInit {
           const ref = appointment.referenceCode || appointment.codigoReferencia;
           if (appointment && ref) {
             // Navega imediatamente para a tela de sucesso
-            this.router.navigate(['/marcacao-sucesso'], {
+          this.router.navigate(['/marcacao-sucesso'], {
               queryParams: { reference: ref }
             });
             // Tenta enviar email/SMS, mas não bloqueia a navegação
@@ -301,5 +452,46 @@ export class MarcacaoAnonimaComponent implements OnInit {
       if (field.errors['pattern']) return 'Formato inválido';
     }
     return '';
+  }
+
+  // Método para obter profissionais recomendados baseado no tipo de consulta
+  getProfissionaisRecomendados(tipoConsulta: string): any[] {
+    const mapeamentoEspecialidades: { [key: string]: string[] } = {
+      'Consulta Geral': ['Medicina Geral'],
+      'Cardiologia': ['Cardiologia'],
+      'Dermatologia': ['Dermatologia'],
+      'Pediatria': ['Pediatria'],
+      'Ortopedia': ['Ortopedia'],
+      'Ginecologia': ['Ginecologia'],
+      'Neurologia': ['Neurologia'],
+      'Psiquiatria': ['Psiquiatria'],
+      'Oftalmologia': ['Oftalmologia'],
+      'Endocrinologia': ['Endocrinologia'],
+      'Raio-X': ['Medicina Geral', 'Ortopedia', 'Cardiologia'],
+      'Análises Sanguíneas': ['Medicina Geral', 'Endocrinologia', 'Cardiologia']
+    };
+
+    const especialidadesRecomendadas = mapeamentoEspecialidades[tipoConsulta] || ['Medicina Geral'];
+    return this.doctors.filter(doctor => especialidadesRecomendadas.includes(doctor.specialty));
+  }
+
+  // Método para formatar o nome do profissional com especialidade
+  formatarProfissional(doctor: any): string {
+    return `${doctor.name} - ${doctor.specialty}`;
+  }
+
+  // Método para atualizar profissionais quando o tipo de consulta muda
+  onTipoConsultaChange(actoIndex: number): void {
+    const actoControl = this.actosClinicosForm.at(actoIndex);
+    const tipoConsulta = actoControl.get('tipo')?.value;
+    
+    // Limpar a seleção do profissional quando o tipo muda
+    actoControl.get('profissional')?.setValue('');
+    
+    // Debug: mostrar profissionais recomendados
+    if (tipoConsulta) {
+      const profissionaisRecomendados = this.getProfissionaisRecomendados(tipoConsulta);
+      console.log(`Profissionais recomendados para ${tipoConsulta}:`, profissionaisRecomendados);
+    }
   }
 }

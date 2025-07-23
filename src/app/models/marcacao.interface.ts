@@ -13,10 +13,10 @@ export interface CreateActoClinico {
 }
 
 export interface PedidoMarcacao {
-  id?: string;
-  dataInicioPreferida: string; // ou Date, se usares objetos de data
-  dataFimPreferida: string;
-  dataCriacao?: string; // Data de criação da marcação (opcional)
+  id?: number;
+  dataInicioPreferida: string | Date; // aceita string ou Date
+  dataFimPreferida: string | Date;
+  dataCriacao?: string | Date; // aceita string ou Date
   horarioPreferido: 'Manhã' | 'Tarde' | 'Noite' | string;
   observacoes: string;
   estado: 'Agendado' | 'Pendente' | 'Cancelado' | 'Concluído' | string;
@@ -29,8 +29,10 @@ export interface PedidoMarcacao {
 export interface CreatePedidoMarcacao {
   estado: number; // 0 = Pendente, 1 = Agendado, 2 = Cancelado, 3 = Concluído
   dataInicioPreferida: string;
+  horaInicioPreferida: string;
   dataFimPreferida: string;
-  horarioPreferido: string;
+  horaFimPreferida: string;
+  horarioPreferido: string; // manter para compatibilidade
   observacoes: string;
   userId?: number;
   actosClinicos: CreateActoClinico[];

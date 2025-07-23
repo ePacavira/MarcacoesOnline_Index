@@ -10,9 +10,6 @@ import { ServicosComponent } from './pages/servicos/servicos.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
-import { UtenteService } from './core/services/utentes.service';
-import { MarcacaoService } from './core/services/marcacao';
-import { UsersService } from './core/services/users.service';
 
 export const routes: Routes = [
   // Público
@@ -119,12 +116,6 @@ export const routes: Routes = [
         loadComponent: () => import('./super/pages/usuarios/usuarios.component').then((m) => m.UsuariosComponent),
       },
     ]
-  },
-  // Privado (gestao) - fora do LayoutPublicComponent
-  {
-    path: 'gestao',
-    canActivate: [authGuard, adminGuard],
-    loadChildren: () => import('./gestao/gestao.routes').then((m) => m.gestaoRoutes),
   },
   // Páginas de Erro
   { 

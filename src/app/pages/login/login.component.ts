@@ -87,4 +87,9 @@ export class LoginComponent {
       }
     });
   }
+
+  irParaMarcacaoAnonima(event: Event): void {
+    event.preventDefault();
+    this.router.navigate(['/marcacao-anonima']);
+  }
 }

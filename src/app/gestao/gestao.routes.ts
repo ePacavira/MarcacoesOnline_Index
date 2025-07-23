@@ -21,10 +21,6 @@ export const gestaoRoutes: Routes = [
         loadComponent: () => import("./pages/pacientes/pacientes.component").then((m) => m.UtenteComponent),
       },
       {
-        path: "consulta",
-        loadComponent: () => import("./pages/pacientes/pacientes.component").then((m) => m.UtenteComponent),
-      },
-      {
         path: "marcacoes",
         loadComponent: () => import("./pages/marcacoes/marcacoes.component").then((m) => m.MarcacoesComponent),
       },

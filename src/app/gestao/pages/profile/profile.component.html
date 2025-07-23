@@ -4,39 +4,39 @@
     <div class="profile-card-title">Dados Pessoais</div>
     <div class="profile-avatar-section">
       <div class="profile-avatar-edit">
-        <img [src]="getFotoPerfilSrc()" alt="Avatar" class="profile-avatar profile-avatar-xl" />
+        <img [src]="getFotoPerfilSrc()" alt="Avatar" class="profile-avatar profile-avatar-xl" (error)="onFotoError($event)" />
         <label class="profile-avatar-upload">
-          <input type="file" (change)="onFotoChange($event)" accept="image/*" />
+          <input type="file" (change)="onFileSelected($event)" accept="image/*" />
           <span class="profile-avatar-edit-icon">
             <img src="https://cdn.jsdelivr.net/gh/feathericons/feather/icons/edit.svg" alt="Editar" class="profile-edit-svg" />
           </span>
         </label>
       </div>
       <div class="profile-info">
-        <div class="profile-name">{{ utente.nome }}</div>
+        <div class="profile-name">{{ utente?.nome || 'Carregando...' }}</div>
         <div class="profile-label">Número de Utente</div>
-        <div class="profile-value">{{ utente.numeroUtente }}</div>
+        <div class="profile-value">{{ utente?.numeroUtente || 'N/A' }}</div>
         <div class="profile-label">Tipo de Usuário</div>
-        <div class="profile-value">{{ utente.tipoUsuario }}</div>
+        <div class="profile-value">{{ utente?.tipoUsuario || 'N/A' }}</div>
       </div>
     </div>
     <hr />
     <div class="profile-section">
       <div class="profile-row spaced">
         <span class="profile-label">Data de Nascimento</span>
-        <span class="profile-value">{{ utente.dataNascimento }}</span>
+        <span class="profile-value">{{ utente?.dataNascimento || 'N/A' }}</span>
       </div>
       <div class="profile-row">
         <span class="profile-label">Género</span>
-        <span class="profile-value">{{ utente.genero }}</span>
+        <span class="profile-value">{{ utente?.genero || 'N/A' }}</span>
       </div>
       <div class="profile-row">
         <span class="profile-label">Data de Cadastro</span>
-        <span class="profile-value">{{ utente.dataCadastro }}</span>
+        <span class="profile-value">{{ utente?.dataCadastro || 'N/A' }}</span>
       </div>
       <div class="profile-row">
         <span class="profile-label">Última Marcação</span>
-        <span class="profile-value">{{ utente.ultimaMarcacao }}</span>
+        <span class="profile-value">{{ utente?.ultimaMarcacao || 'N/A' }}</span>
       </div>
     </div>
   </div>
@@ -44,28 +44,17 @@
   <div class="profile-cards-right">
     <!-- Card de dados editáveis -->
     <div class="profile-card profile-card-editable">
-      <div class="profile-card-title">Dados de Conta</div>
-      <form #profileForm="ngForm">
+      <div class="profile-card-title profile-password-title">Alterar Password</div>
+      <form #profileForm="ngForm" (ngSubmit)="submeterPassword()">
         <div class="profile-section profile-section-single-col">
           <div class="profile-row">
-            <label class="profile-label" for="telefone">Telemóvel</label>
-            <input id="telefone" name="telefone" [(ngModel)]="utente.telefone" class="profile-input" type="text" />
-          </div>
-          <div class="profile-row">
-            <label class="profile-label" for="password">Password</label>
-            <input id="password" name="password" [(ngModel)]="utente.password" class="profile-input" type="password" />
-          </div>
-          <div class="profile-row">
-            <label class="profile-label" for="email">Email</label>
-            <input id="email" name="email" [(ngModel)]="utente.email" class="profile-input" type="email" />
-          </div>
-          <div class="profile-row">
-            <label class="profile-label" for="morada">Morada</label>
-            <input id="morada" name="morada" [(ngModel)]="utente.endereco" class="profile-input" type="text" />
+            <label class="profile-label" for="password"><b>Nova Password</b></label>
+            <input id="password" name="password" [(ngModel)]="password" class="profile-input profile-password-input" type="password" />
           </div>
         </div>
         <div class="profile-save-row">
-          <button class="profile-save" type="submit">Salvar Alterações</button>
+          <button class="profile-save profile-password-btn" type="submit">Salvar Nova Password</button>
+          <button class="profile-cancel-btn" type="button" (click)="onCancelPassword()">Cancelar</button>
         </div>
       </form>
     </div>
